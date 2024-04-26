@@ -17,12 +17,13 @@ internal class NativeInjectorBoostrapper
 {
     public static void RegisterServices(IServiceCollection services, IConfiguration config)
     {
+        services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
 
         services.Configure<QueueCommandSettings>(config.GetSection(nameof(QueueCommandSettings)));
 
         // Domain Bus (Mediator)
-        services.AddScoped<IMediatorHandler, InMemmoryBus>();
+        services.AddSingleton<IMediatorHandler, InMemmoryBus>();
         //services.AddScoped<IOrderBook, OrderBook>();
 
         //SignalR
