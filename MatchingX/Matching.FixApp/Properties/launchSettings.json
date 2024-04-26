@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Matching.FixApp": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}

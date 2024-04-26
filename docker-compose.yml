@@ -1,0 +1,14 @@
+version: '3.4'
+
+services:
+  matchinx.api:
+    image: ${DOCKER_REGISTRY-}matchinxapi
+    build:
+      context: .
+      dockerfile: MatchingX/MatchinX.API/Dockerfile
+  
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+  
+  mongodb:
+    image: mongo

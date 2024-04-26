@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="QuickFix.Net.NETCore.FIX44" Version="1.8.1" />
+    <PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\SharedX\SharedX.Models\SharedX.Core.csproj" />
+    <ProjectReference Include="..\MatchingX.Core\MatchingX.Core.csproj" />
+    <ProjectReference Include="..\MatchingX.Infra\MatchingX.Infra.csproj" />
+  </ItemGroup>
+</Project>
