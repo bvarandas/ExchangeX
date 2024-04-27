@@ -1,8 +1,6 @@
 ﻿using MatchingX.Core.Filters;
 using SharedX.Core.Matching;
-
 namespace MatchingX.Core.Repositories;
-
 public interface IOrderRepository
 {
     Task<IEnumerable<Order>> GetOrdersAsync(OrderParams specParams, CancellationToken cancellation);

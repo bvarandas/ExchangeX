@@ -1,9 +1,9 @@
 ﻿using System.Reflection;
-using FluentResults;
 using MacthingX.Application.Commands;
 using MacthingX.Application.Events;
 using MatchingX.Core.Repositories;
 using MatchingX.Infra.Data;
+using MatchingX.Infra.FixClientApp;
 using MatchingX.Infra.Repositories;
 using MatchinX.API.Fix;
 using MediatR;
@@ -22,7 +22,9 @@ internal class NativeInjectorBoostrapper
         services.Configure<QueueCommandSettings>(config.GetSection(nameof(QueueCommandSettings)));
 
         // FIX - Application
-        services.AddSingleton<IApplication, FixServerApplication>();
+        
+        services.AddSingleton<ITradeClientApp, TradeClientApp>();
+        services.AddSingleton<IApplication, FixServerApp>();
 
         // Domain Bus (Mediator)
         services.AddScoped<IMediatorHandler, InMemmoryBus>();
@@ -66,6 +68,8 @@ internal class NativeInjectorBoostrapper
 
         services.AddSingleton<IOrderContext, OrderContext>();
         services.AddSingleton<IExecutedTradeContext ,ExecutedTradeContext >();
-        //services.AddHostedService<WorkerConsumeBitstamp>();
+
+        services.AddHostedService<MatchingAcceptor>();
+        services.AddHostedService<MatchingInitiator>();
     }
 }

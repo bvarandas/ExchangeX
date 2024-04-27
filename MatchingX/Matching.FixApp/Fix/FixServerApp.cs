@@ -8,17 +8,15 @@ using SharedX.Core.Matching;
 
 namespace MatchinX.API.Fix;
 
-public class FixServerApplication : MessageCracker, IApplication
+public class FixServerApp : MessageCracker, IApplication
 {
-    private readonly ILogger<FixServerApplication> _logger;
+    private readonly ILogger<FixServerApp> _logger;
     private MatchBase _matchEmgine;
     static readonly decimal DEFAULT_MARKET_PRICE = 10;
-    public FixServerApplication (ILogger<FixServerApplication> logger)
+    public FixServerApp (ILogger<FixServerApp> logger)
     {
         _logger = logger;
     }
-
-    
 
     int orderID = 0;
     int execID = 0;
@@ -119,20 +117,31 @@ public class FixServerApplication : MessageCracker, IApplication
 
     public void SendExecutionReport(Order order, ExecType execType )
     {
-        Symbol symbol = new Symbol(order.Symbol);
-        Side side = new Side((char)order.Side);
+        Symbol symbol     = new Symbol(order.Symbol);
+        Side side         = new Side((char)order.Side);
         OrderQty orderQty = new OrderQty(order.Quantity);
-        ClOrdID clOrdID = new ClOrdID(order.AccountId.ToString());
-        LastQty lastQty = new LastQty(order.LastQuantity);
-        LastPx lastPx = new LastPx(order.LastPrice);
-        Account account = new Account(order.AccountId.ToString());
+        ClOrdID clOrdID   = new ClOrdID(order.AccountId.ToString());
+        LastQty lastQty   = new LastQty(order.LastQuantity);
+        LastPx lastPx     = new LastPx(order.LastPrice);
+        Account account   = new Account(order.AccountId.ToString());
 
-        QuickFix.FIX44.ExecutionReport exReport = new QuickFix.FIX44.ExecutionReport(
+        PartyID participator = new PartyID(order.ParticipatorId.ToString());
+        PartyRole role      = new PartyRole(1);
+        PartyIDSource partyIDSource = new PartyIDSource('C');
+        NoPartyIDs partyIDs = new NoPartyIDs(1);
+        
+        var group = new QuickFix.FIX44.ExecutionReport.NoPartyIDsGroup();
+        group.SetField(participator);
+        group.SetField(role);
+        group.SetField(partyIDSource);
+        group.SetField(partyIDs);
+
+        var exReport = new QuickFix.FIX44.ExecutionReport(
             new OrderID(order.OrderID.ToString()),
             new ExecID(order.Id.ToString()),
             new ExecType(ExecType.FILL),
             new OrdStatus(OrdStatus.FILLED),
-            symbol, //shouldn't be here?
+            symbol, 
             side,
             new LeavesQty(order.LeavesQuantity),
             new CumQty(order.Quantity),
@@ -144,6 +153,8 @@ public class FixServerApplication : MessageCracker, IApplication
         exReport.Set(lastQty);
         exReport.Set(lastPx);
         exReport.SetField(account);
+
+        exReport.AddGroup(group);
 
         try
         {
@@ -158,7 +169,6 @@ public class FixServerApplication : MessageCracker, IApplication
         {
             Console.WriteLine(ex.ToString());
         }
-
     }
 
     public void OnMessage(QuickFix.FIX44.OrderCancelRequest msg, SessionID s)

@@ -3,12 +3,13 @@ using Microsoft.Extensions.Logging;
 using QuickFix;
 
 namespace MatchinX.API.Fix;
-public class MatchAcceptor : BackgroundService
+public class MatchingAcceptor : BackgroundService
 {
     private const string HttpServerPrefix = "http://127.0.0.1:5080/";
-    private readonly ILogger<MatchAcceptor> _logger;
+    private readonly ILogger<MatchingAcceptor> _logger;
     private readonly IApplication app;
-    public MatchAcceptor(ILogger<MatchAcceptor> logger, IApplication app)
+    private readonly ThreadedSocketAcceptor _acceptor;
+    public MatchingAcceptor(ILogger<MatchingAcceptor> logger, IApplication app)
     {
         _logger = logger;
 
@@ -21,32 +22,26 @@ public class MatchAcceptor : BackgroundService
         
         IMessageStoreFactory messageFactory = new FileStoreFactory(settings); 
         
-        ThreadedSocketAcceptor acceptor= new 
+        _acceptor= new 
             ThreadedSocketAcceptor(application, messageFactory, settings, logFactory);
-
-        
-        acceptor.Start();
-        
-        while (true)
-        {
-            Console.WriteLine("Aguardando mensagens");
-            Thread.Sleep(10);
-        }
-        
-        acceptor.Stop();
     }
     protected async override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Aguardando mensagens Command...");
+        _logger.LogInformation("Iniciando o Fix acceptor...");
+
+        _acceptor.Start();
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            await Task.Delay(50, stoppingToken);
+            await Task.Delay(5000, stoppingToken);
         }
     }
 
     public async override Task StopAsync(CancellationToken stoppingToken)
     {
-        //_channel.Close();
+        _logger.LogInformation("Finalizando o Fix acceptor...");
+
+        _acceptor.Stop();
+        _logger.LogInformation("Fix acceptor...Finalizado!");
     }
 }
