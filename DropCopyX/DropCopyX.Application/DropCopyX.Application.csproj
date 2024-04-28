@@ -7,12 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Commands\" />
     <Folder Include="Events\" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\SharedX\SharedX.Models\SharedX.Core.csproj" />
+    <ProjectReference Include="..\DropCopyX.Core\DropCopyX.Core.csproj" />
   </ItemGroup>
 
 </Project>

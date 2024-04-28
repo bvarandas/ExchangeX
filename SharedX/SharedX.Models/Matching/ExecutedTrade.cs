@@ -1,6 +1,6 @@
 ﻿using SharedX.Core.Entities;
 namespace SharedX.Core.Matching;
-public abstract class ExecutedTradeBase : BaseEntity
+public abstract class ExecutedTradeBase : BaseEntityFix
 {
     public long BuyerOrderId { get; set; }
     public long SellerOrderId { get; set; }

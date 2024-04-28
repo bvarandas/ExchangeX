@@ -1,0 +1,1 @@
+DropCopy Consumer tcp://producer.zeromq:5555"

@@ -29,6 +29,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{84FE8C9B-5
 	ProjectSection(SolutionItems) = preProject
 		docs\Caas-Trade-Brunao (1).drawio = docs\Caas-Trade-Brunao (1).drawio
 		docs\Caas-Trade-Brunao.drawio = docs\Caas-Trade-Brunao.drawio
+		ServicePorts.txt = ServicePorts.txt
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MatchingX", "MatchingX", "{B49EF215-04DA-4AB7-BA1E-C3CCF766A0E4}"
@@ -105,21 +106,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.logging", "Infrastru
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MatchingX.FixServerApp", "MatchingX\Matching.FixApp\MatchingX.FixServerApp.csproj", "{CE2D453E-4222-4781-A152-3F340F38A66E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MatchingX.ZeroMQApp", "MatchingX\MatchingX.ZeroMQApp\MatchingX.ZeroMQApp.csproj", "{CCD05360-EDBD-48C0-ABE8-88B0D9680A2C}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DropCopyX", "DropCopyX", "{8526774C-772C-447B-A358-4D1D638F4D19}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MarketDataX", "MarketDataX", "{2170D935-0210-445D-B3F0-4876844BAA2E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OrderEntryX", "OrderEntryX", "{675C162A-EC88-4B26-9951-244DBE4CC566}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DropCopyX.ZeroMQApp", "DropCopyX\DropCopyX.ZeroMQApp\DropCopyX.ZeroMQApp.csproj", "{13CD5EAA-314E-44EB-B8FF-74E870E868BF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DropCopyX.ServerApp", "DropCopyX\DropCopyX.ZeroMQApp\DropCopyX.ServerApp.csproj", "{13CD5EAA-314E-44EB-B8FF-74E870E868BF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DropCopyX.Application", "DropCopyX\DropCopyX.Application\DropCopyX.Application.csproj", "{3DF2E71B-22AD-403A-BAC4-AFB6B95CDC9D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DropCopyX.Application", "DropCopyX\DropCopyX.Application\DropCopyX.Application.csproj", "{3DF2E71B-22AD-403A-BAC4-AFB6B95CDC9D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DropCopyX.Infra", "DropCopyX\DropCopyX.Infra\DropCopyX.Infra.csproj", "{5C671019-7D82-4DE9-A3B3-AFE794A5C793}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DropCopyX.Infra", "DropCopyX\DropCopyX.Infra\DropCopyX.Infra.csproj", "{5C671019-7D82-4DE9-A3B3-AFE794A5C793}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DropCopyX.Core", "DropCopyX\DropCopyX.Core\DropCopyX.Core.csproj", "{5B474D4F-4A17-4287-86FB-5BBE27C49D24}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DropCopyX.Core", "DropCopyX\DropCopyX.Core\DropCopyX.Core.csproj", "{5B474D4F-4A17-4287-86FB-5BBE27C49D24}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -259,10 +258,6 @@ Global
 		{CE2D453E-4222-4781-A152-3F340F38A66E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CE2D453E-4222-4781-A152-3F340F38A66E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CE2D453E-4222-4781-A152-3F340F38A66E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CCD05360-EDBD-48C0-ABE8-88B0D9680A2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CCD05360-EDBD-48C0-ABE8-88B0D9680A2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CCD05360-EDBD-48C0-ABE8-88B0D9680A2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CCD05360-EDBD-48C0-ABE8-88B0D9680A2C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{13CD5EAA-314E-44EB-B8FF-74E870E868BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{13CD5EAA-314E-44EB-B8FF-74E870E868BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{13CD5EAA-314E-44EB-B8FF-74E870E868BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -329,7 +324,6 @@ Global
 		{2D7DC299-284F-4A69-9AED-E73EDAA16FD4} = {B49EF215-04DA-4AB7-BA1E-C3CCF766A0E4}
 		{394DCC51-F967-4C0B-B50E-6189EC62095B} = {9B3F8E7E-EA88-4B20-9752-A5DC2A61D7D4}
 		{CE2D453E-4222-4781-A152-3F340F38A66E} = {B49EF215-04DA-4AB7-BA1E-C3CCF766A0E4}
-		{CCD05360-EDBD-48C0-ABE8-88B0D9680A2C} = {B49EF215-04DA-4AB7-BA1E-C3CCF766A0E4}
 		{8526774C-772C-447B-A358-4D1D638F4D19} = {4AFD1806-530A-46E6-AF65-92A8A4A6E581}
 		{2170D935-0210-445D-B3F0-4876844BAA2E} = {4AFD1806-530A-46E6-AF65-92A8A4A6E581}
 		{675C162A-EC88-4B26-9951-244DBE4CC566} = {4AFD1806-530A-46E6-AF65-92A8A4A6E581}
