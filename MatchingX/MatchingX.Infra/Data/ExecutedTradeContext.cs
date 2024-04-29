@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
-using SharedX.Core.Matching;
+using SharedX.Core.Proto;
+
 namespace MatchingX.Infra.Data;
 public class ExecutedTradeContext : IExecutedTradeContext
 {

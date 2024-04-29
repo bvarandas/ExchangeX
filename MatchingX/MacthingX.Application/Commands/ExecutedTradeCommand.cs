@@ -1,5 +1,6 @@
 ﻿using SharedX.Core.Commands;
-using SharedX.Core.Matching;
+using SharedX.Core.Proto;
+
 namespace MacthingX.Application.Commands;
 public class ExecutedTradeCommand : Command
 {

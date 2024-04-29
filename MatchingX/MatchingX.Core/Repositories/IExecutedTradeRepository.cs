@@ -1,5 +1,6 @@
 ﻿using MatchingX.Core.Filters;
-using SharedX.Core.Matching;
+using SharedX.Core.Proto;
+
 namespace MatchingX.Core.Repositories;
 public interface IExecutedTradeRepository
 {

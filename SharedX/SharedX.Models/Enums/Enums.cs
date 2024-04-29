@@ -25,3 +25,11 @@ public enum TimeInForce
     GTC,  // Good Till Cancel
     FOK,  // Fill or Kill
 }
+
+public enum RedisDataBases
+{
+    OrderId = 0,
+    MatchingTradeId= 1, // é o execId do executionReport
+    MatchingExecutionReport = 2,
+    MatchingExecutedTrade = 3
+}

@@ -21,9 +21,10 @@ internal class NativeInjectorBoostrapper
         services.AddSwaggerGen();
 
         services.Configure<QueueCommandSettings>(config.GetSection(nameof(QueueCommandSettings)));
+        services.Configure<ConnectionZmq>(config.GetSection(nameof(ConnectionZmq)));
 
         // FIX - Application
-        
+
         services.AddSingleton<IFixServerApp, FixServerApp>();
         
 
@@ -58,7 +59,8 @@ internal class NativeInjectorBoostrapper
         //services.AddSingleton<INotificationHandler<OrderRejectedEvent>, OrderEventHandler>();
 
         // Infra - Data
-        services.AddSingleton<IDropCopyChache, DropCopyChache>();
+        services.AddSingleton<IExecutedTradeCache, ExecutedTradeCache>();
+        services.AddSingleton<IExecutionReportChache, ExecutionReportChache>();
         services.AddSingleton<IDropCopyContext, DropCopyContext>();
         services.AddSingleton<IDropCopyRepository , DropCopyRepository>();
 

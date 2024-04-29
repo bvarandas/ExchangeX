@@ -1,7 +1,8 @@
 ﻿using MatchingX.Core;
 using MediatR;
 using SharedX.Core.Events;
-using SharedX.Core.Matching;
+using SharedX.Core.Proto;
+
 namespace MacthingX.Application.Events;
 public class ExecutedTradeEvent : Event
 {

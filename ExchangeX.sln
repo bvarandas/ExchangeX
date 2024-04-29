@@ -104,7 +104,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastru
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.logging", "Infrastructure\Common.logging\Common.logging.csproj", "{394DCC51-F967-4C0B-B50E-6189EC62095B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MatchingX.FixServerApp", "MatchingX\Matching.FixApp\MatchingX.FixServerApp.csproj", "{CE2D453E-4222-4781-A152-3F340F38A66E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MatchingX.ServerApp", "MatchingX\MatchingX.ServerApp\MatchingX.ServerApp.csproj", "{CE2D453E-4222-4781-A152-3F340F38A66E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DropCopyX", "DropCopyX", "{8526774C-772C-447B-A358-4D1D638F4D19}"
 EndProject

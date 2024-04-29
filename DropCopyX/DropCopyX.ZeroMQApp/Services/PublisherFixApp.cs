@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using QuickFix;
 using QuickFix.Fields;
 using SharedX.Core.Matching;
+using SharedX.Core.Proto;
 
 namespace DropCopyX.ServerApp.Services;
 internal class PublisherFixApp : BackgroundService
@@ -48,6 +49,7 @@ internal class PublisherFixApp : BackgroundService
 
 internal class FixServerApp : MessageCracker, IFixServerApp
 {
+
     private readonly ILogger<FixServerApp> _logger;
 
     public FixServerApp(ILogger<FixServerApp> logger)
@@ -90,6 +92,54 @@ internal class FixServerApp : MessageCracker, IFixServerApp
         throw new NotImplementedException();
     }
 
+    public void SendTradeCaptureReport(ExecutedTrade trade, ExecType execType)
+    {
+        Symbol symbol = new Symbol(trade.Symbol);
+        
+        //PartyID participator = new PartyID(trade.ParticipatorId.ToString());
+        //PartyRole role = new PartyRole(1);
+        //PartyIDSource partyIDSource = new PartyIDSource('C');
+        //NoPartyIDs partyIDs = new NoPartyIDs(1);
+
+        //var group = new QuickFix.FIX44.ExecutionReport.NoPartyIDsGroup();
+        //group.SetField(participator);
+        //group.SetField(role);
+        //group.SetField(partyIDSource);
+        //group.SetField(partyIDs);
+
+        var exReport = new QuickFix.FIX44.TradeCaptureReport(
+            new TradeReportID(trade..ToString()),
+            new PreviouslyReported(false),
+            symbol,
+            lastQty,
+            lastPx,
+            new TradeDate(trade.TradeDate.ToString("YYYmmDD")),
+            new TransactTime(trade.TradeDate.ToUniversalTime())
+            );
+
+        exReport.Set(clOrdID);
+        exReport.Set(symbol);
+        exReport.Set(orderQty);
+        exReport.Set(lastQty);
+        exReport.Set(lastPx);
+        exReport.SetField(account);
+
+        exReport.AddGroup(group);
+
+        try
+        {
+            Session.SendToTarget(exReport, trade.SessionID);
+        }
+        catch (SessionNotFound ex)
+        {
+            Console.WriteLine("==session not found exception!==");
+            Console.WriteLine(ex.ToString());
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+        }
+    }
     public void SendExecutionReport(Order order, ExecType execType)
     {
         Symbol symbol = new Symbol(order.Symbol);

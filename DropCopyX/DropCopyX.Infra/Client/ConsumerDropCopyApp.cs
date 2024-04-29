@@ -1,47 +1,64 @@
-﻿using DropCopyX.Core.Entities;
+﻿using Amazon.Runtime.Internal.Util;
+using DropCopyX.Application.Commands;
+using DropCopyX.Core.Entities;
+using DropCopyX.Core.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NetMQ;
 using NetMQ.Sockets;
-using SharedX.Core.Extensions; 
-namespace DropCopyX.Infra.Client;
+using SharedX.Core.Bus;
+using SharedX.Core.Extensions;
+using SharedX.Core.Proto;
+using System.Diagnostics;
 
+namespace DropCopyX.Infra.Client;
 public class ConsumerDropCopyApp : BackgroundService
 {
     private readonly IConfiguration _config;
     private readonly ILogger<ConsumerDropCopyApp> _logger;
     private SubscriberSocket _subscriber;
     private readonly string _addressConnect;
-    public ConsumerDropCopyApp(ILogger<ConsumerDropCopyApp> logger, IConfiguration config)
+    private readonly string _topic;
+    private readonly IExecutionReportChache _cache;
+    private readonly IMediatorHandler _mediator;
+    public ConsumerDropCopyApp(ILogger<ConsumerDropCopyApp> logger, IConfiguration config, IExecutionReportChache cache, IMediatorHandler mediator)
     {
         _logger = logger;
         _config = config;
-        _addressConnect = _config["ConnectionStrings:DropCopyZmqConsumer"];
+        _cache = cache;
+        _mediator = mediator;   
+        _addressConnect = _config["ConnectionStrings:DropCopyZmqConsumer:uri"]!;
+        _topic = _config["ConnectionStrings:DropCopyZmqConsumer:topic"]!;
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation("Iniciando o DropCopy Consumer do ZeroMQ...");
-
+        var listExecutions = new List<ExecutionReport>();
+            
         using (_subscriber = new SubscriberSocket())
         {
             _subscriber.Connect(_addressConnect);
-            _subscriber.Subscribe("A");
-            //subscriber.Subscribe("B");
+            _subscriber.Subscribe(_topic);
 
+            var timer = new Stopwatch();
+            timer.Start();
             while (!stoppingToken.IsCancellationRequested)
             {
-                //var topic = subscriber.ReceiveFrameString();
                 var msg = _subscriber.ReceiveMultipartBytes(1);//.ReceiveFrameBytes();//.ReceiveFrameString();
-                var trade = msg[1].DeserializeFromByteArrayProtobuf<ExecutionReport>();
+                var execution = msg[1].DeserializeFromByteArrayProtobuf<ExecutionReport>();
+                _cache.AddExecutionReport(execution);
 
-                //Console.WriteLine("From Publisher tipo mensagem {0}, MaxFloor {1}, account {2}, Balance {3}, Latency {4} Nanoseconds ",
-                //    trade.messageType,
-                //    trade.MaxFloor,
-                //    trade.Account,
-                //    trade.Balance, 
-                //    latency);
+                if (timer.Elapsed.TotalSeconds > 5)
+                {
+                    timer.Stop();
+                    listExecutions.Add(execution);
+                    _mediator.SendCommand(new ExecutionReportCommand(listExecutions));
+                    listExecutions.Clear();
+                }
+
+                Thread.Sleep(10);
             }
         }
 

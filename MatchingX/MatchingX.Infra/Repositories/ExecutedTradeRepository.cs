@@ -4,7 +4,7 @@ using MatchingX.Infra.Data;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using SharedX.Core.Matching;
+using SharedX.Core.Proto;
 
 namespace MatchingX.Infra.Repositories;
 public class ExecutedTradeRepository : IExecutedTradeRepository

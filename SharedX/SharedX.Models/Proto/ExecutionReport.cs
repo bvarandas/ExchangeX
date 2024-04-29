@@ -1,9 +1,7 @@
 ﻿using ProtoBuf;
 using SharedX.Core.Account;
 using SharedX.Core.Enums;
-using SharedX.Core.Matching;
-
-namespace DropCopyX.Core.Entities;
+namespace SharedX.Core.Proto;
 [ProtoContract]
 public class ExecutionReport
 {
@@ -42,8 +40,7 @@ public class ExecutionReport
     [ProtoMember(17)]
     public TimeInForce TimeInForce { get; set; }
     [ProtoMember(18)]
-    public int ExecID { get; set; }// somente no caso de execução
-
+    public long ExecID { get; set; }// somente no caso de execução
 
     public ExecutionReport() { }
 }

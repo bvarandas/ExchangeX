@@ -1,5 +1,5 @@
 ﻿using MongoDB.Driver;
-using SharedX.Core.Matching;
+using SharedX.Core.Proto;
 
 namespace MatchingX.Infra.Data;
 public interface IExecutedTradeContext

@@ -6,6 +6,7 @@ using SharedX.Core.Bus;
 using MacthingX.Application.Commands;
 using MacthingX.Application.Events;
 using QuickFix;
+using SharedX.Core.Proto;
 
 namespace MacthingX.FixApp.Services;
 public abstract class MatchBase : MatchLastPrice, IDisposable
@@ -232,7 +233,8 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
             (orderSeller.Quantity - orderBuyer.Quantity),
             orderSeller.Price,
             orderBuyer.AccountId,
-            orderSeller.AccountId);
+            orderSeller.AccountId,
+            DateTime.Now);
 
         QueueExecutedTraded.Enqueue(executedTrade);
 

@@ -1,5 +1,7 @@
 ﻿using DropCopyX.Core.Entities;
 using SharedX.Core.Commands;
+using SharedX.Core.Proto;
+
 namespace DropCopyX.Application.Commands;
 public class ExecutionReportCommand : Command
 {
