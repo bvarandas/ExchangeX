@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using SharedX.Core.Matching;
+using SharedX.Core.Proto;
 
 namespace DropCopyX.Infra.Data;
 public class DropCopyContext : IDropCopyContext

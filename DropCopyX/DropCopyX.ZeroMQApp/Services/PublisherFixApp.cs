@@ -5,6 +5,7 @@ using QuickFix;
 using QuickFix.Fields;
 using SharedX.Core.Matching;
 using SharedX.Core.Proto;
+using StackExchange.Redis;
 
 namespace DropCopyX.ServerApp.Services;
 internal class PublisherFixApp : BackgroundService
@@ -92,55 +93,58 @@ internal class FixServerApp : MessageCracker, IFixServerApp
         throw new NotImplementedException();
     }
 
-    public void SendTradeCaptureReport(ExecutedTrade trade, ExecType execType)
-    {
-        Symbol symbol = new Symbol(trade.Symbol);
-        
-        //PartyID participator = new PartyID(trade.ParticipatorId.ToString());
-        //PartyRole role = new PartyRole(1);
-        //PartyIDSource partyIDSource = new PartyIDSource('C');
-        //NoPartyIDs partyIDs = new NoPartyIDs(1);
+    //public void SendTradeCaptureReport(ExecutedTrade trade, ExecType execType)
+    //{
+    //    Symbol symbol = new Symbol(trade.Symbol);
 
-        //var group = new QuickFix.FIX44.ExecutionReport.NoPartyIDsGroup();
-        //group.SetField(participator);
-        //group.SetField(role);
-        //group.SetField(partyIDSource);
-        //group.SetField(partyIDs);
+    //    //PartyID participator = new PartyID(trade.ParticipatorId.ToString());
+    //    //PartyRole role = new PartyRole(1);
+    //    //PartyIDSource partyIDSource = new PartyIDSource('C');
+    //    //NoPartyIDs partyIDs = new NoPartyIDs(1);
 
-        var exReport = new QuickFix.FIX44.TradeCaptureReport(
-            new TradeReportID(trade..ToString()),
-            new PreviouslyReported(false),
-            symbol,
-            lastQty,
-            lastPx,
-            new TradeDate(trade.TradeDate.ToString("YYYmmDD")),
-            new TransactTime(trade.TradeDate.ToUniversalTime())
-            );
+    //    //var group = new QuickFix.FIX44.ExecutionReport.NoPartyIDsGroup();
+    //    //group.SetField(participator);
+    //    //group.SetField(role);
+    //    //group.SetField(partyIDSource);
+    //    //group.SetField(partyIDs);
+    //    //ClOrdID clOrdID = new ClOrdID(trade..AccountId.ToString());
+    //    LastQty lastQty = new LastQty(trade.LastQuantity);
+    //    LastPx lastPx = new LastPx(trade.LastPrice);
 
-        exReport.Set(clOrdID);
-        exReport.Set(symbol);
-        exReport.Set(orderQty);
-        exReport.Set(lastQty);
-        exReport.Set(lastPx);
-        exReport.SetField(account);
+    //    var exReport = new QuickFix.FIX44.TradeCaptureReport(
+    //        new TradeReportID(trade.TradeId.ToString()),
+    //        new PreviouslyReported(false),
+    //        symbol,
+    //        lastQty,
+    //        lastPx,
+    //        new TradeDate(trade.TradeDate.ToString("YYYmmDD")),
+    //        new TransactTime(trade.TradeDate.ToUniversalTime())
+    //        );
 
-        exReport.AddGroup(group);
+    //    ////exReport.Set(clOrdID);
+    //    //exReport.Set(symbol);
+    //    //exReport.Set(orderQty);
+    //    //exReport.Set(lastQty);
+    //    //exReport.Set(lastPx);
+    //    //exReport.SetField(account);
 
-        try
-        {
-            Session.SendToTarget(exReport, trade.SessionID);
-        }
-        catch (SessionNotFound ex)
-        {
-            Console.WriteLine("==session not found exception!==");
-            Console.WriteLine(ex.ToString());
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-        }
-    }
-    public void SendExecutionReport(Order order, ExecType execType)
+    //    //exReport.AddGroup(group);
+
+    //    try
+    //    {
+    //        Session.SendToTarget(exReport, trade.SessionID);
+    //    }
+    //    catch (SessionNotFound ex)
+    //    {
+    //        Console.WriteLine("==session not found exception!==");
+    //        Console.WriteLine(ex.ToString());
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        Console.WriteLine(ex.ToString());
+    //    }
+    //}
+    public void SendExecutionReport(SharedX.Core.Matching.Order order, ExecType execType)
     {
         Symbol symbol = new Symbol(order.Symbol);
         Side side = new Side((char)order.Side);

@@ -4,6 +4,8 @@ using DropCopyX.Infra.Data;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using SharedX.Core.Proto;
+
 namespace DropCopyX.Infra.Repositories;
 public class DropCopyRepository : IDropCopyRepository
 {

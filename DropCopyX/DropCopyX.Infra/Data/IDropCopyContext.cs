@@ -1,5 +1,7 @@
 ﻿using DropCopyX.Core.Entities;
 using MongoDB.Driver;
+using SharedX.Core.Proto;
+
 namespace DropCopyX.Infra.Data;
 public interface IDropCopyContext
 {

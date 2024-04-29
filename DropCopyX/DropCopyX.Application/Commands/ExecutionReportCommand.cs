@@ -1,5 +1,4 @@
-﻿using DropCopyX.Core.Entities;
-using SharedX.Core.Commands;
+﻿using SharedX.Core.Commands;
 using SharedX.Core.Proto;
 
 namespace DropCopyX.Application.Commands;

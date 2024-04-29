@@ -1,6 +1,5 @@
-﻿using DropCopyX.Core.Entities;
-using FluentResults;
-
+﻿using FluentResults;
+using SharedX.Core.Proto;
 namespace DropCopyX.Core.Repositories;
 public interface IDropCopyRepository
 {
