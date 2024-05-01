@@ -2,7 +2,7 @@
 using QuickFix;
 using SharedX.Core.Bus;
 using SharedX.Core.Matching;
-
+using SharedX.Core.Enums;
 namespace MacthingX.FixApp.Services;
 
 internal class MatchMarket : MatchBase
@@ -31,27 +31,37 @@ internal class MatchMarket : MatchBase
         if (!_buyOrders.TryGetValue(order.Symbol, out Dictionary<long, Order> buyOrder))
             return;
 
-        if (_sellOrders.TryGetValue(order.Symbol, out Dictionary<long, Order> sellOrder))
+        if (!_sellOrders.TryGetValue(order.Symbol, out Dictionary<long, Order> sellOrder))
             return;
-
+        
+        bool cancelled = false;
+        
         if (order.Side == SharedX.Core.Enums.SideTrade.Buy)
         {
-            var orderToTrade = sellOrder.FirstOrDefault();
+            var orderToTrade = sellOrder.FirstOrDefault(sell=>sell.Value.Quantity == order.Quantity);
             if (!orderToTrade.Equals(default(KeyValuePair<long, Order>)))
             {
-                CreateTrade(order, orderToTrade.Value);
+                CreateTradeCapture(order, orderToTrade.Value);
 
                 RemoveTradedOrders(ref buyOrder, ref sellOrder, order, orderToTrade.Value);
+            }else
+            {
+                if (order.TimeInForce == TimeInForce.FOK) 
+                    RemoveCancelledOrders(ref buyOrder, order, ref cancelled);
             }
         }
         else if (order.Side == SharedX.Core.Enums.SideTrade.Sell)
         {
-            var orderToTrade = sellOrder.FirstOrDefault();
+            var orderToTrade = buyOrder.FirstOrDefault(buy => buy.Value.Quantity == order.Quantity);
             if (!orderToTrade.Equals(default(KeyValuePair<long, Order>)))
             {
-                CreateTrade(order, orderToTrade.Value);
+                CreateTradeCapture(orderToTrade.Value, order);
 
-                RemoveTradedOrders(ref buyOrder, ref sellOrder, order, orderToTrade.Value);
+                RemoveTradedOrders(ref buyOrder, ref sellOrder, orderToTrade.Value, order);
+            }else
+            {
+                if (order.TimeInForce == TimeInForce.FOK)
+                    RemoveCancelledOrders(ref sellOrder, order, ref cancelled);
             }
         }
     }

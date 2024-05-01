@@ -1,6 +1,7 @@
-﻿using SharedX.Core.Proto;
+﻿using SharedX.Core.Enums;
+using SharedX.Core.Matching;
+using SharedX.Core.Proto;
 using System.Collections.Concurrent;
-
 namespace MacthingX.FixApp.Services;
 public abstract class MatchLastPrice
 {
@@ -11,12 +12,16 @@ public abstract class MatchLastPrice
         _lastPrice= new ConcurrentDictionary<string, decimal>();
     }
 
-    protected void AddUpdatePrice(ExecutedTrade trade)
+    protected void AddUpdatePrice(Order order)
     {
-        if (_lastPrice.TryGetValue(trade.Symbol, out decimal price))
+        if (order.OrderStatus.Equals(OrderStatus.Rejected) ||
+            order.OrderStatus.Equals(OrderStatus.Cancelled))
+            return;
+
+            if (_lastPrice.TryGetValue(order.Symbol, out decimal price))
         {
-            _lastPrice[trade.Symbol] = price;
+            _lastPrice[order.Symbol] = price;
         }else
-            _lastPrice.TryAdd(trade.Symbol, trade.OrderPrice);
+            _lastPrice.TryAdd(order.Symbol, order.Price);
     }
 }

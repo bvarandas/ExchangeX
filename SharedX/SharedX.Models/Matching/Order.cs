@@ -18,8 +18,11 @@ public abstract class Order : BaseEntityFix
     public virtual OrderStatus OrderStatus { get; set; }
     public long ParticipatorId { get; set; }
     public long OrderID { get; set; }
+    public long ClOrdID { get; set; }
     public long AccountId { get; set; }
     public Limit Account { get; set; } = null!;
+    public string ExpireDate { get; set; } = string.Empty;
+    public string ExpireTime { get; set; } = string.Empty;
 
     #region Prices
     public decimal Price { get; set; }
@@ -27,5 +30,6 @@ public abstract class Order : BaseEntityFix
     public decimal StopPrice { get; set; }
     public decimal AveragePrice { get; set; }
     #endregion
+    public DateTime TransactTime { get; set; }
     public IList<OrderDetail> OrderDetails { get; set; } = null!;
 }

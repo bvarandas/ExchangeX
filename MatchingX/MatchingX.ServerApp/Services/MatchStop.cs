@@ -67,27 +67,37 @@ internal class MatchStop : MatchBase
             return;
         if (!_sellOrders.TryGetValue(order.Symbol, out Dictionary<long, Order> sellOrder))
             return;
-            
+        
+        bool cancelled = false;
         if (order.Side == SideTrade.Buy)
         {
-            var orderToTrade = sellOrder.FirstOrDefault();
+            var orderToTrade = sellOrder.FirstOrDefault(sell=>sell.Value.Quantity == order.Quantity);
 
             if (!orderToTrade.Equals(default(KeyValuePair<long, Order>)))
             {
-                CreateTrade(order, orderToTrade.Value);
+                CreateTradeCapture(order, orderToTrade.Value);
 
                 RemoveTradedOrders(ref buyOrder, ref sellOrder, order, orderToTrade.Value);
+            }else
+            {
+                if (order.TimeInForce == TimeInForce.FOK)
+                    RemoveCancelledOrders(ref sellOrder, order, ref cancelled);
             }
         }
         else if (order.Side == SideTrade.Sell)
         {
-            var orderToTrade = sellOrder.FirstOrDefault(kvp => kvp.Value.Price >= order.Price);
+            var orderToTrade = buyOrder.FirstOrDefault(kvp => kvp.Value.Quantity == order.Quantity);
 
             if (!orderToTrade.Equals(default(KeyValuePair<long, Order>)))
             {
-                CreateTrade(order, orderToTrade.Value);
+                CreateTradeCapture(orderToTrade.Value, order);
 
-                RemoveTradedOrders(ref buyOrder, ref sellOrder, order, orderToTrade.Value);
+                RemoveTradedOrders(ref buyOrder, ref sellOrder, orderToTrade.Value, order);
+            }
+            else
+            {
+                if (order.TimeInForce == TimeInForce.FOK)
+                    RemoveCancelledOrders(ref buyOrder, order, ref cancelled);
             }
         }
     }

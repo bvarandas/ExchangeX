@@ -12,4 +12,6 @@ public class Limit
     public double TradedLimit {  get; set; }
     [ProtoMember(4)]
     public double ProvidedLimit { get; set; }
+    [ProtoMember(5)]
+    public ushort AccountType { get; set; }
 }

@@ -1,5 +1,5 @@
 ﻿using SharedX.Core.Commands;
-using SharedX.Core.Proto;
+using SharedX.Core.Matching.DropCopy;
 
 namespace DropCopyX.Application.Commands;
 public class ExecutionReportCommand : Command

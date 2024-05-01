@@ -1,14 +1,14 @@
 ﻿using SharedX.Core.Commands;
-using SharedX.Core.Proto;
+using SharedX.Core.Matching.DropCopy;
 
 namespace MacthingX.Application.Commands;
 public class ExecutedTradeCommand : Command
 {
-    public readonly ExecutedTrade ExecutedTrade;
+    public readonly (TradeCaptureReport, TradeCaptureReport) ExecutedTrades;
     public DateTime Timestamp { get; private set; }
-    public ExecutedTradeCommand(ExecutedTrade executedTrade)
+    public ExecutedTradeCommand((TradeCaptureReport, TradeCaptureReport) executedTrade)
     {
         Timestamp = DateTime.Now;
-        ExecutedTrade = executedTrade;
+        ExecutedTrades = executedTrade;
     }
 }

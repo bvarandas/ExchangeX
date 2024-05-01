@@ -5,11 +5,11 @@ using SharedX.Core.Events;
 namespace MacthingX.Application.Events;
 public class OrderCanceledEvent : Event
 {
-    private readonly Order _order;
+    public readonly Order Order;
     public DateTime Timestamp { get; private set; }
     public OrderCanceledEvent(Order order)
     {
-        _order = order;
+        Order = order;
         Timestamp = DateTime.Now;
     }
 }

@@ -6,7 +6,11 @@ using SharedX.Core.Bus;
 using MacthingX.Application.Commands;
 using MacthingX.Application.Events;
 using QuickFix;
-using SharedX.Core.Proto;
+using SharedX.Core.Matching.DropCopy;
+using MacthingX.Application.Querys;
+using QuickFix.Fields;
+using TradeReportTransType = SharedX.Core.Enums.TradeReportTransType;
+using Elasticsearch.Net.Specification.SecurityApi;
 
 namespace MacthingX.FixApp.Services;
 public abstract class MatchBase : MatchLastPrice, IDisposable
@@ -17,21 +21,18 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
     protected readonly ConcurrentDictionary<string, Dictionary<long, Order>> _sellOrders;
 
     protected readonly ConcurrentQueue<Order> QueueOrderStatusChanged;
-    protected readonly ConcurrentQueue<ExecutedTrade> QueueExecutedTraded;
+    protected readonly ConcurrentQueue<(TradeCaptureReport, TradeCaptureReport)> QueueExecutedTraded;
     
     private readonly Thread ThreadExecutedTrade;
     private readonly Thread ThreadOrdersStatus;
 
     protected readonly IMediatorHandler Bus;
-    protected readonly IApplication Fix;
-
+    protected static long TradeId;
     protected MatchBase(ILogger<MatchBase> logger, IMediatorHandler bus, IApplication fix)
     {
         _logger = logger;
         Bus = bus;
-        Fix = fix;
-
-        QueueExecutedTraded = new ConcurrentQueue<ExecutedTrade>();
+        QueueExecutedTraded = new ConcurrentQueue<(TradeCaptureReport, TradeCaptureReport)>();
         QueueOrderStatusChanged = new ConcurrentQueue<Order>();
 
         ThreadExecutedTrade = new Thread(new ThreadStart(ExecutedTradeOutcome));
@@ -64,7 +65,9 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
                     Bus.SendCommand(new OrderCanceledCommand(order));
                     break;
             }
-            
+
+            AddUpdatePrice(order);
+
             if (_running)
                 break;
 
@@ -76,11 +79,9 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
     {
         while(true)
         {
-            if (QueueExecutedTraded.TryDequeue(out ExecutedTrade trade))
-            {
-                AddUpdatePrice(trade);
+            if (QueueExecutedTraded.TryDequeue(out (TradeCaptureReport, TradeCaptureReport) trade))
                 Bus.SendCommand(new ExecutedTradeCommand(trade));
-            }
+            
             if (_running)
                 break;
 
@@ -183,13 +184,13 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
         {
             if (_buyOrders.TryGetValue(orderToCancel.Symbol, out Dictionary<long, Order> buyOrders))
             {
-                RemoveCanceledOrders(ref buyOrders, orderToCancel, ref canceled);
+                RemoveCancelledOrders(ref buyOrders, orderToCancel, ref canceled);
             }
         }else if (orderToCancel.Side == SideTrade.Sell)
         {
             if (_sellOrders.TryGetValue(orderToCancel.Symbol, out Dictionary<long, Order> sellOrders))
             {
-                RemoveCanceledOrders(ref sellOrders, orderToCancel, ref canceled);
+                RemoveCancelledOrders(ref sellOrders, orderToCancel, ref canceled);
             }
         }
         if (canceled)
@@ -199,7 +200,7 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
             QueueOrderStatusChanged.Enqueue(orderToCancel);
         }
     }
-    protected void RemoveCanceledOrders(ref Dictionary<long, Order> orders, Order orderToCancel, ref bool canceled)
+    protected void RemoveCancelledOrders(ref Dictionary<long, Order> orders, Order orderToCancel, ref bool canceled)
     {
         if (orders.TryGetValue(orderToCancel.OrderID, out Order order))
         {
@@ -223,22 +224,80 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
         }
     }
 
-    protected virtual ExecutedTrade CreateTrade(Order orderBuyer, Order orderSeller)
+    protected virtual TradeCaptureReport CreateTradeCaptureCancelled(Order order)
     {
-        var executedTrade = new ExecutedTrade(
-            orderBuyer.Symbol,
-            orderBuyer.OrderID,
-            orderSeller.OrderID,
-            orderBuyer.Quantity,
-            (orderSeller.Quantity - orderBuyer.Quantity),
-            orderSeller.Price,
-            orderBuyer.AccountId,
-            orderSeller.AccountId,
-            DateTime.Now);
+        var trade = new TradeCaptureReport()
+        {
+            TradeReportTransType = 1,
+            TrdType = 0,
+            CopyMsgIndicator = 'Y',
+            PreviouslyReported = 'N',
+            TradeId = TradeId,
+            NoSides = 1,
+            OrderId = order.OrderID.ToString(),
+            ClOrderId = order.ClOrdID.ToString(),
+            LastQty = order.LastQuantity,
+            LastPx = order.LastPrice,
+            Symbol = order.Symbol,
+            Side = (char)order.Side,
+            Price = order.Price,
+            TransactTime = order.TransactTime,
+            TradeDate = DateTime.Now.ToString("yyyyMMdd"),
+            AccountType = order.Account.AccountType,
+        };
+        return trade;
 
-        QueueExecutedTraded.Enqueue(executedTrade);
+    }
 
-        return executedTrade;
+    protected virtual (TradeCaptureReport, TradeCaptureReport) 
+        CreateTradeCapture(Order orderBuyer, Order orderSeller)
+    {
+        var trade = Bus.QueryReply<GetTradeIdQuery, Trade>(new GetTradeIdQuery());
+        TradeId = trade.Result.TradeId;
+
+        var tradeBuyer = new TradeCaptureReport()
+        {
+            TradeReportTransType = 0,
+            TrdType = 0,
+            CopyMsgIndicator = 'Y',
+            PreviouslyReported = 'N',
+            TradeId = TradeId,
+            NoSides = 1,
+            OrderId = orderBuyer.OrderID.ToString(),
+            ClOrderId = orderBuyer.ClOrdID.ToString(),
+            LastQty = orderBuyer.LastQuantity,
+            LastPx = orderBuyer.LastPrice,
+            Symbol = orderBuyer.Symbol,
+            Side = (char)orderBuyer.Side,
+            Price = orderBuyer.Price,
+            TransactTime = orderBuyer.TransactTime,
+            TradeDate = DateTime.Now.ToString("yyyyMMdd"),
+            AccountType = orderBuyer.Account.AccountType,
+        };
+
+        var tradeSeller = new TradeCaptureReport()
+        {
+            TradeReportTransType = 0,
+            TrdType = 0,
+            CopyMsgIndicator = 'Y',
+            PreviouslyReported = 'N',
+            TradeId = TradeId,
+            NoSides = 1,
+            OrderId = orderSeller.OrderID.ToString(),
+            ClOrderId = orderSeller.ClOrdID.ToString(),
+            LastQty = orderSeller.LastQuantity,
+            LastPx = orderSeller.LastPrice,
+            Symbol = orderSeller.Symbol,
+            Side = (char)orderSeller.Side,
+            Price = orderSeller.Price,
+            TransactTime = orderSeller.TransactTime,
+            TradeDate = DateTime.Now.ToString("yyyyMMdd"),
+            AccountType = orderSeller.Account.AccountType,
+        };
+
+        QueueExecutedTraded.Enqueue((tradeBuyer, tradeSeller));
+        
+        return (tradeBuyer, tradeSeller);
     }
 
     public void Dispose()

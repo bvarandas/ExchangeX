@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SharedX.Core.Enums;
-using SharedX.Core.Proto;
+using SharedX.Core.Matching.DropCopy;
 using SharedX.Core.Specs;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
@@ -14,11 +14,11 @@ public class ExecutedTradeCache : IExecutedTradeCache
     private readonly ILogger<ExecutedTradeCache> _logger;
     private readonly IDatabase _dbExecutedTrade;
     private readonly IDatabase _dbTradeId;
-    private static ConcurrentQueue<ExecutedTrade> ExecutedTradeQueue;
+    private static ConcurrentQueue<TradeCaptureReport> ExecutedTradeQueue;
     public ExecutedTradeCache(ILogger<ExecutedTradeCache> logger, IOptions<ConnectionRedis> config)
     {
         _logger = logger;
-        ExecutedTradeQueue = new ConcurrentQueue<ExecutedTrade>();
+        ExecutedTradeQueue = new ConcurrentQueue<TradeCaptureReport>();
 
         _redis = ConnectionMultiplexer.Connect(_config.Value.ConnectionString, options => {
             options.ReconnectRetryPolicy = new ExponentialRetry(5000, 1000 * 60);
@@ -27,12 +27,12 @@ public class ExecutedTradeCache : IExecutedTradeCache
         _dbExecutedTrade = _redis.GetDatabase((int)RedisDataBases.MatchingExecutedTrade);
         _dbTradeId = _redis.GetDatabase((int)RedisDataBases.MatchingTradeId);
     }
-    public async void AddExecutionReport(ExecutedTrade trade)
+    public async void AddExecutionReport(TradeCaptureReport trade)
     {
         ExecutedTradeQueue.Enqueue(trade);
         await SetValueRedis(trade);
     }
-    private async Task SetValueRedis(ExecutedTrade trade)
+    private async Task SetValueRedis(TradeCaptureReport trade)
     {
         RedisKey key = new RedisKey(trade.TradeId.ToString());
         RedisValue value = new RedisValue(Newtonsoft.Json.JsonConvert.SerializeObject(trade));

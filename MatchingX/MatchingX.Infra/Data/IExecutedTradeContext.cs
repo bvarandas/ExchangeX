@@ -1,8 +1,8 @@
 ﻿using MongoDB.Driver;
-using SharedX.Core.Proto;
+using SharedX.Core.Matching.DropCopy;
 
 namespace MatchingX.Infra.Data;
 public interface IExecutedTradeContext
 {
-    IMongoCollection<ExecutedTrade> ExecutedTrade { get; }
+    IMongoCollection<TradeCaptureReport> ExecutedTrade { get; }
 }

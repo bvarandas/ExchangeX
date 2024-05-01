@@ -1,14 +1,14 @@
 ﻿using MatchingX.Core;
 using MediatR;
 using SharedX.Core.Events;
-using SharedX.Core.Proto;
+using SharedX.Core.Matching.DropCopy;
 
 namespace MacthingX.Application.Events;
 public class ExecutedTradeEvent : Event
 {
-    public ExecutedTrade ExecutedTrade {  get; private set; }
+    public (TradeCaptureReport,TradeCaptureReport) ExecutedTrade {  get; private set; }
     public DateTime Timestamp { get; private set; }
-    public ExecutedTradeEvent(ExecutedTrade executedTrade)
+    public ExecutedTradeEvent((TradeCaptureReport, TradeCaptureReport) executedTrade)
     {
         ExecutedTrade = executedTrade;
         Timestamp = DateTime.Now;

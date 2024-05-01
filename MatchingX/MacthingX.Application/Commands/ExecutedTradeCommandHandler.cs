@@ -16,11 +16,11 @@ public class ExecutedTradeCommandHandler : IRequestHandler<ExecutedTradeCommand,
 
     public async Task<bool> Handle(ExecutedTradeCommand command, CancellationToken cancellationToken)
     {
-        await _repository.CreateExecutedTradeAsync(command.ExecutedTrade, cancellationToken);
+        await _repository.CreateExecutedTradeAsync(command.ExecutedTrades, cancellationToken);
 
         //if (Comit()) TODO: Fazer Unit of Work
         //{
-        await _bus.RaiseEvent(new ExecutedTradeEvent(command.ExecutedTrade));
+        await _bus.RaiseEvent(new ExecutedTradeEvent(command.ExecutedTrades));
         //return await Task.FromResult(true);
         //}
 

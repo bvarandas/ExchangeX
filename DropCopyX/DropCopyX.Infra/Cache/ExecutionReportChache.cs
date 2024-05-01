@@ -2,14 +2,14 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SharedX.Core.Enums;
-using SharedX.Core.Proto;
+using SharedX.Core.Matching.DropCopy;
 using SharedX.Core.Specs;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
 namespace DropCopyX.Infra.Cache;
 public class ExecutionReportChache : IExecutionReportChache
 {
-    private readonly IOptions<ConnectionRedis> _config;
+    private readonly ConnectionRedis _config;
     private readonly ConnectionMultiplexer _redis;
     private readonly IDatabase _dbExecutionReport;
     private readonly ILogger<ExecutionReportChache> _logger;
@@ -17,11 +17,11 @@ public class ExecutionReportChache : IExecutionReportChache
     private static ConcurrentQueue<ExecutionReport> ExecutionReportQueue;
     public ExecutionReportChache(ILogger<ExecutionReportChache> logger, IOptions<ConnectionRedis> config)
     {
-        _config = config;
+        _config = config.Value;
         
         ExecutionReportQueue = new ConcurrentQueue<ExecutionReport>();
 
-        _redis = ConnectionMultiplexer.Connect(_config.Value.ConnectionString, options => {
+        _redis = ConnectionMultiplexer.Connect(_config.ConnectionString, options => {
             options.ReconnectRetryPolicy = new ExponentialRetry(5000, 1000 * 60);
         });
 

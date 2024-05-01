@@ -1,7 +1,10 @@
 ﻿using System.Reflection;
 using MacthingX.Application.Commands;
 using MacthingX.Application.Events;
+using MacthingX.Application.Querys;
+using MatchingX.Core.Interfaces;
 using MatchingX.Core.Repositories;
+using MatchingX.Infra.Cache;
 using MatchingX.Infra.Data;
 using MatchingX.Infra.FixClientApp;
 using MatchingX.Infra.Repositories;
@@ -11,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using QuickFix;
 using SharedX.Core.Bus;
+using SharedX.Core.Matching;
 using SharedX.Core.Specs;
 namespace MatchinX.API.Config;
 internal class NativeInjectorBoostrapper
@@ -25,7 +29,7 @@ internal class NativeInjectorBoostrapper
         
         services.AddSingleton<ITradeClientApp, TradeClientApp>();
         services.AddSingleton<IApplication, FixServerApp>();
-
+        
         // Domain Bus (Mediator)
         services.AddScoped<IMediatorHandler, InMemmoryBus>();
         //services.AddScoped<IOrderBook, OrderBook>();
@@ -56,6 +60,9 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<INotificationHandler<OrderOpenedEvent>, OrderEventHandler>();
         services.AddSingleton<INotificationHandler<OrderRejectedEvent>, OrderEventHandler>();
 
+        // Domain - Querys
+        services.AddSingleton<IRequestHandler<GetTradeIdQuery, Trade>, GetTradeQueryHandler>();
+
         // Domain - Commands
         services.AddSingleton<IRequestHandler<OrderFilledCommand, bool>, OrderCommandHandler>();
         services.AddSingleton<IRequestHandler<OrderRejectedCommand, bool>, OrderCommandHandler>();
@@ -63,6 +70,9 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IRequestHandler<OrderCanceledCommand, bool>, OrderCommandHandler>();
 
         // Infra - Data
+        services.AddSingleton<IDropCopyCache, DropCopyCache>();
+        services.AddSingleton<IMarketDataCache, MarketDataCache>();
+
         services.AddSingleton<IOrderRepository, OrderRepository>();
         services.AddSingleton<IExecutedTradeRepository, ExecutedTradeRepository>();
 

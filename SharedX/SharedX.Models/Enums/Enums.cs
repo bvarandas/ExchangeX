@@ -24,12 +24,21 @@ public enum TimeInForce
 {
     GTC,  // Good Till Cancel
     FOK,  // Fill or Kill
+    DAY,  // Order will be automatically cancelled when trading day is closed
 }
 
 public enum RedisDataBases
 {
     OrderId = 0,
-    MatchingTradeId= 1, // é o execId do executionReport
-    MatchingExecutionReport = 2,
-    MatchingExecutedTrade = 3
+    MatchingTradeId= 1,             // é o execId do executionReport
+    MatchingExecutionReport = 2,    // dropcopy
+    MatchingExecutedTrade = 3,      // dropcopy
+    MatchingSecurity= 4,            // marketdata
+    MatchingSnapshotIncrement = 5,   // marketdata
+}
+
+public enum TradeReportTransType
+{
+    Trade = 0,
+    Cancellation =1
 }

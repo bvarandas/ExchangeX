@@ -9,7 +9,7 @@ using NetMQ;
 using NetMQ.Sockets;
 using SharedX.Core.Bus;
 using SharedX.Core.Extensions;
-using SharedX.Core.Proto;
+using SharedX.Core.Matching.DropCopy;
 using System.Diagnostics;
 
 namespace DropCopyX.Infra.Client;

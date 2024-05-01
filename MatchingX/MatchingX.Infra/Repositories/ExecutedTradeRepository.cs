@@ -4,7 +4,7 @@ using MatchingX.Infra.Data;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using SharedX.Core.Proto;
+using SharedX.Core.Matching.DropCopy;
 
 namespace MatchingX.Infra.Repositories;
 public class ExecutedTradeRepository : IExecutedTradeRepository
@@ -16,14 +16,15 @@ public class ExecutedTradeRepository : IExecutedTradeRepository
         _context = context;
         _logger = logger;
     }
-    public async Task<bool> CreateExecutedTradeAsync(ExecutedTrade executedTrade, CancellationToken cancellationToken)
+    public async Task<bool> CreateExecutedTradeAsync((TradeCaptureReport, TradeCaptureReport) executedTrade, CancellationToken cancellationToken)
     {
         bool result = false;
         try
         {
-            var inserts = new List<WriteModel<ExecutedTrade>>();
+            var inserts = new List<WriteModel<TradeCaptureReport>>();
 
-            inserts.Add(new InsertOneModel<ExecutedTrade>(executedTrade));
+            inserts.Add(new InsertOneModel<TradeCaptureReport>(executedTrade.Item1));
+            inserts.Add(new InsertOneModel<TradeCaptureReport>(executedTrade.Item2));
 
             var insertResult = await _context.ExecutedTrade.BulkWriteAsync(inserts,null, cancellationToken);
             result = insertResult.IsAcknowledged && insertResult.ModifiedCount > 0;
@@ -34,16 +35,16 @@ public class ExecutedTradeRepository : IExecutedTradeRepository
         }
         return result;
     }
-    public async Task<bool> CreateExecutedTradesAsync(List<ExecutedTrade> executedTrades, CancellationToken cancellationToken)
+    public async Task<bool> CreateExecutedTradesAsync(List<TradeCaptureReport> executedTrades, CancellationToken cancellationToken)
     {
         bool result = false;
         try
         {
-            var inserts = new List<WriteModel<ExecutedTrade>>();
+            var inserts = new List<WriteModel<TradeCaptureReport>>();
 
             executedTrades.ForEach((executedTrade)=>
             {
-                inserts.Add(new InsertOneModel<ExecutedTrade>(executedTrade));
+                inserts.Add(new InsertOneModel<TradeCaptureReport>(executedTrade));
             });
 
             var insertResult = await _context.ExecutedTrade.BulkWriteAsync(inserts, null ,cancellationToken);
@@ -55,13 +56,13 @@ public class ExecutedTradeRepository : IExecutedTradeRepository
         }
         return result;
     }
-    public async Task<IEnumerable<ExecutedTrade>> GetExecutedTradeAsync(ExecutedTradeParams specParams, CancellationToken cancellationToken)
+    public async Task<IEnumerable<TradeCaptureReport>> GetExecutedTradeAsync(ExecutedTradeParams specParams, CancellationToken cancellationToken)
     {
-        IEnumerable<ExecutedTrade> result = null!;
+        IEnumerable<TradeCaptureReport> result = null!;
 
         try
         {
-            var builder = Builders<ExecutedTrade>.Filter;
+            var builder = Builders<TradeCaptureReport>.Filter;
             var filter = builder.Empty;
 
             if (!string.IsNullOrEmpty(specParams.Search))

@@ -1,4 +1,5 @@
-﻿using SharedX.Core.Proto;
+﻿using SharedX.Core.Matching.DropCopy;
+
 namespace DropCopyX.Core.Interfaces;
 public interface IExecutionReportChache
 {

@@ -1,10 +1,10 @@
 ﻿using MatchingX.Core.Filters;
-using SharedX.Core.Proto;
+using SharedX.Core.Matching.DropCopy;
 
 namespace MatchingX.Core.Repositories;
 public interface IExecutedTradeRepository
 {
-    Task<IEnumerable<ExecutedTrade>> GetExecutedTradeAsync(ExecutedTradeParams specParams, CancellationToken cancellation);
-    Task<bool> CreateExecutedTradeAsync(ExecutedTrade executedTrade, CancellationToken cancellation);
-    Task<bool> CreateExecutedTradesAsync(List<ExecutedTrade> executedTrades, CancellationToken cancellationToken);
+    Task<IEnumerable<TradeCaptureReport>> GetExecutedTradeAsync(ExecutedTradeParams specParams, CancellationToken cancellation);
+    Task<bool> CreateExecutedTradeAsync((TradeCaptureReport, TradeCaptureReport) executedTrade, CancellationToken cancellation);
+    Task<bool> CreateExecutedTradesAsync(List<TradeCaptureReport> executedTrades, CancellationToken cancellationToken);
 }
