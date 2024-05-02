@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using MatchingX.Core.Repositories;
+using Microsoft.Extensions.Logging;
 using QuickFix;
 using SharedX.Core.Bus;
 using SharedX.Core.Enums;
@@ -9,7 +10,11 @@ internal class MacthStopLimit : MatchBase
 {
     private readonly Thread ThreadOrdersStopLimitPrice;
     private readonly ConcurrentQueue<Order> QueueOrderStopLimitPrice;
-    public MacthStopLimit(ILogger<MatchBase> logger, IMediatorHandler mediator, IApplication fix) : base(logger, mediator, fix)
+    public MacthStopLimit(ILogger<MatchBase> logger, 
+        IMediatorHandler mediator, 
+        IApplication fix, 
+        IOrderRepository orderRepository, 
+        ITradeRepository tradeRepository) : base(logger, mediator, fix, orderRepository, tradeRepository)
     {
         QueueOrderStopLimitPrice = new ConcurrentQueue<Order>();
 

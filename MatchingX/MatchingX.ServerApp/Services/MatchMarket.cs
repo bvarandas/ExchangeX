@@ -3,11 +3,17 @@ using QuickFix;
 using SharedX.Core.Bus;
 using SharedX.Core.Matching;
 using SharedX.Core.Enums;
+using MatchingX.Core.Repositories;
+
 namespace MacthingX.FixApp.Services;
 
 internal class MatchMarket : MatchBase
 {
-    public MatchMarket(ILogger<MatchBase> logger, IMediatorHandler mediator, IApplication fix) : base(logger, mediator, fix)
+    public MatchMarket(ILogger<MatchBase> logger, 
+        IMediatorHandler mediator, 
+        IApplication fix,
+        IOrderRepository orderRepository,
+        ITradeRepository tradeRepository) : base(logger, mediator, fix, orderRepository, tradeRepository)
     {
     }
 

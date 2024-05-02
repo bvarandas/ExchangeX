@@ -1,10 +1,12 @@
-﻿using FluentResults;
+﻿using Amazon.Util.Internal;
+using FluentResults;
 using MatchingX.Core.Filters;
 using MatchingX.Core.Repositories;
 using MatchingX.Infra.Data;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using SharedX.Core.Enums;
 using SharedX.Core.Matching;
 namespace MatchingX.Infra.Repositories;
 public class OrderRepository : IOrderRepository
@@ -57,6 +59,26 @@ public class OrderRepository : IOrderRepository
             _logger.LogError(ex.Message, ex);
         }
 
+        return result;
+    }
+
+    public async Task<IEnumerable<Order>> GetOrdersOnRestartAsync(OrderParams specParams, CancellationToken cancellation)
+    {
+        IEnumerable<Order> result = null!;
+        try
+        {
+            var builder = Builders<Order>.Filter;
+            var filter = builder.Eq(o => o.OrderStatus, OrderStatus.New)
+                       | builder.Eq(o => o.OrderStatus, OrderStatus.PartiallyFilled);
+
+            var orders = await _context.OrderTrade.FindAsync(filter);
+
+            result = orders.ToEnumerable();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+        }
         return result;
     }
 

@@ -33,7 +33,7 @@ internal class MatchBackgroundService : BackgroundService
         using (_publisher = new PublisherSocket())
         {
             //_publisher.Bind("tcp://*:5555");
-            _publisher.Bind(_config.Value.Publisher.Uri);
+            //_publisher.Bind(_config.Value.Publisher.Uri);
 
             while (stoppingToken.IsCancellationRequested)
             {
@@ -50,7 +50,7 @@ internal class MatchBackgroundService : BackgroundService
     public async override Task StopAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation("Finalizando o publisher ZeroMQ...");
-        _publisher.Disconnect(_config.Value.Publisher.Uri);
+        //_publisher.Disconnect(_config.Value.Publisher.Uri);
         await base.StopAsync(stoppingToken);
         _logger.LogInformation("Publisher ZeroMq...Finalizado!");
     }

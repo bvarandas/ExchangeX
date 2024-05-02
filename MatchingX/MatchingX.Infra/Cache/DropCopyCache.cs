@@ -61,7 +61,7 @@ public class DropCopyCache : IDropCopyCache
         await _dbExecutionReport.SetAddAsync(key, value);
     }
 
-    public bool TryDequeueExecuteReport(ExecutionReport execution)
+    public bool TryDequeueExecuteReport(ref ExecutionReport execution)
     {
         if (ExecutionReportQueue.TryDequeue(out ExecutionReport executionFound))
         {
@@ -71,7 +71,7 @@ public class DropCopyCache : IDropCopyCache
         return false;
     }
 
-    public bool TryDequeueTradeCaptureReport(TradeCaptureReport trade)
+    public bool TryDequeueTradeCaptureReport(ref TradeCaptureReport trade)
     {
         if (TradeCaptureQueue.TryDequeue(out TradeCaptureReport tradeFound))
         {

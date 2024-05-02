@@ -1,6 +1,8 @@
 ﻿using MediatR;
 using SharedX.Core.Commands;
 using SharedX.Core.Events;
+using SharedX.Core.Querys;
+
 namespace SharedX.Core.Bus;
 public class InMemmoryBus : IMediatorHandler
 {

@@ -8,10 +8,8 @@ using MacthingX.Application.Events;
 using QuickFix;
 using SharedX.Core.Matching.DropCopy;
 using MacthingX.Application.Querys;
-using QuickFix.Fields;
 using TradeReportTransType = SharedX.Core.Enums.TradeReportTransType;
-using Elasticsearch.Net.Specification.SecurityApi;
-
+using MatchingX.Core.Repositories;
 namespace MacthingX.FixApp.Services;
 public abstract class MatchBase : MatchLastPrice, IDisposable
 {
@@ -28,10 +26,23 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
 
     protected readonly IMediatorHandler Bus;
     protected static long TradeId;
-    protected MatchBase(ILogger<MatchBase> logger, IMediatorHandler bus, IApplication fix)
+
+    private readonly IOrderRepository _orderRepository;
+    private readonly ITradeRepository _tradeRepository;
+    protected MatchBase(ILogger<MatchBase> logger, 
+        IMediatorHandler bus, 
+        IApplication fix,
+        IOrderRepository orderRepository,
+        ITradeRepository tradeRepository)
     {
         _logger = logger;
         Bus = bus;
+        _orderRepository = orderRepository;
+        _tradeRepository = tradeRepository;
+
+        _buyOrders = new ConcurrentDictionary<string, Dictionary<long, Order>>();
+        _sellOrders = new ConcurrentDictionary<string, Dictionary<long, Order>>();
+
         QueueExecutedTraded = new ConcurrentQueue<(TradeCaptureReport, TradeCaptureReport)>();
         QueueOrderStatusChanged = new ConcurrentQueue<Order>();
 
@@ -42,7 +53,42 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
         ThreadOrdersStatus = new Thread(new ThreadStart(OrderStatusChangedOutcome));
         ThreadOrdersStatus.Name = nameof(OrderStatusChangedOutcome);
         ThreadOrdersStatus.Start();
+
+        LoadOrdersOnRestart();
+
     }
+    private void LoadOrdersOnRestart()
+    {
+        var ordersDb = _orderRepository.GetOrdersOnRestartAsync(new MatchingX.Core.Filters.OrderParams(), default(CancellationToken));
+        var buyOrders = ordersDb.Result.Where(o => o.Side == SideTrade.Buy);
+        var sellOrders = ordersDb.Result.Where(o => o.Side == SideTrade.Sell);
+
+        foreach (var order in buyOrders) {
+            if (_buyOrders.TryGetValue(order.Symbol, out var orders)){
+                orders.TryAdd(order.OrderID, order);
+            }
+            else
+            {
+                var dicOrders = new Dictionary<long, Order>();
+                dicOrders.Add(order.OrderID, order);
+                _buyOrders.TryAdd(order.Symbol, dicOrders);
+            }
+        }
+
+        foreach (var order in sellOrders)
+        {
+            if (_sellOrders.TryGetValue(order.Symbol, out var orders)){
+                orders.TryAdd(order.OrderID, order);
+            }
+            else
+            {
+                var dicOrders = new Dictionary<long, Order>();
+                dicOrders.Add(order.OrderID, order);
+                _sellOrders.TryAdd(order.Symbol, dicOrders);
+            }
+        }
+    }
+
     private void OrderStatusChangedOutcome()
     {
         while (true)
@@ -252,7 +298,7 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
     protected virtual (TradeCaptureReport, TradeCaptureReport) 
         CreateTradeCapture(Order orderBuyer, Order orderSeller)
     {
-        var trade = Bus.QueryReply<GetTradeIdQuery, Trade>(new GetTradeIdQuery());
+        var trade = _tradeRepository.GetTradeIdAsync(default(CancellationToken));
         TradeId = trade.Result.TradeId;
 
         var tradeBuyer = new TradeCaptureReport()

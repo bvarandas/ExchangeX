@@ -62,6 +62,7 @@ internal class NativeInjectorBoostrapper
 
         // Domain - Querys
         services.AddSingleton<IRequestHandler<GetTradeIdQuery, Trade>, GetTradeQueryHandler>();
+        services.AddSingleton<IRequestHandler<GetOrderQuery, IEnumerable<Order>>, GetOrderQueryHandler>();
 
         // Domain - Commands
         services.AddSingleton<IRequestHandler<OrderFilledCommand, bool>, OrderCommandHandler>();

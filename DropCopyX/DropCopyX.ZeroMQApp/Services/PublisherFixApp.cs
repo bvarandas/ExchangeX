@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using QuickFix;
 using QuickFix.Fields;
 using SharedX.Core.Matching;
-using SharedX.Core.Proto;
 using StackExchange.Redis;
 
 namespace DropCopyX.ServerApp.Services;
