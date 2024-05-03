@@ -6,6 +6,10 @@ using SharedX.Core.Matching.MarketData;
 using SharedX.Core.Specs;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
+using SharedX.Core;
+using SharedX.Core.Matching;
+using Order = SharedX.Core.Matching.Order;
+
 namespace DropCopyX.Infra.Cache;
 public class OrderChache : IOrderChache
 {
@@ -13,44 +17,42 @@ public class OrderChache : IOrderChache
     private readonly ConnectionMultiplexer _redis;
     private readonly IDatabase _dbOrderEntry;
     private readonly ILogger<OrderChache> _logger;
+    private static ConcurrentQueue<Order> IncrementalQueue;
+    private RedisKey key = new RedisKey(Constants.RedisOrderEngine);
 
-    private static ConcurrentQueue<MarketData> IncrementalQueue;
     public OrderChache(ILogger<OrderChache> logger, IOptions<ConnectionRedis> config)
     {
         _config = config.Value;
 
-        IncrementalQueue = new ConcurrentQueue<MarketData>();
+        IncrementalQueue = new ConcurrentQueue<Order>();
 
         _redis = ConnectionMultiplexer.Connect(_config.ConnectionString, options => {
             options.ReconnectRetryPolicy = new ExponentialRetry(5000, 1000 * 60);
         });
-
-        _dbOrderEntry = _redis.GetDatabase((int)RedisDataBases.MatchingExecutionReport);
-
+        _dbOrderEntry = _redis.GetDatabase((int)RedisDataBases.Matching);
         _logger = logger;
-        
     }
 
-    public async void AddMarketData(MarketData report)
+    public async void AddMarketData(Order order)
     {
-        IncrementalQueue.Enqueue(report);
-        await SetValueRedis(report);
+        IncrementalQueue.Enqueue(order);
+        await SetValueRedis(order);
     }
 
-    private async Task SetValueRedis(MarketData market)
+    private async Task SetValueRedis(Order order)
     {
-        RedisKey key = new RedisKey(market.Id.ToString());
-        RedisValue value = new RedisValue(Newtonsoft.Json.JsonConvert.SerializeObject(market));
+        RedisValue value = new RedisValue(Newtonsoft.Json.JsonConvert.SerializeObject(order));
         await _dbOrderEntry.SetAddAsync(key, value);
     }
 
-    public MarketData TryDequeueExecutionReport()
+    public Order TryDequeueExecutionReport(ref Order order)
     {
-        if (IncrementalQueue.TryDequeue(out MarketData report))
+        if (IncrementalQueue.TryDequeue(out Order orderFound))
         {
-            return report;
+            order = orderFound;
+            return order;
         }
-        return default(MarketData);
+        return default(Order);
     }
 
 }

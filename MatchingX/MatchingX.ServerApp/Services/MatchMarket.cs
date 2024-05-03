@@ -4,6 +4,7 @@ using SharedX.Core.Bus;
 using SharedX.Core.Matching;
 using SharedX.Core.Enums;
 using MatchingX.Core.Repositories;
+using SharedX.Core.Interfaces;
 
 namespace MacthingX.FixApp.Services;
 

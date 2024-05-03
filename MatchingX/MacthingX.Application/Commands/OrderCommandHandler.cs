@@ -1,7 +1,8 @@
 ﻿using MacthingX.Application.Events;
-using MatchingX.Core.Repositories;
 using MediatR;
 using SharedX.Core.Bus;
+using SharedX.Core.Interfaces;
+
 namespace MacthingX.Application.Commands;
 
 public class OrderCommandHandler :

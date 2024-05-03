@@ -2,6 +2,8 @@
 using MediatR;
 using SharedX.Core.Matching;
 using MatchingX.Core.Filters;
+using SharedX.Core.Interfaces;
+
 namespace MacthingX.Application.Querys;
 public class GetOrderQueryHandler : IRequestHandler<GetOrderQuery, IEnumerable<Order>>
 {
@@ -12,7 +14,7 @@ public class GetOrderQueryHandler : IRequestHandler<GetOrderQuery, IEnumerable<O
     }
     public async Task<IEnumerable<Order>> Handle(GetOrderQuery request, CancellationToken cancellationToken)
     {
-        var result = await _repository.GetOrdersOnRestartAsync(new OrderParams(), cancellationToken);
+        var result = await _repository.GetOrdersOnRestartAsync(cancellationToken);
 
         return result;
     }

@@ -2,13 +2,10 @@
 using SharedX.Core.Matching;
 using SharedX.Core.Matching.DropCopy;
 using SharedX.Core.Matching.MarketData;
-
 namespace MacthingX.Application.Extensions;
-
 public static class MatchingExtensions 
 {
-    private static long ExecId = 0;
-    public static MarketData ToMarketData(this Order order)
+     public static MarketData ToMarketData(this Order order)
     {
         var marketdata = new MarketData();
         marketdata.Symbol = order.Symbol;
@@ -33,7 +30,7 @@ public static class MatchingExtensions
         ep.OrderID = order.OrderID;
         ep.OrigCLOrdID = order.ClOrdID;
         ep.ClOrdID = order.ClOrdID;
-        ep.ExecID = ++ExecId;
+        ep.ExecID = 0;
         ep.TrdMatchID = 0;                       // verificar depois no trade
         ep.ExecType = (char)order.OrderStatus;
         ep.OrderStatus = order.OrderStatus;

@@ -1,5 +1,4 @@
-﻿using DropCopyX.Core.Entities;
-using DropCopyX.Core.Repositories;
+﻿using DropCopyX.Core.Repositories;
 using DropCopyX.Infra.Data;
 using FluentResults;
 using Microsoft.Extensions.Logging;

@@ -21,7 +21,6 @@ public class PublisherMarketDataApp : BackgroundService
     private Thread ThreadIncremental;
     private readonly Semaphore _semaphore;
 
-
     public PublisherMarketDataApp(ILogger<PublisherMarketDataApp> logger,
         IOptions<ConnectionZmq> options, IMarketDataCache cache)
     {

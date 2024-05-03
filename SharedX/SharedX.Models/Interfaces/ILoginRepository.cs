@@ -1,6 +1,7 @@
-﻿using OrderEntryX.Core.Entities;
-using FluentResults;
-namespace OrderEntryX.Core.Repositories;
+﻿using FluentResults;
+using SharedX.Core.Entities;
+
+namespace SharedX.Core.Repositories;
 
 public interface ILoginRepository
 {

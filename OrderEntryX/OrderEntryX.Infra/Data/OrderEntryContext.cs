@@ -1,9 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using OrderEntryX.Core.Entities;
-using OrderEntryX.Infra.Data;
-using SharedX.Core.Matching;
-
+using SharedX.Core.Entities;
 namespace OrderEntryX.Infra.Data;
 public class OrderEntryContext : IOrderEntryContext
 {

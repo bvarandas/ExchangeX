@@ -1,6 +1,5 @@
 ﻿using ProtoBuf;
 using SharedX.Core.Enums;
-using SharedX.Core.Account;
 namespace SharedX.Core.Models;
 [ProtoContract]
 public class OrderModel 
@@ -8,9 +7,9 @@ public class OrderModel
     [ProtoMember(1)]
     public string Symbol { get; set; } = string.Empty;
     [ProtoMember(2)]
-    public double Quantity { get; set; }
+    public decimal Quantity { get; set; }
     [ProtoMember(3)]
-    public double Price { get; set; }
+    public decimal Price { get; set; }
     [ProtoMember(4)]
     public SideTrade Side { get; set; }
     [ProtoMember(5)]
@@ -18,12 +17,19 @@ public class OrderModel
     [ProtoMember(6)]
     public virtual OrderStatus OrderStatus { get; set; }
     [ProtoMember(7)]
-    public long MpOrderId { get; set; }
+    public long MpId { get; set; }
     [ProtoMember(8)]
     public long OrderID { get; set; }
     [ProtoMember(9)]
-    public Account.Limit Account { get; set; } = null!;
-
+    public int Account { get; set; }
+    [ProtoMember(10)]
+    public long ClOrdId { get; set; }
+    [ProtoMember(11)]
+    public decimal StopPrice { get; set; }
+    [ProtoMember(12)]
+    public TimeInForce TimeInForce { get; set; }
+    [ProtoMember(13)]
+    public DateTime TransactTime { get; set; }
     public OrderModel()
     {
         

@@ -14,8 +14,11 @@ public class DropCopyCache : IDropCopyCache
     private readonly ConcurrentQueue<ExecutionReport> ExecutionReportQueue;
     private readonly ConnectionRedis _config;
     private readonly ConnectionMultiplexer _redis;
-    private readonly IDatabase _dbTradeCaptureReport;
-    private readonly IDatabase _dbExecutionReport;
+    private readonly IDatabase _dbMatching;
+
+    private RedisKey keyTradeCapture = new RedisKey("TradeCapture");
+    private RedisKey keyExecuteReport = new RedisKey("ExecuteReport");
+
     private readonly ILogger<DropCopyCache> _logger;
 
     public DropCopyCache(ILogger<DropCopyCache> logger, IOptions<ConnectionRedis> config)
@@ -29,9 +32,7 @@ public class DropCopyCache : IDropCopyCache
             options.ReconnectRetryPolicy = new ExponentialRetry(5000, 1000 * 60);
         });
 
-        _dbTradeCaptureReport = _redis.GetDatabase((int)RedisDataBases.MatchingExecutionReport);
-        _dbExecutionReport = _redis.GetDatabase((int)RedisDataBases.MatchingExecutedTrade);
-
+        _dbMatching = _redis.GetDatabase((int)RedisDataBases.Matching);
         _logger = logger;
     }
 
@@ -49,16 +50,14 @@ public class DropCopyCache : IDropCopyCache
 
     private async Task SetValueTradeCaptureReportRedisAsync(TradeCaptureReport report)
     {
-        RedisKey key = new RedisKey(report.TradeId.ToString());
         RedisValue value = new RedisValue(Newtonsoft.Json.JsonConvert.SerializeObject(report));
-        await _dbTradeCaptureReport.SetAddAsync(key, value);
+        _dbMatching.HashIncrement(keyTradeCapture, value);
     }
 
     private async Task SetValueExecutionReportRedisAsync(ExecutionReport report)
     {
-        RedisKey key = new RedisKey(report.OrderID.ToString());
         RedisValue value = new RedisValue(Newtonsoft.Json.JsonConvert.SerializeObject(report));
-        await _dbExecutionReport.SetAddAsync(key, value);
+        _dbMatching.HashIncrement(keyExecuteReport, value);
     }
 
     public bool TryDequeueExecuteReport(ref ExecutionReport execution)

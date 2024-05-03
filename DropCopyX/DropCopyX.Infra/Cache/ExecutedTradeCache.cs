@@ -1,7 +1,9 @@
 ﻿using DropCopyX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SharedX.Core;
 using SharedX.Core.Enums;
+using SharedX.Core.Matching;
 using SharedX.Core.Matching.DropCopy;
 using SharedX.Core.Specs;
 using StackExchange.Redis;
@@ -12,9 +14,12 @@ public class ExecutedTradeCache : IExecutedTradeCache
     private readonly IOptions<ConnectionRedis> _config;
     private readonly ConnectionMultiplexer _redis;
     private readonly ILogger<ExecutedTradeCache> _logger;
-    private readonly IDatabase _dbExecutedTrade;
-    private readonly IDatabase _dbTradeId;
+    private readonly IDatabase _dbMatching;
     private static ConcurrentQueue<TradeCaptureReport> ExecutedTradeQueue;
+    
+    private RedisKey keyTradeId = new RedisKey(Constants.RedisKeyTradeId);
+    private RedisKey keyExecutedTrade = new RedisKey(Constants.RedisExecutedTrade);
+
     public ExecutedTradeCache(ILogger<ExecutedTradeCache> logger, IOptions<ConnectionRedis> config)
     {
         _logger = logger;
@@ -23,9 +28,7 @@ public class ExecutedTradeCache : IExecutedTradeCache
         _redis = ConnectionMultiplexer.Connect(_config.Value.ConnectionString, options => {
             options.ReconnectRetryPolicy = new ExponentialRetry(5000, 1000 * 60);
         });
-
-        _dbExecutedTrade = _redis.GetDatabase((int)RedisDataBases.MatchingExecutedTrade);
-        _dbTradeId = _redis.GetDatabase((int)RedisDataBases.MatchingTradeId);
+        _dbMatching = _redis.GetDatabase((int)RedisDataBases.Matching);
     }
     public async void AddExecutionReport(TradeCaptureReport trade)
     {
@@ -34,22 +37,23 @@ public class ExecutedTradeCache : IExecutedTradeCache
     }
     private async Task SetValueRedis(TradeCaptureReport trade)
     {
-        RedisKey key = new RedisKey(trade.TradeId.ToString());
         RedisValue value = new RedisValue(Newtonsoft.Json.JsonConvert.SerializeObject(trade));
-        await _dbExecutedTrade.SetAddAsync(key, value);
+
+        await _dbMatching.HashIncrementAsync(keyExecutedTrade, value, trade.TradeId);
     }
 
     public long GetLastTradeId()
     {
-        var execId =  _dbTradeId.StringGet("TradeId", CommandFlags.None);
+        var TradeId =  _dbMatching.HashGetAsync(keyTradeId, new RedisValue("TradeId") );
+
+        var execId = _dbMatching.StringGet("TradeId", CommandFlags.None);
         if (!execId.HasValue)
             return 0;
         return (long)execId;
     }
     public async void SerLastTradeId(long tradeId)
     {
-        RedisKey key = new RedisKey("TradeId");
         RedisValue value = new RedisValue(tradeId.ToString());
-        await _dbTradeId.SetAddAsync(key, value);
+        await _dbMatching.HashIncrementAsync(keyTradeId, value);
     }
 }

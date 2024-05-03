@@ -29,14 +29,16 @@ public enum TimeInForce
 
 public enum RedisDataBases
 {
-    OrderId = 0,
-    MatchingTradeId= 1,             // é o execId do executionReport
-    MatchingExecutionReport = 2,    // dropcopy
-    MatchingExecutedTrade = 3,      // dropcopy
-    MatchingSecurity= 4,            // marketdata
-    MatchingSnapshotIncrement = 5,   // marketdata
+    //OrderId = 0,
+    Matching = 0,
+    //MatchingTradeId= 1,             // é o execId do executionReport
+    //MatchingExecutionReport = 2,    // dropcopy
+    //MatchingExecutedTrade = 3,      // dropcopy
+    //MatchingSecurity= 4,            // marketdata
+    //MatchingSnapshotIncrement = 5,  // marketdata
+    OrderEngine=1,                  // OrderEngine
 }
-
+//public enum Redis
 public enum TradeReportTransType
 {
     Trade = 0,

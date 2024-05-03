@@ -1,5 +1,6 @@
-﻿using OrderEntryX.Core.Entities;
-using SharedX.Core.Commands;
+﻿using SharedX.Core.Commands;
+using SharedX.Core.Entities;
+
 namespace OrderEntryX.Application.Commands;
 public class LoginAddCommand : Command
 {

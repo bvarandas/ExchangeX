@@ -1,6 +1,5 @@
 ﻿using Amazon.Runtime.Internal.Util;
 using DropCopyX.Application.Commands;
-using DropCopyX.Core.Entities;
 using DropCopyX.Core.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;

@@ -14,8 +14,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using QuickFix;
 using SharedX.Core.Bus;
+using SharedX.Core.Interfaces;
 using SharedX.Core.Matching;
 using SharedX.Core.Specs;
+using SharedX.Infra.Order.Data;
+using SharedX.Infra.Order.Repositories;
+
 namespace MatchinX.API.Config;
 internal class NativeInjectorBoostrapper
 {

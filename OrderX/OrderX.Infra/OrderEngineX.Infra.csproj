@@ -7,6 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MongoDB.Driver" Version="2.25.0" />
+    <PackageReference Include="NetMQ" Version="4.0.1.13" />
+    <PackageReference Include="ServiceStack.Redis" Version="8.2.2" />
+    <PackageReference Include="StackExchange.Redis" Version="2.6.122" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\SharedX\SharedX.Models\SharedX.Core.csproj" />
+    <ProjectReference Include="..\..\SharedX\Sharex.Infra\Sharex.Infra.csproj" />
     <ProjectReference Include="..\OrderEngineX.Core\OrderEngineX.Core.csproj" />
   </ItemGroup>
 

@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using DropCopyX.Application.Commands;
-using DropCopyX.Core.Entities;
 using DropCopyX.Core.Interfaces;
 using DropCopyX.Core.Repositories;
 using DropCopyX.Infra.Cache;

@@ -7,9 +7,10 @@ using MacthingX.Application.Commands;
 using MacthingX.Application.Events;
 using QuickFix;
 using SharedX.Core.Matching.DropCopy;
-using MacthingX.Application.Querys;
 using TradeReportTransType = SharedX.Core.Enums.TradeReportTransType;
 using MatchingX.Core.Repositories;
+using SharedX.Core.Interfaces;
+
 namespace MacthingX.FixApp.Services;
 public abstract class MatchBase : MatchLastPrice, IDisposable
 {
@@ -59,7 +60,7 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
     }
     private void LoadOrdersOnRestart()
     {
-        var ordersDb = _orderRepository.GetOrdersOnRestartAsync(new MatchingX.Core.Filters.OrderParams(), default(CancellationToken));
+        var ordersDb = _orderRepository.GetOrdersOnRestartAsync(default(CancellationToken));
         var buyOrders = ordersDb.Result.Where(o => o.Side == SideTrade.Buy);
         var sellOrders = ordersDb.Result.Where(o => o.Side == SideTrade.Sell);
 

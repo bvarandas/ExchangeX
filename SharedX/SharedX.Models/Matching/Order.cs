@@ -2,7 +2,7 @@
 using SharedX.Core.Entities;
 using SharedX.Core.Enums;
 namespace SharedX.Core.Matching;
-public abstract class Order : BaseEntityFix 
+public class Order : BaseEntityFix 
 {
     public string Symbol { get; set; } = string.Empty;
     
@@ -13,7 +13,7 @@ public abstract class Order : BaseEntityFix
     #endregion
 
     public SideTrade Side { get; set; }
-    public  OrderType OrderType { get; set; }
+    public OrderType OrderType { get; set; }
     public TimeInForce TimeInForce { get; set; }
     public virtual OrderStatus OrderStatus { get; set; }
     public long ParticipatorId { get; set; }

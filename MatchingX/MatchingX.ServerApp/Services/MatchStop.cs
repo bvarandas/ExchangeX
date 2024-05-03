@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using QuickFix;
 using SharedX.Core.Bus;
 using SharedX.Core.Enums;
+using SharedX.Core.Interfaces;
 using SharedX.Core.Matching;
 using System.Collections.Concurrent;
 namespace MacthingX.FixApp.Services;

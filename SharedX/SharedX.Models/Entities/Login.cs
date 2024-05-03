@@ -1,5 +1,4 @@
-﻿using SharedX.Core.Entities;
-namespace OrderEntryX.Core.Entities;
+﻿namespace SharedX.Core.Entities;
 public class Login : BaseEntity
 {
     public string UserName { get; set; }=string.Empty;

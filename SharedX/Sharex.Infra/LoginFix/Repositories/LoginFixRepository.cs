@@ -1,20 +1,20 @@
-﻿using DropCopyX.Core.Entities;
-using DropCopyX.Core.Repositories;
-using DropCopyX.Infra.Data;
-using FluentResults;
+﻿using FluentResults;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using SharedX.Core.Entities;
+using SharedX.Core.Repositories;
+using Sharex.Infra.LoginFix.Data;
 using System.Security.Cryptography;
 using System.Text;
 using Error = FluentResults.Error;
-namespace DropCopyX.Infra.Repositories;
-public class LoginRepository : ILoginRepository
+namespace ShareX.Infra.Repositories;
+public class LoginFixRepository : ILoginRepository
 {
-    private readonly IDropCopyContext _context;
-    private readonly ILogger<LoginRepository> _logger;
+    private readonly ILoginFixContext _context;
+    private readonly ILogger<LoginFixRepository> _logger;
     private readonly MD5 _md5;
-    public LoginRepository(ILogger<LoginRepository> logger, IDropCopyContext context)
+    public LoginFixRepository(ILogger<LoginFixRepository> logger, ILoginFixContext context)
     {
         _logger = logger;
         _context = context;
