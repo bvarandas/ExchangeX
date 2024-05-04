@@ -1,14 +1,12 @@
 ﻿using DropCopyX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NRedisStack.Graph;
 using SharedX.Core;
 using SharedX.Core.Enums;
 using SharedX.Core.Matching.DropCopy;
 using SharedX.Core.Specs;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
-using System.Reflection.Metadata;
 
 namespace DropCopyX.Infra.Cache;
 public class ExecutionReportChache : IExecutionReportChache
@@ -48,13 +46,15 @@ public class ExecutionReportChache : IExecutionReportChache
         await _dbExecutionReport.HashIncrementAsync(keyExecutionReport, value);
     }
 
-    public ExecutionReport TryDequeueExecutionReport()
+    public bool TryDequeueExecutionReport(out ExecutionReport report)
     {
-        if (ExecutionReportQueue.TryDequeue(out ExecutionReport report))
+        report = default(ExecutionReport);
+        if (ExecutionReportQueue.TryDequeue(out ExecutionReport reportFound))
         {
-            return report;
+            report = reportFound;
+            return true;
         }
-        return default(ExecutionReport);
+        return false;
     }
 
 }
