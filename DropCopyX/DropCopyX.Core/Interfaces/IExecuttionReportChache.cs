@@ -4,5 +4,5 @@ namespace DropCopyX.Core.Interfaces;
 public interface IExecutionReportChache
 {
     void AddExecutionReport(ExecutionReport report);
-    ExecutionReport TryDequeueExecutionReport();
+    bool TryDequeueExecutionReport(out ExecutionReport  report);
 }

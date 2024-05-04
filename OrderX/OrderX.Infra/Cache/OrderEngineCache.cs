@@ -1,14 +1,9 @@
-﻿using Microsoft.AspNetCore.DataProtection.KeyManagement;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OrderEngineX.Core.Interfaces;
-using QuickFix.Config;
-using ServiceStack.Redis;
 using SharedX.Core.Enums;
-using SharedX.Core.Matching;
 using SharedX.Core.Specs;
 using StackExchange.Redis;
-using System;
 using System.Collections.Concurrent;
 using Order = SharedX.Core.Matching.Order;
 
@@ -21,11 +16,9 @@ public class OrderEngineCache : IOrderEngineCache
     private readonly ConnectionMultiplexer _redis;
     private readonly IDatabase _dbOrderEngine;
     private readonly ILogger<OrderEngineCache> _logger;
-    private readonly RedisClient _redisClient;
-    private readonly RedisKey _key;
+        private readonly RedisKey _key;
     public OrderEngineCache(ILogger<OrderEngineCache> logger, 
-        IOptions<ConnectionRedis> config,
-        RedisClient redisClient)
+        IOptions<ConnectionRedis> config)
     {
         _config = config.Value;
         OrderEngineQueue = new ConcurrentQueue<Order>();
@@ -35,7 +28,7 @@ public class OrderEngineCache : IOrderEngineCache
         });
 
         _dbOrderEngine = _redis.GetDatabase((int)RedisDataBases.OrderEngine);
-        _redisClient = redisClient;
+    
         _logger = logger;
 
         _key = new RedisKey("Orders");
@@ -53,8 +46,9 @@ public class OrderEngineCache : IOrderEngineCache
         await _dbOrderEngine.HashIncrementAsync(_key, value);
     }
 
-    public bool TryDequeueOrder(ref Order order)
+    public bool TryDequeueOrder(out Order order)
     {
+        order = default;
         if (OrderEngineQueue.TryDequeue(out Order orderFound))
         {
             order = orderFound;

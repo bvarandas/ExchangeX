@@ -1,41 +1,21 @@
 ﻿using MassTransit;
 using SharedX.Core.Matching;
-
+using OrderEngineX.Core.Interfaces;
 namespace OrderX.API.Consumer;
-public class ConsumerOrdersApp : BackgroundService
+public class ConsumerOrdersApp : IConsumer<Order>
 {
     private readonly ILogger<ConsumerOrdersApp> _logger;
-    public ConsumerOrdersApp(ILogger<ConsumerOrdersApp> logger)
+    private readonly IOrderEngineCache _cache;
+    public ConsumerOrdersApp(ILogger<ConsumerOrdersApp> logger, IOrderEngineCache cache)
     {
         _logger = logger;
-    }
-
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async override Task StopAsync(CancellationToken stoppingToken)
-    {
-        _logger.LogInformation("Finalizando o consumer RabbitMQ...");
-        
-
-        _logger.LogInformation("Consumer RabbitMq...Finalizado!");
-    }
-}
-
-public class ConsumerOrders : IConsumer<Order>
-{
-    private readonly ILogger<ConsumerOrders> _logger;
-    public ConsumerOrders(ILogger<ConsumerOrders> logger)
-    {
-        _logger = logger;
+        _cache = cache;
     }
 
     public Task Consume(ConsumeContext<Order> context)
     {
         Console.Write(context.Message);
-
+        _cache.AddOrder(context.Message);
         return Task.CompletedTask;
     }
 }

@@ -94,13 +94,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderEntryX.Infra", "OrderE
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderEntryX.ServerApp", "OrderEntryX\OrderEntryX.ZeroMQApp\OrderEntryX.ServerApp.csproj", "{098DCC6E-6896-46C5-ACC7-8220B34B4E54}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderX.API", "OrderX\OrderX.API\OrderX.API.csproj", "{F2084172-8818-4AE9-923B-1C4B24A7BD9B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderEngineX.API", "OrderX\OrderX.API\OrderEngineX.API.csproj", "{F2084172-8818-4AE9-923B-1C4B24A7BD9B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderEngineX.Core", "OrderX\OrderEngineX.Core\OrderEngineX.Core.csproj", "{E93CDCF1-D2FA-4C11-93AC-DD91E8E21125}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderEngineX.Application", "OrderX\OrderEngineX.Application\OrderEngineX.Application.csproj", "{D4EFFFA2-9953-4930-9186-C20568F59923}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderEngineX.Application", "OrderX\OrderEngineX.Application\OrderEngineX.Application.csproj", "{D4EFFFA2-9953-4930-9186-C20568F59923}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sharex.Infra", "SharedX\Sharex.Infra\Sharex.Infra.csproj", "{5F5862A9-99CC-4D73-B686-9FA57B840E43}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sharex.Infra", "SharedX\Sharex.Infra\Sharex.Infra.csproj", "{5F5862A9-99CC-4D73-B686-9FA57B840E43}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

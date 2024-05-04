@@ -60,8 +60,9 @@ public class DropCopyCache : IDropCopyCache
         _dbMatching.HashIncrement(keyExecuteReport, value);
     }
 
-    public bool TryDequeueExecuteReport(ref ExecutionReport execution)
+    public bool TryDequeueExecuteReport(out ExecutionReport execution)
     {
+        execution = default(ExecutionReport)!;
         if (ExecutionReportQueue.TryDequeue(out ExecutionReport executionFound))
         {
             execution = executionFound;
@@ -70,8 +71,9 @@ public class DropCopyCache : IDropCopyCache
         return false;
     }
 
-    public bool TryDequeueTradeCaptureReport(ref TradeCaptureReport trade)
+    public bool TryDequeueTradeCaptureReport(out TradeCaptureReport trade)
     {
+        trade = default(TradeCaptureReport)!;
         if (TradeCaptureQueue.TryDequeue(out TradeCaptureReport tradeFound))
         {
             trade = tradeFound;

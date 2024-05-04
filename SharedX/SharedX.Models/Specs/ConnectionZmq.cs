@@ -2,6 +2,7 @@
 public  class ConnectionZmq
 {
     public PubSub Consumer { get; set; } = null!;
+    public PubSub ConsumerExecutionReport { get; set; } = null!;
     public PubSub PublisherDropCopy { get; set; } = null!;
     public PubSub PublisherMarketData { get; set; } = null!;
     public PubSub PublisherOrders { get; set; } = null!;

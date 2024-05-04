@@ -45,14 +45,14 @@ public class OrderChache : IOrderChache
         await _dbOrderEntry.SetAddAsync(key, value);
     }
 
-    public Order TryDequeueExecutionReport(ref Order order)
+    public bool TryDequeueExecutionReport(ref Order order)
     {
         if (IncrementalQueue.TryDequeue(out Order orderFound))
         {
             order = orderFound;
-            return order;
+            return true;
         }
-        return default(Order);
+        return false;
     }
 
 }

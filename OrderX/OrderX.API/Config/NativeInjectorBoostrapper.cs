@@ -1,5 +1,12 @@
 ﻿using System.Reflection;
+using MarketDataX.Application.Commands;
 using MassTransit;
+using MediatR;
+using OrderEngineX.Application.Commands;
+using OrderEngineX.Application.Events;
+using OrderEngineX.Core.Interfaces;
+using OrderEngineX.Infra.Cache;
+using OrderEngineX.Infra.Publisher;
 using OrderX.API.Consumer;
 using SharedX.Core.Bus;
 using SharedX.Core.Specs;
@@ -15,7 +22,7 @@ internal class NativeInjectorBoostrapper
 
         services.AddMassTransit(x =>
         {
-            x.AddConsumer<ConsumerOrders>();
+            x.AddConsumer<ConsumerOrdersApp>();
             x.UsingRabbitMq((context, cfg) =>
             {
                 string hostname = config["QueueCommandSettings:Hostname"]!;
@@ -34,7 +41,6 @@ internal class NativeInjectorBoostrapper
 
         //services.AddSingleton<IFixServerApp, FixServerApp>();
         
-
         // Domain Bus (Mediator)
         services.AddScoped<IMediatorHandler, InMemmoryBus>();
         //services.AddScoped<IOrderBook, OrderBook>();
@@ -58,20 +64,20 @@ internal class NativeInjectorBoostrapper
         }));
 
         // Domain - Events
-        //services.AddSingleton<INotificationHandler<ExecutedTradeEvent>, ExecutedTradeEventHandler>();
+        services.AddSingleton<IRequestHandler<OrderTradeNewEvent, bool>, OrderTradeEventHandler>();
+        services.AddSingleton<IRequestHandler<OrderTradeModifyEvent, bool>, OrderTradeEventHandler>();
+        services.AddSingleton<IRequestHandler<OrderTradeCancelEvent, bool>, OrderTradeEventHandler>();
 
-        //services.AddSingleton<IRequestHandler<ExecutionReportCommand, bool>, ExecutionReportCommandHandler>();
-        //services.AddSingleton<INotificationHandler<OrderFilledEvent>, OrderEventHandler>();
-        //services.AddSingleton<INotificationHandler<OrderOpenedEvent>, OrderEventHandler>();
-        //services.AddSingleton<INotificationHandler<OrderRejectedEvent>, OrderEventHandler>();
+        // Domain - Command
+        services.AddSingleton<IRequestHandler<OrderTradeCancelCommand, bool>, OrderTradeCommandHandler>();
+        services.AddSingleton<IRequestHandler<OrderTradeModifyCommand, bool>, OrderTradeCommandHandler>();
+        services.AddSingleton<IRequestHandler<OrderTradeNewCommand, bool>, OrderTradeCommandHandler>();
 
         // Infra - Data
-        //services.AddSingleton<IExecutedTradeCache, ExecutedTradeCache>();
-        //services.AddSingleton<IExecutionReportChache, ExecutionReportChache>();
-        //services.AddSingleton<IDropCopyContext, DropCopyContext>();
-        //services.AddSingleton<IDropCopyRepository , DropCopyRepository>();
+        services.AddSingleton<IExecutionReportCache, ExecutionReportCache>();
+        services.AddSingleton<IOrderEngineCache, OrderEngineCache>();
 
-        services.AddHostedService<ConsumerOrdersApp>();
+        services.AddHostedService<ConsumerExecutionReportApp>();
         //services.AddHostedService<PublisherFixApp>();
     }
 }

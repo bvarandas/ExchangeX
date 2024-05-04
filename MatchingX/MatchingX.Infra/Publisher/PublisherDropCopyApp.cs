@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetMQ;
 using NetMQ.Sockets;
+using SharedX.Core.Extensions;
 using SharedX.Core.Matching.DropCopy;
 using SharedX.Core.Specs;
 namespace MatchingX.Infra.Publisher;
@@ -11,18 +12,18 @@ namespace MatchingX.Infra.Publisher;
 public class PublisherDropCopyApp : BackgroundService
 {
     private readonly ILogger<PublisherDropCopyApp> _logger;
-    private PublisherSocket _publisher;
+    private PushSocket _sender;
     private readonly ConnectionZmq _config;
     private readonly IDropCopyCache _cache;
     public PublisherDropCopyApp(ILogger<PublisherDropCopyApp> logger, 
-        IOptions<ConnectionZmq> options, IDropCopyCache cache )
+        IOptions<ConnectionZmq> options, 
+        IDropCopyCache cache )
     {
         _logger = logger;
         _config = options.Value;
         _cache = cache;
     }
 
-    
     public override Task StartAsync(CancellationToken cancellationToken)
     {
         return base.StartAsync(cancellationToken);
@@ -30,7 +31,7 @@ public class PublisherDropCopyApp : BackgroundService
 
     public override Task StopAsync(CancellationToken cancellationToken)
     {
-        _publisher.Disconnect(_config.PublisherDropCopy.Uri);
+        _sender.Disconnect(_config.PublisherDropCopy.Uri);
         return base.StopAsync(cancellationToken);
     }
 
@@ -38,18 +39,16 @@ public class PublisherDropCopyApp : BackgroundService
     {
         _logger.LogInformation("Iniciando o Publisher DropCopy ZeroMQ...");
 
-        using (_publisher = new PublisherSocket())
+        using (_sender = new PushSocket(_config.PublisherDropCopy.Uri))
         {
-            _publisher.Bind(_config.PublisherDropCopy.Uri);
-
             while (!stoppingToken.IsCancellationRequested)
             {
-                //var message = 
-                
-                //_publisher
-                //    .SendMoreFrame(_config.Publisher.Topic[])
-                //    .SendMultipartBytes();
-                
+                while (_cache.TryDequeueExecuteReport(out ExecutionReport report))
+                {
+                    var message = report.SerializeToByteArrayProtobuf<ExecutionReport>();
+                    _sender.SendMultipartBytes(message);
+                }
+
                 Thread.Sleep(10);
             }
         }
