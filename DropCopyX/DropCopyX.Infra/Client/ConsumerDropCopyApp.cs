@@ -37,7 +37,7 @@ public class ConsumerDropCopyApp : BackgroundService
         _logger.LogInformation("Iniciando o DropCopy Consumer do ZeroMQ...");
         var listExecutions = new List<ExecutionReport>();
             
-        using (_receiver = new PullSocket(_config.ConsumerExecutionReport.Uri))
+        using (_receiver = new PullSocket(_config.MatchingToDropCopy.Uri))
         {
             var timer = new Stopwatch();
             timer.Start();
@@ -66,7 +66,7 @@ public class ConsumerDropCopyApp : BackgroundService
     public async override Task StopAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation("Finalizando o publisher ZeroMQ...");
-        _receiver.Disconnect(_config.ConsumerExecutionReport.Uri);
+        _receiver.Disconnect(_config.MatchingToDropCopy.Uri);
         _logger.LogInformation("Publisher ZeroMq...Finalizado!");
     }
 }

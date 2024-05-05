@@ -1,12 +1,65 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MatchingX.ServerApp.Consumer
+﻿using MatchingX.Core.Interfaces;
+using MatchingX.ServerApp.Publisher;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using NetMQ;
+using NetMQ.Sockets;
+using SharedX.Core.Extensions;
+using SharedX.Core.Matching;
+using SharedX.Core.Specs;
+namespace MatchingX.ServerApp.Consumer;
+public class ConsumerOrderApp : BackgroundService
 {
-    internal class ConsumerOrderApp
+    private readonly ILogger<PublisherMarketDataApp> _logger;
+    private PullSocket _receiver;
+    private readonly ConnectionZmq _config;
+    private readonly IMatchingReceiver _matchReceiver;
+    private static Thread ThreadReceiverOrder= null!;
+
+    public ConsumerOrderApp(ILogger<PublisherMarketDataApp> logger,
+        IOptions<ConnectionZmq> options
+        ,IMatchingReceiver matchReceiver
+        )
     {
+        _logger = logger;
+        _config = options.Value;
+        _matchReceiver = matchReceiver;
+    }
+
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        return Task.CompletedTask;
+    }
+
+    public override Task StartAsync(CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Iniciando o Receiver Order ZeroMQ...");
+
+        ThreadReceiverOrder = new Thread(() => ReceiverOrder(cancellationToken));
+        ThreadReceiverOrder.Name = nameof(ThreadReceiverOrder);
+        ThreadReceiverOrder.Start();
+
+        return Task.CompletedTask;
+    }
+    public async override Task StopAsync(CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Finalizando o COnsumer Order ZeroMQ...");
+        _receiver.Disconnect(_config.MatchingToMarketData.Uri);
+        await base.StopAsync(cancellationToken);
+    }
+
+    private void ReceiverOrder(CancellationToken stoppingToken)
+    {
+        using (_receiver = new PullSocket(_config.OrderEngineToMatching.Uri))
+        {
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                var message = _receiver.ReceiveMultipartBytes()[0];
+                var order = message.DeserializeFromByteArrayProtobuf<Order>();
+                //_matchReceiver.ReceiveOrder(order);
+                Thread.Sleep(10);
+            }
+        }
     }
 }

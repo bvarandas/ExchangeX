@@ -1,18 +1,20 @@
 ﻿using System.Reflection;
 using MacthingX.Application.Commands;
 using MacthingX.Application.Events;
+using MacthingX.Application.Interfaces;
 using MacthingX.Application.Querys;
+using MacthingX.Application.Services;
 using MatchingX.Core.Interfaces;
 using MatchingX.Core.Repositories;
 using MatchingX.Infra.Cache;
 using MatchingX.Infra.Data;
 using MatchingX.Infra.FixClientApp;
 using MatchingX.Infra.Repositories;
-using MatchinX.API.Fix;
+using MatchingX.ServerApp.Consumer;
+using MatchingX.ServerApp.Publisher;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using QuickFix;
 using SharedX.Core.Bus;
 using SharedX.Core.Interfaces;
 using SharedX.Core.Matching;
@@ -28,11 +30,12 @@ internal class NativeInjectorBoostrapper
         services.AddSwaggerGen();
 
         services.Configure<QueueCommandSettings>(config.GetSection(nameof(QueueCommandSettings)));
-
+        services.Configure<ConnectionRedis>(config.GetSection(nameof(ConnectionRedis)));
+        services.Configure<ConnectionZmq>(config.GetSection(nameof(ConnectionZmq)));
         // FIX - Application
-        
+
         services.AddSingleton<ITradeClientApp, TradeClientApp>();
-        services.AddSingleton<IApplication, FixServerApp>();
+        //services.AddSingleton<IApplication, FixServerApp>();
         
         // Domain Bus (Mediator)
         services.AddScoped<IMediatorHandler, InMemmoryBus>();
@@ -74,6 +77,14 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IRequestHandler<OrderCanceledCommand, bool>, OrderCommandHandler>();
         services.AddSingleton<IRequestHandler<OrderCanceledCommand, bool>, OrderCommandHandler>();
 
+        // Domain - Services
+        services.AddSingleton<IMatchingReceiver, MatchingReceiver>();
+        services.AddSingleton<IMatchLimit,       MatchLimit>();
+        services.AddSingleton<IMatchStop,        MatchStop>();
+        services.AddSingleton<IMatchStopLimit,   MatchStopLimit>();
+        services.AddSingleton<IMatchMarket,      MatchMarket>();
+        
+
         // Infra - Data
         services.AddSingleton<IDropCopyCache, DropCopyCache>();
         services.AddSingleton<IMarketDataCache, MarketDataCache>();
@@ -81,10 +92,15 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IOrderRepository, OrderRepository>();
         services.AddSingleton<IExecutedTradeRepository, ExecutedTradeRepository>();
 
+        services.AddSingleton<ITradeRepository, TradeRepository>();
+        services.AddSingleton<ITradeContext, TradeContext>();
+
         services.AddSingleton<IOrderContext, OrderContext>();
         services.AddSingleton<IExecutedTradeContext ,ExecutedTradeContext >();
 
-        services.AddHostedService<MatchingAcceptor>();
-        services.AddHostedService<MatchingInitiator>();
+        services.AddHostedService<ConsumerOrderApp>();
+        services.AddHostedService<PublisherMarketDataApp>();
+        services.AddHostedService<PublisherOrderEngineApp>();
+        services.AddHostedService<PublisherDropCopyApp>();
     }
 }

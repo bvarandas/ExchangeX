@@ -92,7 +92,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderEntryX.Core", "OrderEn
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderEntryX.Infra", "OrderEntryX\OrderEntryX.Infra\OrderEntryX.Infra.csproj", "{7CE01506-9BB4-47A7-B0E2-7FC6954D0747}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderEntryX.ServerApp", "OrderEntryX\OrderEntryX.ZeroMQApp\OrderEntryX.ServerApp.csproj", "{098DCC6E-6896-46C5-ACC7-8220B34B4E54}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderEntryX.ServerApp", "OrderEntryX\OrderEntryX.ServerApp\OrderEntryX.ServerApp.csproj", "{098DCC6E-6896-46C5-ACC7-8220B34B4E54}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderEngineX.API", "OrderX\OrderX.API\OrderEngineX.API.csproj", "{F2084172-8818-4AE9-923B-1C4B24A7BD9B}"
 EndProject

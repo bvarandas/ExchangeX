@@ -1,14 +1,29 @@
 version: '3.4'
 
 services:
-  matchinx.api:
-    image: ${DOCKER_REGISTRY-}matchinxapi
+  matchingx:
+    image: ${DOCKER_REGISTRY-}matching
     build:
       context: .
-      dockerfile: MatchingX/MatchinX.API/Dockerfile
+      dockerfile: MatchingX/MatchingX.ServerApp/Dockerfile
+ 
+  orderentryx:
+    image: ${DOCKER_REGISTRY-}orderentry
+    build:
+      context: .
+      dockerfile: OrderEntryX/OrderEntryX.ServerApp/Dockerfile
   
   rabbitmq:
     image: rabbitmq:3-management-alpine
   
   mongodb:
     image: mongo
+  
+  postgres:
+    image: postgres
+
+  redis:
+    image: redis
+  
+  adminer:
+    image: adminer

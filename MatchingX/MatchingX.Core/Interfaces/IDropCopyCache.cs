@@ -6,4 +6,5 @@ public interface IDropCopyCache
     void AddTradeCaptureReport(TradeCaptureReport trade);
     bool TryDequeueTradeCaptureReport(out TradeCaptureReport trade);
     bool TryDequeueExecuteReport(out ExecutionReport execution);
+    bool TryDequeueExecuteToOrderReport(out ExecutionReport execution);
 }

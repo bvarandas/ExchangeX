@@ -12,6 +12,7 @@ public class DropCopyCache : IDropCopyCache
 {
     private readonly ConcurrentQueue<TradeCaptureReport> TradeCaptureQueue;
     private readonly ConcurrentQueue<ExecutionReport> ExecutionReportQueue;
+    private readonly ConcurrentQueue<ExecutionReport> ExecutionReportToOrderQueue;
     private readonly ConnectionRedis _config;
     private readonly ConnectionMultiplexer _redis;
     private readonly IDatabase _dbMatching;
@@ -27,6 +28,7 @@ public class DropCopyCache : IDropCopyCache
 
         TradeCaptureQueue = new ConcurrentQueue<TradeCaptureReport>();
         ExecutionReportQueue = new ConcurrentQueue<ExecutionReport>();
+        ExecutionReportToOrderQueue = new ConcurrentQueue<ExecutionReport>();
 
         _redis = ConnectionMultiplexer.Connect(_config.ConnectionString, options => {
             options.ReconnectRetryPolicy = new ExponentialRetry(5000, 1000 * 60);
@@ -39,6 +41,7 @@ public class DropCopyCache : IDropCopyCache
     public async void AddExecutionReport(ExecutionReport execution)
     {
         ExecutionReportQueue.Enqueue(execution);
+        ExecutionReportToOrderQueue.Enqueue(execution);
         await SetValueExecutionReportRedisAsync(execution);
     }
 
@@ -64,6 +67,17 @@ public class DropCopyCache : IDropCopyCache
     {
         execution = default(ExecutionReport)!;
         if (ExecutionReportQueue.TryDequeue(out ExecutionReport executionFound))
+        {
+            execution = executionFound;
+            return true;
+        }
+        return false;
+    }
+
+    public bool TryDequeueExecuteToOrderReport(out ExecutionReport execution)
+    {
+        execution = default(ExecutionReport)!;
+        if (ExecutionReportToOrderQueue.TryDequeue(out ExecutionReport executionFound))
         {
             execution = executionFound;
             return true;

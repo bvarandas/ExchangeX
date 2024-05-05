@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "OrderEntryX.ServerApp": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}

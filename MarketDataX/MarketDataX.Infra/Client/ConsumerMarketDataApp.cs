@@ -1,32 +1,30 @@
 ﻿using MarketDataX.Core.Interfaces;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NetMQ;
 using NetMQ.Sockets;
 using SharedX.Core.Bus;
 using SharedX.Core.Extensions;
 using SharedX.Core.Matching.MarketData;
-using System.Diagnostics;
-
+using SharedX.Core.Specs;
 namespace MarketDataX.Infra.Client;
 public class ConsumerMarketDataApp : BackgroundService
 {
-    private readonly IConfiguration _config;
+    private readonly ConnectionZmq _config;
     private readonly ILogger<ConsumerMarketDataApp> _logger;
-    private SubscriberSocket _subscriber;
-    private readonly string _addressConnect;
-    private readonly string _topic;
+    private PullSocket _receiver;
     private readonly IMarketDataChache _cache;
     private readonly IMediatorHandler _mediator;
-    public ConsumerMarketDataApp(ILogger<ConsumerMarketDataApp> logger, IConfiguration config, IMarketDataChache cache, IMediatorHandler mediator)
+    public ConsumerMarketDataApp(ILogger<ConsumerMarketDataApp> logger, 
+        IOptions<ConnectionZmq> options, 
+        IMarketDataChache cache, 
+        IMediatorHandler mediator)
     {
         _logger = logger;
-        _config = config;
+        _config = options.Value;
         _cache = cache;
         _mediator = mediator;   
-        _addressConnect = _config["ConnectionStrings:MarquetDataZmqConsumer:uri"]!;
-        _topic = _config["ConnectionStrings:MarketDataZmqConsumer:topic"]!;
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -34,14 +32,11 @@ public class ConsumerMarketDataApp : BackgroundService
         _logger.LogInformation("Iniciando o MarketData Consumer do ZeroMQ...");
         var listExecutions = new List<MarketData>();
             
-        using (_subscriber = new SubscriberSocket())
+        using (_receiver = new PullSocket(_config.MatchingToMarketData.Uri))
         {
-            _subscriber.Connect(_addressConnect);
-            _subscriber.Subscribe(_topic);
-
             while (!stoppingToken.IsCancellationRequested)
             {
-                var msg = _subscriber.ReceiveMultipartBytes(1);//.ReceiveFrameBytes();//.ReceiveFrameString();
+                var msg = _receiver.ReceiveMultipartBytes(1);//.ReceiveFrameBytes();//.ReceiveFrameString();
                 var marketData = msg[1].DeserializeFromByteArrayProtobuf<MarketData>();
                 _cache.AddMarketData(marketData);
                 Thread.Sleep(10);
@@ -52,7 +47,7 @@ public class ConsumerMarketDataApp : BackgroundService
     public async override Task StopAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation("Finalizando o consumer ZeroMQ...");
-        _subscriber.Disconnect(_addressConnect);
+        _receiver.Disconnect(_config.MatchingToMarketData.Uri);
         _logger.LogInformation("Consumer ZeroMq...Finalizado!");
     }
 }

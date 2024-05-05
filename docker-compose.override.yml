@@ -1,7 +1,7 @@
 version: '3.4'
 
 services:
-  matchinx.api:
+  matchingx:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
@@ -10,7 +10,6 @@ services:
       - exchange
 
   postgres:
-    image: postgres
     restart: always
     # set shared memory limit when using docker-compose
     shm_size: 128mb
@@ -26,7 +25,6 @@ services:
       - exchange
 
   adminer:
-    image: adminer
     restart: always
     ports:
       - 8080:8080
@@ -43,7 +41,6 @@ services:
       - exchange
 
   redis:
-    image: redis
     command: redis-server --requirepass Redis2019!
     ports:
       - "6379:6379"

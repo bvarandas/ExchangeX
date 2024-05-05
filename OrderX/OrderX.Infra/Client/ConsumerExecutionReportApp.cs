@@ -29,14 +29,14 @@ public class ConsumerExecutionReportApp : BackgroundService
 
     public override Task StopAsync(CancellationToken cancellationToken)
     {
-        _receiver.Disconnect(_config.ConsumerExecutionReport.Uri);
+        _receiver.Disconnect(_config.OrderEntryToOrderEngine.Uri);
         return base.StopAsync(cancellationToken);
     }
 
     protected async override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation("Iniciando o Publisher Order ZeroMQ...");
-        using ( _receiver = new PullSocket(_config.Consumer.Uri)) 
+        using ( _receiver = new PullSocket(_config.OrderEntryToOrderEngine.Uri)) 
         {
             while (!stoppingToken.IsCancellationRequested)
             {
