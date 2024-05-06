@@ -13,10 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Entities\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\SharedX\SharedX.Models\SharedX.Core.csproj" />
   </ItemGroup>
 

@@ -6,7 +6,9 @@ using SharedX.Core.Specs;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
 using SharedX.Core;
-using Order = SharedX.Core.Matching.Order;
+using System.Text.Json.Nodes;
+using SharedX.Core.Matching.OrderEngine;
+
 namespace DropCopyX.Infra.Cache;
 public class OrderEntryChache : IOrderEntryChache
 {
@@ -14,43 +16,38 @@ public class OrderEntryChache : IOrderEntryChache
     private readonly ConnectionMultiplexer _redis;
     private readonly IDatabase _dbOrderEntry;
     private readonly ILogger<OrderEntryChache> _logger;
-    private static ConcurrentQueue<Order> IncrementalQueue;
+    private static ConcurrentQueue<OrderEngine> OrderEntryQueue=null!;
     private RedisKey key = new RedisKey(Constants.RedisOrderEngine);
 
     public OrderEntryChache(ILogger<OrderEntryChache> logger, IOptions<ConnectionRedis> config)
     {
         _config = config.Value;
-
-        IncrementalQueue = new ConcurrentQueue<Order>();
-
+        OrderEntryQueue = new ConcurrentQueue<OrderEngine>();
         _redis = ConnectionMultiplexer.Connect(_config.ConnectionString, options => {
             options.ReconnectRetryPolicy = new ExponentialRetry(5000, 1000 * 60);
         });
         _dbOrderEntry = _redis.GetDatabase((int)RedisDataBases.Matching);
         _logger = logger;
     }
-
-    public async void AddOrderEntryAsync(Order order)
+    public async void AddOrderEntryAsync(OrderEngine order)
     {
-        IncrementalQueue.Enqueue(order);
+        OrderEntryQueue.Enqueue(order);
         await SetValueRedis(order);
     }
-
-    private async Task SetValueRedis(Order order)
+    private async Task SetValueRedis(OrderEngine order)
     {
-        RedisValue value = new RedisValue(Newtonsoft.Json.JsonConvert.SerializeObject(order));
+        var jsonString = Newtonsoft.Json.JsonConvert.SerializeObject(order);
+        RedisValue value = new RedisValue();
         await _dbOrderEntry.SetAddAsync(key, value);
     }
-
-    public bool TryDequeueOrderEntry(out Order order)
+    public bool TryDequeueOrderEntry(out OrderEngine order)
     {
         order = default!;
-        if (IncrementalQueue.TryDequeue(out Order orderFound))
+        if (OrderEntryQueue.TryDequeue(out OrderEngine orderFound))
         {
             order = orderFound;
             return true;
         }
         return false;
     }
-
 }

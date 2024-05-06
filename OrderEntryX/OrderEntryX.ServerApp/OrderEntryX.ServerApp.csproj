@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\SharedX\Sharex.Infra\Sharex.Infra.csproj" />
     <ProjectReference Include="..\OrderEntryX.Application\OrderEntryX.Application.csproj" />
     <ProjectReference Include="..\OrderEntryX.Core\OrderEntryX.Core.csproj" />
     <ProjectReference Include="..\OrderEntryX.Infra\OrderEntryX.Infra.csproj" />

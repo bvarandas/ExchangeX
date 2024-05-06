@@ -21,7 +21,7 @@ public class TradeRepository : ITradeRepository
 
     public async Task<Trade> GetTradeIdAsync(CancellationToken cancellation)
     {
-        Trade result = default(Trade);
+        Trade result = default(Trade)!;
         try
         {
             var builder = Builders<Trade>.Filter;
@@ -53,10 +53,8 @@ public class TradeRepository : ITradeRepository
         }
         catch (Exception ex)
         {
-            
             _logger.LogError(ex.Message, ex);
         }
-
         return result;
     }
 }

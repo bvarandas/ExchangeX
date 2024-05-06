@@ -6,7 +6,7 @@ using NetMQ.Sockets;
 using OrderEntryX.Core.Interfaces;
 using SharedX.Core.Extensions;
 using SharedX.Core.Matching;
-using SharedX.Core.Matching.MarketData;
+using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
 namespace OrderEntryX.Infra.Client;
 public class PublisherOrdersApp : BackgroundService
@@ -41,9 +41,9 @@ public class PublisherOrdersApp : BackgroundService
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                while (_orderEntryChache.TryDequeueOrderEntry(out Order order))
+                while (_orderEntryChache.TryDequeueOrderEntry(out OrderEngine order))
                 {
-                    var message = order.SerializeToByteArrayProtobuf<Order>();
+                    var message = order.SerializeToByteArrayProtobuf<OrderEngine>();
                     _sender.SendMultipartBytes(message);
                 }
 

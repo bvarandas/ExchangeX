@@ -3,6 +3,8 @@ using OrderEntryX.ServerApp;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using Microsoft.Extensions.DependencyInjection;
+using OrderEntryX.Infra.Data;
 
 var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
@@ -25,6 +27,5 @@ IHost host = Host.CreateDefaultBuilder(args)
         {
             NativeInjectorBoostrapper.RegisterServices(services, config);
         }).Build();
-
-await host
-.RunAsync();
+    await host
+    .RunAsync();

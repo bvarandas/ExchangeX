@@ -30,6 +30,17 @@ public class OrderModel
     public TimeInForce TimeInForce { get; set; }
     [ProtoMember(13)]
     public DateTime TransactTime { get; set; }
+    [ProtoMember(14)]
+    public string ExpireDate { get; set; }
+    [ProtoMember(15)]
+    public string ExpireTime { get; set; }
+    [ProtoMember(17)]
+    public long ClOrdID { get; set; }
+    [ProtoMember(18)]
+    public long AccountId { get; set; }
+    [ProtoMember(19)]
+    public long ParticipatorId { get; set; }
+    
     public OrderModel()
     {
         

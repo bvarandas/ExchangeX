@@ -44,3 +44,10 @@ public enum TradeReportTransType
     Trade = 0,
     Cancellation =1
 }
+
+public enum Execution
+{
+    ToOpen = 0,
+    toCancel = 1,
+    toCancelReplace = 2
+}

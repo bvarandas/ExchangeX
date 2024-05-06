@@ -6,10 +6,13 @@ using OrderEntryX.Core.Interfaces;
 using OrderEntryX.Core.Repositories;
 using OrderEntryX.Infra.Client;
 using OrderEntryX.Infra.Data;
-using OrderEntryX.Infra.Repositories;
 using OrderEntryX.ServerApp.Services;
 using SharedX.Core.Bus;
+using SharedX.Core.Repositories;
 using SharedX.Core.Specs;
+using Sharex.Infra.LoginFix.Data;
+using ShareX.Infra.Repositories;
+
 namespace OrderEntryX.ServerApp;
 internal class NativeInjectorBoostrapper
 {
@@ -55,10 +58,12 @@ internal class NativeInjectorBoostrapper
         //services.AddSingleton<INotificationHandler<OrderRejectedEvent>, OrderEventHandler>();
 
         // Infra - Data
-        services.AddSingleton<IOrderEntryChache, OrderEntryChache>();
+        
+        services.AddSingleton<ILoginRepository, LoginFixRepository>();
+        services.AddSingleton<ILoginFixContext, LoginFixContext>();
 
+        services.AddSingleton<IOrderEntryChache, OrderEntryChache>();
         services.AddSingleton<IOrderEntryContext, OrderEntryContext>();
-        services.AddSingleton<IOrderEntryRepository, OrderEntryRepository>();
 
         services.AddHostedService<PublisherOrdersApp>();
         services.AddHostedService<ConsumerFixApp>();

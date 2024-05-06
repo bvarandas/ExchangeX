@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using QuickFix.Fields;
 using SharedX.Core.Entities;
 using SharedX.Core.Repositories;
 using Sharex.Infra.LoginFix.Data;
@@ -33,8 +34,8 @@ public class LoginFixRepository : ILoginRepository
 
             inserts.Add(new InsertOneModel<Login>(login));
 
-            var insertResult = await _context.Login.BulkWriteAsync(inserts, null, cancellation);
-            result = insertResult.IsAcknowledged && insertResult.ModifiedCount > 0;
+            var insertResult = _context.Login.BulkWriteAsync(inserts, null, cancellation);
+            result = insertResult.Result.IsAcknowledged && insertResult.Result.ModifiedCount > 0;
         }
         catch (Exception ex)
         {
@@ -50,43 +51,42 @@ public class LoginFixRepository : ILoginRepository
         try
         {
             var builder = Builders<Login>.Filter;
-            var filter = builder.Empty;
-            if (!string.IsNullOrEmpty(login.Id))
-            {
-                var searchFilter = builder.Regex(x => x.Id, new BsonRegularExpression(login.Id));
-                filter &= searchFilter;
-            }
+            var passwordBytes = _md5.ComputeHash(Encoding.UTF8.GetBytes(login.Password));
+            var password = GetPasswordByte(passwordBytes);
+
+            var filter = builder.Eq(u => u.UserName, login.UserName) | 
+                         builder.Eq(p=>p.Password, login.Password); 
+            
             var loginFound = _context.Login.Find(filter).FirstOrDefault();
             if (loginFound != null)
             {
-                var password = _md5.ComputeHash(Encoding.UTF8.GetBytes(login.Password));
                 var passwordFound = loginFound.Password;
 
-                if (!loginFound.GrantedIPs.Contains(login.ActualIP))
-                {
-                    result.Errors.Add(new Error("IP not whitelisted."));
-                    result = false;
-                }
+                //if (!loginFound.GrantedIPs.Contains(login.ActualIP))
+                //{
+                //    result = Result.Fail(new Error("IP not whitelisted."));
+                //}
 
                 if (passwordFound is null || !password.Equals(passwordFound))
                 {
-                    result.Errors.Add(new Error("password is not valid."));
-                    result = false;
+                    result = Result.Fail(new Error("password is not valid."));
                 }
 
                 if (!login.Active)
                 {
-                    result.Errors.Add(new Error("User is not active."));
-                    result = false;
+                    
+                    result = Result.Fail(new Error("User is not active."));
                 }
                 
                 if (result.Errors.Count.Equals(0))
-                    result = true;
+                {
+                    result = Result.Ok(true);
+                }
+                    
 
             }else
             {
-                result.Errors.Add(new Error("Login not found"));
-                result = false;
+                result = Result.Fail("Login not found");
             }
         }
         catch (Exception ex)
