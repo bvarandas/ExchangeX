@@ -51,15 +51,34 @@ public class ConsumerOrderApp : BackgroundService
 
     private void ReceiverOrder(CancellationToken stoppingToken)
     {
-        using (_receiver = new PullSocket(_config.OrderEngineToMatching.Uri))
+        bool isConnected = false;
+        
+        do
         {
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
-                var message = _receiver.ReceiveMultipartBytes()[0];
-                var order = message.DeserializeFromByteArrayProtobuf<Order>();
-                //_matchReceiver.ReceiveOrder(order);
-                Thread.Sleep(10);
+                _logger.LogInformation($"Receiver de ordens tentando conectar..{_config.OrderEngineToMatching.Uri}");
+                using (_receiver = new PullSocket(_config.OrderEngineToMatching.Uri))
+                {
+                    _logger.LogInformation("Receiver de ordens Conectado!!!");
+                    isConnected = true;
+
+                    while (!stoppingToken.IsCancellationRequested)
+                    {
+                        var message = _receiver.ReceiveMultipartBytes()[0];
+                        var order = message.DeserializeFromByteArrayProtobuf<Order>();
+                        _matchReceiver.ReceiveOrder(order);
+                        Thread.Sleep(10);
+                    }
+                }
             }
-        }
+            catch (Exception ex)
+            {
+                isConnected = false;
+                _logger.LogError(ex.Message, ex);
+            }
+
+            Thread.Sleep(100);
+        }while (!isConnected);
     }
 }

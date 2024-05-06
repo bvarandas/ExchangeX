@@ -9,10 +9,7 @@ using SharedX.Core.Matching;
 namespace MacthingX.Application.Services;
 public class MatchLimit : MatchBase, IMatchLimit
 {
-    public MatchLimit(ILogger<MatchBase> logger, 
-        IMediatorHandler mediator, 
-        IOrderRepository orderRepository,
-        ITradeRepository tradeRepository) : base(logger, mediator, orderRepository, tradeRepository)
+    public MatchLimit() : base()
     {
     }
     public void ReceiveOrder(Order order)

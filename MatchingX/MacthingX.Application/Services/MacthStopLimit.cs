@@ -12,10 +12,7 @@ public class MatchStopLimit : MatchBase, IMatchStopLimit
 {
     private readonly Thread ThreadOrdersStopLimitPrice;
     private readonly ConcurrentQueue<Order> QueueOrderStopLimitPrice;
-    public MatchStopLimit(ILogger<MatchBase> logger, 
-        IMediatorHandler mediator, 
-        IOrderRepository orderRepository, 
-        ITradeRepository tradeRepository) : base(logger, mediator, orderRepository, tradeRepository)
+    public MatchStopLimit() : base()
     {
         QueueOrderStopLimitPrice = new ConcurrentQueue<Order>();
 
@@ -32,28 +29,28 @@ public class MatchStopLimit : MatchBase, IMatchStopLimit
     {
         while (true)
         {
-            if (!QueueOrderStopLimitPrice.TryDequeue(out Order order))
-                continue;
-
-            if (!_lastPrice.TryGetValue(order.Symbol, out decimal price))
+            if (QueueOrderStopLimitPrice.TryDequeue(out Order order))
             {
-                QueueOrderStopLimitPrice.Enqueue(order);
-                continue;
-            }
-            
-            switch ((order.OrderType, order.Side))
-            {
-                case (OrderType.StopLimit, SideTrade.Sell) when order.Price >= price:
-                case (OrderType.StopLimit, SideTrade.Buy) when order.Price <= price:
-                    // Adicionar no book e mandar ordem Limit
-                    base.AddOrder(order);
-                    this.MatchOrderLimit(order);
-                    break;
-                default:
+                if (!_lastPrice.TryGetValue(order.Symbol, out decimal price))
+                {
                     QueueOrderStopLimitPrice.Enqueue(order);
-                    break;
+                    Thread.Sleep(10);
+                    continue;
+                }
+
+                switch ((order.OrderType, order.Side))
+                {
+                    case (OrderType.StopLimit, SideTrade.Sell) when order.StopPrice >= price:
+                    case (OrderType.StopLimit, SideTrade.Buy) when order.StopPrice <= price:
+                        // Adicionar no book e mandar ordem Limit
+                        base.AddOrder(order);
+                        this.MatchOrderLimit(order);
+                        break;
+                    default:
+                        QueueOrderStopLimitPrice.Enqueue(order);
+                        break;
+                }
             }
-            
             Thread.Sleep(10);
         }
     }

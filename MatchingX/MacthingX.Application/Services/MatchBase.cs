@@ -30,33 +30,33 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
 
     private readonly IOrderRepository _orderRepository;
     private readonly ITradeRepository _tradeRepository;
-    protected MatchBase(ILogger<MatchBase> logger, 
-        IMediatorHandler bus, 
-        IOrderRepository orderRepository,
-        ITradeRepository tradeRepository)
-    {
-        _logger = logger;
-        Bus = bus;
-        _orderRepository = orderRepository;
-        _tradeRepository = tradeRepository;
+    //protected MatchBase(ILogger<MatchBase> logger, 
+    //    IMediatorHandler bus, 
+    //    IOrderRepository orderRepository,
+    //    ITradeRepository tradeRepository)
+    //{
+    //    _logger = logger;
+    //    Bus = bus;
+    //    _orderRepository = orderRepository;
+    //    _tradeRepository = tradeRepository;
 
-        _buyOrders = new ConcurrentDictionary<string, Dictionary<long, Order>>();
-        _sellOrders = new ConcurrentDictionary<string, Dictionary<long, Order>>();
+    //    _buyOrders = new ConcurrentDictionary<string, Dictionary<long, Order>>();
+    //    _sellOrders = new ConcurrentDictionary<string, Dictionary<long, Order>>();
 
-        QueueExecutedTraded = new ConcurrentQueue<(TradeCaptureReport, TradeCaptureReport)>();
-        QueueOrderStatusChanged = new ConcurrentQueue<Order>();
+    //    QueueExecutedTraded = new ConcurrentQueue<(TradeCaptureReport, TradeCaptureReport)>();
+    //    QueueOrderStatusChanged = new ConcurrentQueue<Order>();
 
-        //ThreadExecutedTrade = new Thread(new ThreadStart(ExecutedTradeOutcome));
-        //ThreadExecutedTrade.Name = nameof(ExecutedTradeOutcome);
-        //ThreadExecutedTrade.Start();
+    //    //ThreadExecutedTrade = new Thread(new ThreadStart(ExecutedTradeOutcome));
+    //    //ThreadExecutedTrade.Name = nameof(ExecutedTradeOutcome);
+    //    //ThreadExecutedTrade.Start();
 
-        //ThreadOrdersStatus = new Thread(new ThreadStart(OrderStatusChangedOutcome));
-        //ThreadOrdersStatus.Name = nameof(OrderStatusChangedOutcome);
-        //ThreadOrdersStatus.Start();
+    //    //ThreadOrdersStatus = new Thread(new ThreadStart(OrderStatusChangedOutcome));
+    //    //ThreadOrdersStatus.Name = nameof(OrderStatusChangedOutcome);
+    //    //ThreadOrdersStatus.Start();
 
-        //LoadOrdersOnRestart();
+    //    //LoadOrdersOnRestart();
 
-    }
+    //}
     private void LoadOrdersOnRestart()
     {
         var ordersDb = _orderRepository.GetOrdersOnRestartAsync(default(CancellationToken));

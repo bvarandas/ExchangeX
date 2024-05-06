@@ -1,7 +1,6 @@
 ﻿using MacthingX.Application.Interfaces;
 using MatchingX.Core.Repositories;
 using Microsoft.Extensions.Logging;
-using QuickFix;
 using SharedX.Core.Bus;
 using SharedX.Core.Enums;
 using SharedX.Core.Interfaces;
@@ -12,10 +11,7 @@ public class MatchStop : MatchBase, IMatchStop
 {
     private readonly Thread ThreadOrdersStopPrice;
     private readonly ConcurrentQueue<Order> QueueOrderStopPrice;
-    public MatchStop(ILogger<MatchBase> logger, 
-        IMediatorHandler mediator, 
-        IOrderRepository orderRepository,
-        ITradeRepository tradeRepository) : base(logger, mediator, orderRepository, tradeRepository)
+    public MatchStop() : base()
     {
         QueueOrderStopPrice = new ConcurrentQueue<Order>();
 
@@ -33,28 +29,28 @@ public class MatchStop : MatchBase, IMatchStop
     {
         while (true)
         {
-            if (!QueueOrderStopPrice.TryDequeue(out Order order))
-                continue;
-
-            if (!_lastPrice.TryGetValue(order.Symbol, out decimal price))
+            if (QueueOrderStopPrice.TryDequeue(out Order order))
             {
-                QueueOrderStopPrice.Enqueue(order);
-                return;
-            }
-
-            switch ((order.OrderType, order.Side))
-            {
-                case (OrderType.Stop, SideTrade.Sell) when order.Price >= price:
-                case (OrderType.Stop, SideTrade.Buy) when order.Price <= price:
-                    // Adicionar no book e mandar ordem market
-                    base.AddOrder(order);
-                    this.MatchOrderMarket(order);
-                    break;
-                default:
+                if (!_lastPrice.TryGetValue(order.Symbol, out decimal price))
+                {
                     QueueOrderStopPrice.Enqueue(order);
-                    break;
-            }
+                    Thread.Sleep(10);
+                    continue;
+                }
 
+                switch ((order.OrderType, order.Side))
+                {
+                    case (OrderType.Stop, SideTrade.Sell) when order.StopPrice >= price:
+                    case (OrderType.Stop, SideTrade.Buy) when order.StopPrice <= price:
+                        // Adicionar no book e mandar ordem market
+                        base.AddOrder(order);
+                        this.MatchOrderMarket(order);
+                        break;
+                    default:
+                        QueueOrderStopPrice.Enqueue(order);
+                        break;
+                }
+            }
             Thread.Sleep(10);
         }
     }

@@ -10,10 +10,7 @@ using MacthingX.Application.Interfaces;
 namespace MacthingX.Application.Services;
 public class MatchMarket : MatchBase, IMatchMarket
 {
-    public MatchMarket(ILogger<MatchBase> logger, 
-        IMediatorHandler mediator, 
-        IOrderRepository orderRepository,
-        ITradeRepository tradeRepository) : base(logger, mediator, orderRepository, tradeRepository)
+    public MatchMarket() : base()
     {
     }
 
