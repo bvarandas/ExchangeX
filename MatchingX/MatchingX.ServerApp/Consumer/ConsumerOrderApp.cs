@@ -7,6 +7,7 @@ using NetMQ;
 using NetMQ.Sockets;
 using SharedX.Core.Extensions;
 using SharedX.Core.Matching;
+using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
 namespace MatchingX.ServerApp.Consumer;
 public class ConsumerOrderApp : BackgroundService
@@ -66,7 +67,7 @@ public class ConsumerOrderApp : BackgroundService
                     while (!stoppingToken.IsCancellationRequested)
                     {
                         var message = _receiver.ReceiveMultipartBytes()[0];
-                        var order = message.DeserializeFromByteArrayProtobuf<Order>();
+                        var order = message.DeserializeFromByteArrayProtobuf<OrderEngine>();
                         _matchReceiver.ReceiveOrder(order);
                         Thread.Sleep(10);
                     }

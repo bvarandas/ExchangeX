@@ -141,7 +141,7 @@ internal class FixServerApp : MessageCracker, IFixServerApp
     //        Console.WriteLine(ex.ToString());
     //    }
     //}
-    public void SendExecutionReport(SharedX.Core.Matching.Order order, ExecType execType)
+    public void SendExecutionReport(SharedX.Core.Matching.OrderEng order, ExecType execType)
     {
         Symbol symbol = new Symbol(order.Symbol);
         Side side = new Side((char)order.Side);

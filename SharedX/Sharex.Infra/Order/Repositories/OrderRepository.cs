@@ -13,13 +13,13 @@ public class OrderRepository : IOrderRepository
         _context = context;
         _logger = logger;
     }
-    public async Task<bool> CreateOrdersAsync(Core.Matching.Order order, CancellationToken cancellation)
+    public async Task<bool> CreateOrdersAsync(Core.Matching.OrderEng order, CancellationToken cancellation)
     {
         bool result = false;
         try
         {
-            var inserts = new List<WriteModel<Core.Matching.Order>>();
-            inserts.Add(new InsertOneModel<Core.Matching.Order>(order));
+            var inserts = new List<WriteModel<Core.Matching.OrderEng>>();
+            inserts.Add(new InsertOneModel<Core.Matching.OrderEng>(order));
 
             var insertResult = await _context.OrderTrade.BulkWriteAsync(inserts, null, cancellation);
             result = insertResult.IsAcknowledged && insertResult.ModifiedCount > 0;
@@ -67,13 +67,13 @@ public class OrderRepository : IOrderRepository
         }
         return result;
     }
-    public async Task<IEnumerable<Core.Matching.Order>> GetOrdersByAccountIdAsync(int accountId, CancellationToken cancellation)
+    public async Task<IEnumerable<Core.Matching.OrderEng>> GetOrdersByAccountIdAsync(int accountId, CancellationToken cancellation)
     {
-        IEnumerable<Core.Matching.Order> result = null!;
+        IEnumerable<Core.Matching.OrderEng> result = null!;
 
         try
         {
-            var builder = Builders<Core.Matching.Order>.Filter;
+            var builder = Builders<Core.Matching.OrderEng>.Filter;
             var filter = builder.Eq(o => o.AccountId, accountId);
 
             result = _context.OrderTrade.Find(filter).ToEnumerable();
@@ -85,12 +85,12 @@ public class OrderRepository : IOrderRepository
 
         return result;
     }
-    public async Task<IEnumerable<  Core.Matching.Order>> GetOrdersOnRestartAsync(CancellationToken cancellation)
+    public async Task<IEnumerable<  Core.Matching.OrderEng>> GetOrdersOnRestartAsync(CancellationToken cancellation)
     {
-        IEnumerable<Core.Matching.Order> result = null!;
+        IEnumerable<Core.Matching.OrderEng> result = null!;
         try
         {
-            var builder = Builders<Core.Matching.Order>.Filter;
+            var builder = Builders<Core.Matching.OrderEng>.Filter;
             var filter = builder.Eq(o => o.OrderStatus, OrderStatus.New)
                        | builder.Eq(o => o.OrderStatus, OrderStatus.PartiallyFilled);
 
@@ -104,16 +104,16 @@ public class OrderRepository : IOrderRepository
         }
         return result;
     }
-    public async Task<bool> UpdateOrderAsync(Core.Matching.Order order, CancellationToken cancellation)
+    public async Task<bool> UpdateOrderAsync(Core.Matching.OrderEng order, CancellationToken cancellation)
     {
         bool result = false;
         try
         {
-            var updates = new List<WriteModel<Core.Matching.Order>>();
-            var filterBuilder = Builders<Core.Matching.Order>.Filter;
+            var updates = new List<WriteModel<Core.Matching.OrderEng>>();
+            var filterBuilder = Builders<Core.Matching.OrderEng>.Filter;
 
             var filter = filterBuilder.Where(x => x.OrderID == order.OrderID);
-            updates.Add(new ReplaceOneModel< Core.Matching.Order>(filter, order));
+            updates.Add(new ReplaceOneModel< Core.Matching.OrderEng>(filter, order));
 
             var updateResult = await _context.OrderTrade.BulkWriteAsync(updates, null, cancellation);
             result = updateResult.IsAcknowledged && updateResult.ModifiedCount > 0;

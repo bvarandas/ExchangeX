@@ -2,7 +2,8 @@
 using MatchingX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using SharedX.Core.Enums;
-using SharedX.Core.Matching;
+using SharedX.Core.Matching.OrderEngine;
+
 namespace MacthingX.Application.Services;
 public class MatchingReceiver : IMatchingReceiver
 {
@@ -23,7 +24,7 @@ public class MatchingReceiver : IMatchingReceiver
         _matchStop = matchStop;
         _matchStopLimit = matchStopLimit;
     }
-    public void ReceiveOrder(Order order) 
+    public void ReceiveOrder(OrderEngine order) 
     {
         _logger.LogInformation($"Chegou Order do tipo {order.OrderType.ToString()}");
         switch(order.OrderType)

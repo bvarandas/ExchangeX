@@ -37,9 +37,9 @@ public class PublisherOrderApp : BackgroundService
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                while (_cache.TryDequeueOrder(out Order order))
+                while (_cache.TryDequeueOrder(out OrderEng order))
                 {
-                    var message = order.SerializeToByteArrayProtobuf<Order>();
+                    var message = order.SerializeToByteArrayProtobuf<OrderEng>();
                     _sender.SendMultipartBytes(message);
                 }
                 Thread.Sleep(10);

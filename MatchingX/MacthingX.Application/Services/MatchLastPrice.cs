@@ -1,5 +1,5 @@
 ﻿using SharedX.Core.Enums;
-using SharedX.Core.Matching;
+using SharedX.Core.Matching.OrderEngine;
 using System.Collections.Concurrent;
 namespace MacthingX.Application.Services;
 public abstract class MatchLastPrice
@@ -9,7 +9,7 @@ public abstract class MatchLastPrice
     {
         _lastPrice= new ConcurrentDictionary<string, decimal>();
     }
-    protected void AddUpdatePrice(Order order)
+    protected void AddUpdatePrice(OrderEngine order)
     {
         if (order.OrderStatus.Equals(OrderStatus.Rejected) ||
             order.OrderStatus.Equals(OrderStatus.Cancelled))

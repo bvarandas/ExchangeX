@@ -5,33 +5,33 @@ using SharedX.Core.Enums;
 
 namespace SharedX.Core.Matching;
 
-public class OrderBook : Order, IOrderBook
+public class OrderBook : OrderEng, IOrderBook
 {
     protected readonly ILogger<OrderBook> _logger;
     
-    protected readonly Order[] _bookBid;
-    protected readonly Order[] _bookAsk;
+    protected readonly OrderEng[] _bookBid;
+    protected readonly OrderEng[] _bookAsk;
     public OrderBook(ILogger<OrderBook> logger)
     {
         _logger = logger;
         
     }
 
-    public void AddOrder(Order order)
+    public void AddOrder(OrderEng order)
     {
         if (order.Side == SideTrade.Buy)
         {
-            _bookBid.Concat(new Order[] { order });
+            _bookBid.Concat(new OrderEng[] { order });
             Array.Sort(_bookBid, new OrderBuyComparer());
         }
         else if (order.Side == SideTrade.Sell)
         {
-            _bookAsk.Concat(new Order[] { order });
+            _bookAsk.Concat(new OrderEng[] { order });
             Array.Sort(_bookAsk, new OrderSellComparer());
         }
     }
 
-    public void ReplaceOrder(Order order)
+    public void ReplaceOrder(OrderEng order)
     {
         if (order.Side == SideTrade.Buy)
         {
@@ -46,7 +46,7 @@ public class OrderBook : Order, IOrderBook
         }
     }
 
-    public void CancelOrder(Order order)
+    public void CancelOrder(OrderEng order)
     {
 
     }

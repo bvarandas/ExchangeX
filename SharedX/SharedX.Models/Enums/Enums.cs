@@ -48,6 +48,6 @@ public enum TradeReportTransType
 public enum Execution
 {
     ToOpen = 0,
-    toCancel = 1,
-    toCancelReplace = 2
+    ToCancel = 1,
+    ToCancelReplace = 2
 }

@@ -7,9 +7,9 @@ using SharedX.Core.Models;
 namespace SharedX.Core.Extensions;
 public static class OrderExtensions
 {
-    public static Order ToOrder(this OrderModel model)
+    public static OrderEngine ToOrder(this OrderModel model)
     {
-        var order = new Order();
+        var order = new OrderEngine();
         order.OrderID = model.OrderID;
         order.StopPrice = model.StopPrice;
         order.LastPrice = model.Price;

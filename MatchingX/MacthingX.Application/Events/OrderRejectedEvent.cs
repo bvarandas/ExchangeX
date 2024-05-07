@@ -5,9 +5,9 @@ using SharedX.Core.Events;
 namespace MacthingX.Application.Events;
 public class OrderRejectedEvent : Event
 {
-    public readonly Order Order;
+    public readonly OrderEng Order;
     public DateTime Timestamp { get; private set; }
-    public OrderRejectedEvent(Order order)
+    public OrderRejectedEvent(OrderEng order)
     {
         Timestamp = DateTime.Now;
         Order = order;

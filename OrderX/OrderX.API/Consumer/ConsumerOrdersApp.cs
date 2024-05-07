@@ -2,7 +2,7 @@
 using SharedX.Core.Matching;
 using OrderEngineX.Core.Interfaces;
 namespace OrderX.API.Consumer;
-public class ConsumerOrdersApp : IConsumer<Order>
+public class ConsumerOrdersApp : IConsumer<OrderEng>
 {
     private readonly ILogger<ConsumerOrdersApp> _logger;
     private readonly IOrderEngineCache _cache;
@@ -12,7 +12,7 @@ public class ConsumerOrdersApp : IConsumer<Order>
         _cache = cache;
     }
 
-    public Task Consume(ConsumeContext<Order> context)
+    public Task Consume(ConsumeContext<OrderEng> context)
     {
         Console.Write(context.Message);
         _cache.AddOrder(context.Message);

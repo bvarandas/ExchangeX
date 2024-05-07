@@ -5,14 +5,14 @@ using MatchingX.Core.Filters;
 using SharedX.Core.Interfaces;
 
 namespace MacthingX.Application.Querys;
-public class GetOrderQueryHandler : IRequestHandler<GetOrderQuery, IEnumerable<Order>>
+public class GetOrderQueryHandler : IRequestHandler<GetOrderQuery, IEnumerable<OrderEng>>
 {
     private readonly IOrderRepository _repository;
     public GetOrderQueryHandler(IOrderRepository repository)
     {
         _repository = repository;
     }
-    public async Task<IEnumerable<Order>> Handle(GetOrderQuery request, CancellationToken cancellationToken)
+    public async Task<IEnumerable<OrderEng>> Handle(GetOrderQuery request, CancellationToken cancellationToken)
     {
         var result = await _repository.GetOrdersOnRestartAsync(cancellationToken);
 

@@ -2,7 +2,7 @@
 namespace ShareX.Core.Interfaces;
 public interface IOrderBook
 {
-    void AddOrder(Order order);
-    void ReplaceOrder(Order order);
-    void CancelOrder(Order orderToCancel);
+    void AddOrder(OrderEng order);
+    void ReplaceOrder(OrderEng order);
+    void CancelOrder(OrderEng orderToCancel);
 }

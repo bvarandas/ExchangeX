@@ -3,8 +3,8 @@
 namespace MatchingX.Core.Interfaces;
 public  interface IMatch
 {
-    bool AddOrder(Order order);
-    bool ReplaceOrder(Order order);
-    bool CancelOrder(Order orderToCancel);
-    bool MatchOrder(Order order);
+    bool AddOrder(OrderEng order);
+    bool ReplaceOrder(OrderEng order);
+    bool CancelOrder(OrderEng orderToCancel);
+    bool MatchOrder(OrderEng order);
 }

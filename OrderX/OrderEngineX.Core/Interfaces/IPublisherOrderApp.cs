@@ -3,5 +3,5 @@
 namespace OrderEngineX.Core.Interfaces;
 public interface IPublisherOrderApp
 {
-    Task AddOrderToQueue(Order order);
+    Task AddOrderToQueue(OrderEng order);
 }

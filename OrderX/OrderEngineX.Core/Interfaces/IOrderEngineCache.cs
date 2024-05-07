@@ -2,6 +2,6 @@
 namespace OrderEngineX.Core.Interfaces;
 public interface IOrderEngineCache
 {
-    void AddOrder(Order order);
-    bool TryDequeueOrder(out Order order);
+    void AddOrder(OrderEng order);
+    bool TryDequeueOrder(out OrderEng order);
 }

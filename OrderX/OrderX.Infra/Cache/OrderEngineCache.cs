@@ -5,13 +5,13 @@ using SharedX.Core.Enums;
 using SharedX.Core.Specs;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
-using Order = SharedX.Core.Matching.Order;
+using OrderEng = SharedX.Core.Matching.OrderEng;
 
 namespace OrderEngineX.Infra.Cache;
 
 public class OrderEngineCache : IOrderEngineCache
 {
-    private readonly ConcurrentQueue<Order> OrderEngineQueue;
+    private readonly ConcurrentQueue<OrderEng> OrderEngineQueue;
     private readonly ConnectionRedis _config;
     private readonly ConnectionMultiplexer _redis;
     private readonly IDatabase _dbOrderEngine;
@@ -21,7 +21,7 @@ public class OrderEngineCache : IOrderEngineCache
         IOptions<ConnectionRedis> config)
     {
         _config = config.Value;
-        OrderEngineQueue = new ConcurrentQueue<Order>();
+        OrderEngineQueue = new ConcurrentQueue<OrderEng>();
 
         _redis = ConnectionMultiplexer.Connect(_config.ConnectionString, options => {
             options.ReconnectRetryPolicy = new ExponentialRetry(5000, 1000 * 60);
@@ -34,22 +34,22 @@ public class OrderEngineCache : IOrderEngineCache
         _key = new RedisKey("Orders");
 
     }
-    public async void AddOrder(Order order)
+    public async void AddOrder(OrderEng order)
     {
         OrderEngineQueue.Enqueue(order);
         await SetValueOrderRedisAsync(order);
     }
 
-    private async Task SetValueOrderRedisAsync(Order order)
+    private async Task SetValueOrderRedisAsync(OrderEng order)
     {
         RedisValue value = new RedisValue(Newtonsoft.Json.JsonConvert.SerializeObject(order));
         await _dbOrderEngine.HashIncrementAsync(_key, value);
     }
 
-    public bool TryDequeueOrder(out Order order)
+    public bool TryDequeueOrder(out OrderEng order)
     {
         order = default;
-        if (OrderEngineQueue.TryDequeue(out Order orderFound))
+        if (OrderEngineQueue.TryDequeue(out OrderEng orderFound))
         {
             order = orderFound;
             return true;

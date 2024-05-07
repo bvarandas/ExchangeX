@@ -5,7 +5,7 @@ using SharedX.Core.Matching.MarketData;
 namespace MacthingX.Application.Extensions;
 public static class MatchingExtensions 
 {
-     public static MarketData ToMarketData(this Order order)
+     public static MarketData ToMarketData(this OrderEng order)
     {
         var marketdata = new MarketData();
         marketdata.Symbol = order.Symbol;
@@ -23,7 +23,7 @@ public static class MatchingExtensions
         marketdata.AggressorSide =(char) order.Side;
         return marketdata;
     }
-    public static ExecutionReport ToExecutionReport(this Order order)
+    public static ExecutionReport ToExecutionReport(this OrderEng order)
     {
         var isTrade=  (order.OrderStatus == OrderStatus.PartiallyFilled || order.OrderStatus == OrderStatus.Filled);
         var ep = new ExecutionReport();

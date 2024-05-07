@@ -14,32 +14,32 @@ public class MatchMarket : MatchBase, IMatchMarket
     {
     }
 
-    public void ReceiveOrder(Order order)
+    public void ReceiveOrder(OrderEng order)
     {
         this.AddOrder(order);
     }
 
-    protected override void AddOrder(Order order)
+    protected override void AddOrder(OrderEng order)
     {
         base.AddOrder(order);
     }
 
-    protected override void CancelOrder(Order orderToCancel)
+    protected override void CancelOrder(OrderEng orderToCancel)
     {
         base.CancelOrder(orderToCancel);
     }
 
-    protected override void ReplaceOrder(Order order)
+    protected override void ReplaceOrder(OrderEng order)
     {
         base.ReplaceOrder(order);
     }
 
-    protected override void MatchOrderMarket(Order order)
+    protected override void MatchOrderMarket(OrderEng order)
     {
-        if (!_buyOrders.TryGetValue(order.Symbol, out Dictionary<long, Order> buyOrder))
+        if (!_buyOrders.TryGetValue(order.Symbol, out Dictionary<long, OrderEng> buyOrder))
             return;
 
-        if (!_sellOrders.TryGetValue(order.Symbol, out Dictionary<long, Order> sellOrder))
+        if (!_sellOrders.TryGetValue(order.Symbol, out Dictionary<long, OrderEng> sellOrder))
             return;
         
         bool cancelled = false;
@@ -47,7 +47,7 @@ public class MatchMarket : MatchBase, IMatchMarket
         if (order.Side == SharedX.Core.Enums.SideTrade.Buy)
         {
             var orderToTrade = sellOrder.FirstOrDefault(sell=>sell.Value.Quantity == order.Quantity);
-            if (!orderToTrade.Equals(default(KeyValuePair<long, Order>)))
+            if (!orderToTrade.Equals(default(KeyValuePair<long, OrderEng>)))
             {
                 CreateTradeCapture(order, orderToTrade.Value);
 
@@ -61,7 +61,7 @@ public class MatchMarket : MatchBase, IMatchMarket
         else if (order.Side == SharedX.Core.Enums.SideTrade.Sell)
         {
             var orderToTrade = buyOrder.FirstOrDefault(buy => buy.Value.Quantity == order.Quantity);
-            if (!orderToTrade.Equals(default(KeyValuePair<long, Order>)))
+            if (!orderToTrade.Equals(default(KeyValuePair<long, OrderEng>)))
             {
                 CreateTradeCapture(orderToTrade.Value, order);
 
@@ -73,7 +73,7 @@ public class MatchMarket : MatchBase, IMatchMarket
             }
         }
     }
-    protected override void MatchOrderLimit(Order order)
+    protected override void MatchOrderLimit(OrderEng order)
     {
         throw new NotImplementedException();
     }

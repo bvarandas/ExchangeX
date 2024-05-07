@@ -3,7 +3,7 @@ using MongoDB.Driver;
 namespace SharedX.Infra.Order.Data;
 public class OrderContext : IOrderContext
 {
-    public IMongoCollection<SharedX.Core.Matching.Order> OrderTrade { get; }
+    public IMongoCollection<SharedX.Core.Matching.OrderEng> OrderTrade { get; }
     public MongoClient MongoClient { get; }
 
     public IMongoCollection<long> OrderId { get; }
@@ -13,7 +13,7 @@ public class OrderContext : IOrderContext
         MongoClient = new MongoClient(configuration.GetValue<string>("DatabaseSettings:ConnectionString"));
         var database = MongoClient.GetDatabase(configuration.GetValue<string>("DatabaseSettings:DatabaseName"));
 
-        OrderTrade = database.GetCollection<SharedX.Core.Matching.Order>(
+        OrderTrade = database.GetCollection<SharedX.Core.Matching.OrderEng>(
             configuration.GetValue<string>("DatabaseSettings:CollectionNameOrder"));
 
         OrderId = database.GetCollection<long>(

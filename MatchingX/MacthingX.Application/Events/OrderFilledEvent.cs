@@ -6,9 +6,9 @@ using SharedX.Core.Events;
 namespace MacthingX.Application.Events;
 public class OrderFilledEvent : Event
 {
-    private readonly Order _order;
+    private readonly OrderEng _order;
     public DateTime Timestamp { get; private set; }
-    public OrderFilledEvent(Order order)
+    public OrderFilledEvent(OrderEng order)
     {
         Timestamp = DateTime.Now;
         _order = order;

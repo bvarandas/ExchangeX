@@ -10,16 +10,17 @@ using SharedX.Core.Matching.DropCopy;
 using TradeReportTransType = SharedX.Core.Enums.TradeReportTransType;
 using MatchingX.Core.Repositories;
 using SharedX.Core.Interfaces;
+using SharedX.Core.Matching.OrderEngine;
 
 namespace MacthingX.Application.Services;
 public abstract class MatchBase : MatchLastPrice, IDisposable
 {
     protected bool _running;
     protected readonly ILogger<MatchBase> _logger;
-    protected readonly ConcurrentDictionary<string, Dictionary<long, Order>> _buyOrders;
-    protected readonly ConcurrentDictionary<string, Dictionary<long, Order>> _sellOrders;
+    protected readonly ConcurrentDictionary<string, Dictionary<long, OrderEngine>> _buyOrders;
+    protected readonly ConcurrentDictionary<string, Dictionary<long, OrderEngine>> _sellOrders;
 
-    protected readonly ConcurrentQueue<Order> QueueOrderStatusChanged;
+    protected readonly ConcurrentQueue<OrderEngine> QueueOrderStatusChanged;
     protected readonly ConcurrentQueue<(TradeCaptureReport, TradeCaptureReport)> QueueExecutedTraded;
     
     private readonly Thread ThreadExecutedTrade;
@@ -69,7 +70,7 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
             }
             else
             {
-                var dicOrders = new Dictionary<long, Order>();
+                var dicOrders = new Dictionary<long, OrderEngine>();
                 dicOrders.Add(order.OrderID, order);
                 _buyOrders.TryAdd(order.Symbol, dicOrders);
             }
@@ -82,7 +83,7 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
             }
             else
             {
-                var dicOrders = new Dictionary<long, Order>();
+                var dicOrders = new Dictionary<long, OrderEngine>();
                 dicOrders.Add(order.OrderID, order);
                 _sellOrders.TryAdd(order.Symbol, dicOrders);
             }
@@ -93,7 +94,7 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
     {
         while (true)
         {
-            if (!QueueOrderStatusChanged.TryDequeue(out Order order))
+            if (!QueueOrderStatusChanged.TryDequeue(out OrderEngine order))
                 continue;
 
             switch(order.OrderStatus)
@@ -135,32 +136,32 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
         }
     }
 
-    protected void SortBuyOrders(ref Dictionary<long, Order> buyOrders)
+    protected void SortBuyOrders(ref Dictionary<long, OrderEngine> buyOrders)
     {
         var ordersSorted = buyOrders.OrderBy(kvp => kvp.Value.Price);
-        buyOrders = ordersSorted.ToDictionary<KeyValuePair<long, Order>, long, Order>(
+        buyOrders = ordersSorted.ToDictionary<KeyValuePair<long, OrderEngine>, long, OrderEngine>(
         pair => pair.Key, pair => pair.Value);
     }
 
-    protected void SortSellOrders(ref Dictionary<long, Order> sellOrders)
+    protected void SortSellOrders(ref Dictionary<long, OrderEngine> sellOrders)
     {
         var ordersSorted = sellOrders.OrderByDescending(kvp => kvp.Value.Price);
-        sellOrders = ordersSorted.ToDictionary<KeyValuePair<long, Order>, long, Order>(
+        sellOrders = ordersSorted.ToDictionary<KeyValuePair<long, OrderEngine>, long, OrderEngine>(
         pair => pair.Key, pair => pair.Value);
     }
 
-    protected virtual void AddOrder(Order order)
+    protected virtual void AddOrder(OrderEngine order)
     {
         if (order.Side == SideTrade.Buy)
         {
-            if (_buyOrders.TryGetValue(order.Symbol, out Dictionary<long, Order> buyOrder))
+            if (_buyOrders.TryGetValue(order.Symbol, out Dictionary<long, OrderEngine> buyOrder))
             {
                 buyOrder.TryAdd(order.OrderID, order);
                 SortBuyOrders(ref buyOrder);
             }
             else
             {
-                var buyOrderNew = new Dictionary<long, Order>();
+                var buyOrderNew = new Dictionary<long, OrderEngine>();
                 buyOrderNew.TryAdd(order.OrderID, order);
                 _buyOrders.TryAdd(order.Symbol, buyOrderNew);
             }
@@ -168,14 +169,14 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
         }
         else if (order.Side == SideTrade.Sell)
         {
-            if (_sellOrders.TryGetValue(order.Symbol, out Dictionary<long, Order> sellOrder))
+            if (_sellOrders.TryGetValue(order.Symbol, out Dictionary<long, OrderEngine> sellOrder))
             {
                 sellOrder.TryAdd(order.OrderID, order);
                 SortSellOrders(ref sellOrder);
             }
             else
             {
-                var sellOrderNew = new Dictionary<long, Order>();
+                var sellOrderNew = new Dictionary<long, OrderEngine>();
                 sellOrderNew.TryAdd(order.OrderID, order);
                 _sellOrders.TryAdd(order.Symbol, sellOrderNew);
             }
@@ -185,21 +186,21 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
         QueueOrderStatusChanged.Enqueue(order);
     }
 
-    protected virtual void AddOrderDetail(ref Order order)
+    protected virtual void AddOrderDetail(ref OrderEngine order)
     {
         if (order.OrderDetails is null)
-            order.OrderDetails = new List<OrderDetail>();
+            order.OrderDetails = new List<OrderEngineDetail>();
 
-        order.OrderDetails.Add((OrderDetail)order);
+        order.OrderDetails.Add((OrderEngineDetail)order);
     }
 
-    protected virtual void ReplaceOrder(Order order)
+    protected virtual void ReplaceOrder(OrderEngine order)
     {
         if (order.Side == SideTrade.Buy)
         {
-            if (_buyOrders.TryGetValue(order.Symbol, out Dictionary<long, Order> buyOrders))
+            if (_buyOrders.TryGetValue(order.Symbol, out Dictionary<long, OrderEngine> buyOrders))
             {
-                if (buyOrders.TryGetValue(order.OrderID, out Order orderBuy))
+                if (buyOrders.TryGetValue(order.OrderID, out OrderEngine orderBuy))
                 {
                     orderBuy = order;
                 }
@@ -207,9 +208,9 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
         }
         else if (order.Side == SideTrade.Sell)
         {
-            if (_sellOrders.TryGetValue(order.Symbol, out Dictionary<long, Order> sellOrders))
+            if (_sellOrders.TryGetValue(order.Symbol, out Dictionary<long, OrderEngine> sellOrders))
             {
-                if (sellOrders.TryGetValue(order.OrderID, out Order orderSell))
+                if (sellOrders.TryGetValue(order.OrderID, out OrderEngine orderSell))
                 {
                     orderSell = order;
                 }
@@ -221,20 +222,20 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
         order.OrderStatus = OrderStatus.New;
         QueueOrderStatusChanged.Enqueue(order);
     }
-    protected abstract void MatchOrderLimit(Order order);
-    protected abstract void MatchOrderMarket(Order order);
-    protected virtual void CancelOrder(Order orderToCancel)
+    protected abstract void MatchOrderLimit(OrderEngine order);
+    protected abstract void MatchOrderMarket(OrderEngine order);
+    protected virtual void CancelOrder(OrderEngine orderToCancel)
     {
         bool canceled = false;
         if (orderToCancel.Side == SideTrade.Buy)
         {
-            if (_buyOrders.TryGetValue(orderToCancel.Symbol, out Dictionary<long, Order> buyOrders))
+            if (_buyOrders.TryGetValue(orderToCancel.Symbol, out Dictionary<long, OrderEngine> buyOrders))
             {
                 RemoveCancelledOrders(ref buyOrders, orderToCancel, ref canceled);
             }
         }else if (orderToCancel.Side == SideTrade.Sell)
         {
-            if (_sellOrders.TryGetValue(orderToCancel.Symbol, out Dictionary<long, Order> sellOrders))
+            if (_sellOrders.TryGetValue(orderToCancel.Symbol, out Dictionary<long, OrderEngine> sellOrders))
             {
                 RemoveCancelledOrders(ref sellOrders, orderToCancel, ref canceled);
             }
@@ -246,31 +247,31 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
             QueueOrderStatusChanged.Enqueue(orderToCancel);
         }
     }
-    protected void RemoveCancelledOrders(ref Dictionary<long, Order> orders, Order orderToCancel, ref bool canceled)
+    protected void RemoveCancelledOrders(ref Dictionary<long, OrderEngine> orders, OrderEngine orderToCancel, ref bool canceled)
     {
-        if (orders.TryGetValue(orderToCancel.OrderID, out Order order))
+        if (orders.TryGetValue(orderToCancel.OrderID, out OrderEngine order))
         {
             //orders.TryRemove(new KeyValuePair<long, Order>(order.OrderID, order));
             canceled = orders.Remove(orderToCancel.OrderID);
         }
     }
-    protected void RemoveTradedOrders(ref Dictionary<long,Order> buyOrders, 
-        ref Dictionary<long, Order> sellOrders, 
-        Order buyOrder, 
-        Order sellOrder)
+    protected void RemoveTradedOrders(ref Dictionary<long,OrderEngine> buyOrders, 
+        ref Dictionary<long, OrderEngine> sellOrders, 
+        OrderEngine buyOrder, 
+        OrderEngine sellOrder)
     {
-        if (buyOrders.TryGetValue(buyOrder.OrderID, out Order orderBuyFound))
+        if (buyOrders.TryGetValue(buyOrder.OrderID, out OrderEngine orderBuyFound))
         {
             buyOrders.Remove(buyOrder.OrderID);
         }
 
-        if (sellOrders.TryGetValue(sellOrder.OrderID, out Order orderSellFound))
+        if (sellOrders.TryGetValue(sellOrder.OrderID, out OrderEngine orderSellFound))
         {
             sellOrders.Remove(sellOrder.OrderID);
         }
     }
 
-    protected virtual TradeCaptureReport CreateTradeCaptureCancelled(Order order)
+    protected virtual TradeCaptureReport CreateTradeCaptureCancelled(OrderEngine order)
     {
         var trade = new TradeCaptureReport()
         {
@@ -296,7 +297,7 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
     }
 
     protected virtual (TradeCaptureReport, TradeCaptureReport) 
-        CreateTradeCapture(Order orderBuyer, Order orderSeller)
+        CreateTradeCapture(OrderEngine orderBuyer, OrderEngine orderSeller)
     {
         var trade = _tradeRepository.GetTradeIdAsync(default(CancellationToken));
         TradeId = trade.Result.TradeId;
