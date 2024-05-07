@@ -1,10 +1,9 @@
-﻿using SharedX.Core.Matching;
-
+﻿using SharedX.Core.Matching.OrderEngine;
 namespace MatchingX.Core.Interfaces;
 public  interface IMatch
 {
-    bool AddOrder(OrderEng order);
-    bool ReplaceOrder(OrderEng order);
-    bool CancelOrder(OrderEng orderToCancel);
-    bool MatchOrder(OrderEng order);
+    bool AddOrder(OrderEngine order);
+    bool ReplaceOrder(OrderEngine order);
+    bool CancelOrder(OrderEngine orderToCancel);
+    bool MatchOrder(OrderEngine order);
 }

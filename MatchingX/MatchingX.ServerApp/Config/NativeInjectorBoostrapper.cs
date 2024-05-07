@@ -18,6 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SharedX.Core.Bus;
 using SharedX.Core.Interfaces;
 using SharedX.Core.Matching;
+using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
 using SharedX.Infra.Order.Data;
 using SharedX.Infra.Order.Repositories;
@@ -69,7 +70,7 @@ internal class NativeInjectorBoostrapper
 
         // Domain - Querys
         services.AddSingleton<IRequestHandler<GetTradeIdQuery, Trade>, GetTradeQueryHandler>();
-        services.AddSingleton<IRequestHandler<GetOrderQuery, IEnumerable<OrderEng>>, GetOrderQueryHandler>();
+        services.AddSingleton<IRequestHandler<GetOrderQuery, IEnumerable<OrderEngine>>, GetOrderQueryHandler>();
 
         // Domain - Commands
         services.AddSingleton<IRequestHandler<OrderFilledCommand, bool>, OrderCommandHandler>();

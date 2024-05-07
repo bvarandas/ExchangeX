@@ -1,8 +1,9 @@
 ﻿using MassTransit;
-using SharedX.Core.Matching;
 using OrderEngineX.Core.Interfaces;
+using SharedX.Core.Matching.OrderEngine;
+
 namespace OrderX.API.Consumer;
-public class ConsumerOrdersApp : IConsumer<OrderEng>
+public class ConsumerOrdersApp : IConsumer<OrderEngine>
 {
     private readonly ILogger<ConsumerOrdersApp> _logger;
     private readonly IOrderEngineCache _cache;
@@ -12,7 +13,7 @@ public class ConsumerOrdersApp : IConsumer<OrderEng>
         _cache = cache;
     }
 
-    public Task Consume(ConsumeContext<OrderEng> context)
+    public Task Consume(ConsumeContext<OrderEngine> context)
     {
         Console.Write(context.Message);
         _cache.AddOrder(context.Message);

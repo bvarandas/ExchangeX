@@ -1,8 +1,8 @@
-﻿using SharedX.Core.Matching;
+﻿using SharedX.Core.Matching.OrderEngine;
 namespace ShareX.Core.Interfaces;
 public interface IOrderBook
 {
-    void AddOrder(OrderEng order);
-    void ReplaceOrder(OrderEng order);
-    void CancelOrder(OrderEng orderToCancel);
+    void AddOrder(OrderEngine order);
+    void ReplaceOrder(OrderEngine order);
+    void CancelOrder(OrderEngine orderToCancel);
 }

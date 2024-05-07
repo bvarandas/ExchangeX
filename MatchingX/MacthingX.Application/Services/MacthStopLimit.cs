@@ -1,26 +1,21 @@
 ﻿using MacthingX.Application.Interfaces;
-using MatchingX.Core.Repositories;
-using Microsoft.Extensions.Logging;
-using QuickFix;
-using SharedX.Core.Bus;
 using SharedX.Core.Enums;
-using SharedX.Core.Interfaces;
-using SharedX.Core.Matching;
+using SharedX.Core.Matching.OrderEngine;
 using System.Collections.Concurrent;
 namespace MacthingX.Application.Services;
 public class MatchStopLimit : MatchBase, IMatchStopLimit
 {
     private readonly Thread ThreadOrdersStopLimitPrice;
-    private readonly ConcurrentQueue<OrderEng> QueueOrderStopLimitPrice;
+    private readonly ConcurrentQueue<OrderEngine> QueueOrderStopLimitPrice;
     public MatchStopLimit() : base()
     {
-        QueueOrderStopLimitPrice = new ConcurrentQueue<OrderEng>();
+        QueueOrderStopLimitPrice = new ConcurrentQueue<OrderEngine>();
 
         ThreadOrdersStopLimitPrice = new Thread(new ThreadStart(OrderStopLimitVerifyReachPrice));
         ThreadOrdersStopLimitPrice.Name = nameof(OrderStopLimitVerifyReachPrice);
         ThreadOrdersStopLimitPrice.Start();
     }
-    public void ReceiveOrder(OrderEng order)
+    public void ReceiveOrder(OrderEngine order)
     {
         this.AddOrder(order);
     }
@@ -29,7 +24,7 @@ public class MatchStopLimit : MatchBase, IMatchStopLimit
     {
         while (true)
         {
-            if (QueueOrderStopLimitPrice.TryDequeue(out OrderEng order))
+            if (QueueOrderStopLimitPrice.TryDequeue(out OrderEngine order))
             {
                 if (!_lastPrice.TryGetValue(order.Symbol, out decimal price))
                 {
@@ -55,12 +50,12 @@ public class MatchStopLimit : MatchBase, IMatchStopLimit
         }
     }
 
-    protected override void MatchOrderLimit(OrderEng order)
+    protected override void MatchOrderLimit(OrderEngine order)
     {
-        if (_buyOrders.TryGetValue(order.Symbol, out Dictionary<long, OrderEng> buyOrder))
+        if (_buyOrders.TryGetValue(order.Symbol, out Dictionary<long, OrderEngine> buyOrder))
             return;
 
-        if (_sellOrders.TryGetValue(order.Symbol, out Dictionary<long, OrderEng> sellOrder))
+        if (_sellOrders.TryGetValue(order.Symbol, out Dictionary<long, OrderEngine> sellOrder))
             return;
         
         bool cancelled = false;
@@ -68,7 +63,7 @@ public class MatchStopLimit : MatchBase, IMatchStopLimit
         {
             var orderToTrade = sellOrder.FirstOrDefault(kvp => kvp.Value.Price <= order.Price && 
                                                                kvp.Value.Quantity == order.Quantity);
-            if (!orderToTrade.Equals(default(KeyValuePair<long, OrderEng>)))
+            if (!orderToTrade.Equals(default(KeyValuePair<long, OrderEngine>)))
             {
                 CreateTradeCapture(order, orderToTrade.Value);
                 RemoveTradedOrders(ref buyOrder, ref sellOrder, order, orderToTrade.Value);
@@ -82,7 +77,7 @@ public class MatchStopLimit : MatchBase, IMatchStopLimit
         {
             var orderToTrade = buyOrder.FirstOrDefault(kvp => kvp.Value.Price >= order.Price && 
                                                                kvp.Value.Quantity == order.Quantity);
-            if (!orderToTrade.Equals(default(KeyValuePair<long, OrderEng>)))
+            if (!orderToTrade.Equals(default(KeyValuePair<long, OrderEngine>)))
             {
                 CreateTradeCapture(orderToTrade.Value, order);
                 RemoveTradedOrders(ref buyOrder, ref sellOrder, orderToTrade.Value, order);
@@ -95,7 +90,7 @@ public class MatchStopLimit : MatchBase, IMatchStopLimit
         }
     }
 
-    protected override void MatchOrderMarket(OrderEng order)
+    protected override void MatchOrderMarket(OrderEngine order)
     {
         throw new NotImplementedException();
     }

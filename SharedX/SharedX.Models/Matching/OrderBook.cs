@@ -1,37 +1,38 @@
 ﻿using Microsoft.Extensions.Logging;
 using ShareX.Core.Interfaces;
-using System.Collections.Concurrent;
+
+
 using SharedX.Core.Enums;
 
 namespace SharedX.Core.Matching;
 
-public class OrderBook : OrderEng, IOrderBook
+public class OrderBook : OrderEngine.OrderEngine, IOrderBook
 {
     protected readonly ILogger<OrderBook> _logger;
     
-    protected readonly OrderEng[] _bookBid;
-    protected readonly OrderEng[] _bookAsk;
+    protected readonly OrderEngine.OrderEngine[] _bookBid;
+    protected readonly OrderEngine.OrderEngine[] _bookAsk;
     public OrderBook(ILogger<OrderBook> logger)
     {
         _logger = logger;
         
     }
 
-    public void AddOrder(OrderEng order)
+    public void AddOrder(OrderEngine.OrderEngine order)
     {
         if (order.Side == SideTrade.Buy)
         {
-            _bookBid.Concat(new OrderEng[] { order });
+            _bookBid.Concat(new OrderEngine.OrderEngine[] { order });
             Array.Sort(_bookBid, new OrderBuyComparer());
         }
         else if (order.Side == SideTrade.Sell)
         {
-            _bookAsk.Concat(new OrderEng[] { order });
+            _bookAsk.Concat(new OrderEngine.OrderEngine[] { order });
             Array.Sort(_bookAsk, new OrderSellComparer());
         }
     }
 
-    public void ReplaceOrder(OrderEng order)
+    public void ReplaceOrder(OrderEngine.OrderEngine order)
     {
         if (order.Side == SideTrade.Buy)
         {
@@ -46,7 +47,7 @@ public class OrderBook : OrderEng, IOrderBook
         }
     }
 
-    public void CancelOrder(OrderEng order)
+    public void CancelOrder(OrderEngine.OrderEngine order)
     {
 
     }

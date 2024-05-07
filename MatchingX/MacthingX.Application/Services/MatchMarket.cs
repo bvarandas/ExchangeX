@@ -6,6 +6,7 @@ using SharedX.Core.Enums;
 using MatchingX.Core.Repositories;
 using SharedX.Core.Interfaces;
 using MacthingX.Application.Interfaces;
+using SharedX.Core.Matching.OrderEngine;
 
 namespace MacthingX.Application.Services;
 public class MatchMarket : MatchBase, IMatchMarket
@@ -14,32 +15,32 @@ public class MatchMarket : MatchBase, IMatchMarket
     {
     }
 
-    public void ReceiveOrder(OrderEng order)
+    public void ReceiveOrder(OrderEngine order)
     {
         this.AddOrder(order);
     }
 
-    protected override void AddOrder(OrderEng order)
+    protected override void AddOrder(OrderEngine order)
     {
         base.AddOrder(order);
     }
 
-    protected override void CancelOrder(OrderEng orderToCancel)
+    protected override void CancelOrder(OrderEngine orderToCancel)
     {
         base.CancelOrder(orderToCancel);
     }
 
-    protected override void ReplaceOrder(OrderEng order)
+    protected override void ReplaceOrder(OrderEngine order)
     {
         base.ReplaceOrder(order);
     }
 
-    protected override void MatchOrderMarket(OrderEng order)
+    protected override void MatchOrderMarket(OrderEngine order)
     {
-        if (!_buyOrders.TryGetValue(order.Symbol, out Dictionary<long, OrderEng> buyOrder))
+        if (!_buyOrders.TryGetValue(order.Symbol, out Dictionary<long, OrderEngine> buyOrder))
             return;
 
-        if (!_sellOrders.TryGetValue(order.Symbol, out Dictionary<long, OrderEng> sellOrder))
+        if (!_sellOrders.TryGetValue(order.Symbol, out Dictionary<long, OrderEngine> sellOrder))
             return;
         
         bool cancelled = false;
@@ -47,7 +48,7 @@ public class MatchMarket : MatchBase, IMatchMarket
         if (order.Side == SharedX.Core.Enums.SideTrade.Buy)
         {
             var orderToTrade = sellOrder.FirstOrDefault(sell=>sell.Value.Quantity == order.Quantity);
-            if (!orderToTrade.Equals(default(KeyValuePair<long, OrderEng>)))
+            if (!orderToTrade.Equals(default(KeyValuePair<long, OrderEngine>)))
             {
                 CreateTradeCapture(order, orderToTrade.Value);
 
@@ -61,7 +62,7 @@ public class MatchMarket : MatchBase, IMatchMarket
         else if (order.Side == SharedX.Core.Enums.SideTrade.Sell)
         {
             var orderToTrade = buyOrder.FirstOrDefault(buy => buy.Value.Quantity == order.Quantity);
-            if (!orderToTrade.Equals(default(KeyValuePair<long, OrderEng>)))
+            if (!orderToTrade.Equals(default(KeyValuePair<long, OrderEngine>)))
             {
                 CreateTradeCapture(orderToTrade.Value, order);
 
@@ -73,7 +74,7 @@ public class MatchMarket : MatchBase, IMatchMarket
             }
         }
     }
-    protected override void MatchOrderLimit(OrderEng order)
+    protected override void MatchOrderLimit(OrderEngine order)
     {
         throw new NotImplementedException();
     }

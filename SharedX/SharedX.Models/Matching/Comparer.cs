@@ -1,7 +1,7 @@
 ﻿namespace SharedX.Core.Matching;
-public class OrderBuyComparer : IComparer<OrderEng>
+public class OrderBuyComparer : IComparer<OrderEngine.OrderEngine>
 {
-    public int Compare(OrderEng? x, OrderEng? y)
+    public int Compare(OrderEngine.OrderEngine? x, OrderEngine.OrderEngine? y)
     {
         if (x.Price == y.Price) return 0;
         if (x.Price > y.Price) return -1;
@@ -10,9 +10,9 @@ public class OrderBuyComparer : IComparer<OrderEng>
 }
 
 
-public class OrderSellComparer : IComparer<OrderEng>
+public class OrderSellComparer : IComparer<OrderEngine.OrderEngine>
 {
-    public int Compare(OrderEng? x, OrderEng? y)
+    public int Compare(OrderEngine.OrderEngine? x, OrderEngine.OrderEngine? y)
     {
         if (x.Price == y.Price) return 0;
         if (x.Price < y.Price) return -1;

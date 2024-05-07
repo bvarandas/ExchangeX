@@ -1,13 +1,12 @@
-﻿using MediatR;
-using SharedX.Core.Matching;
-using SharedX.Core.Events;
+﻿using SharedX.Core.Events;
+using SharedX.Core.Matching.OrderEngine;
 
 namespace MacthingX.Application.Events;
 public class OrderRejectedEvent : Event
 {
-    public readonly OrderEng Order;
+    public readonly OrderEngine Order;
     public DateTime Timestamp { get; private set; }
-    public OrderRejectedEvent(OrderEng order)
+    public OrderRejectedEvent(OrderEngine order)
     {
         Timestamp = DateTime.Now;
         Order = order;

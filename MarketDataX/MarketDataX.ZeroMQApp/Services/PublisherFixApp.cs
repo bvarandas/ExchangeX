@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using QuickFix;
 using QuickFix.Fields;
+using SharedX.Core.Matching.OrderEngine;
 
 namespace MarketDataX.ServerApp.Services;
 internal class PublisherFixApp : BackgroundService
@@ -141,7 +142,7 @@ internal class FixServerApp : MessageCracker, IFixServerApp
     //        Console.WriteLine(ex.ToString());
     //    }
     //}
-    public void SendExecutionReport(SharedX.Core.Matching.OrderEng order, ExecType execType)
+    public void SendExecutionReport(OrderEngine order, ExecType execType)
     {
         Symbol symbol = new Symbol(order.Symbol);
         Side side = new Side((char)order.Side);
@@ -184,7 +185,7 @@ internal class FixServerApp : MessageCracker, IFixServerApp
 
         try
         {
-            Session.SendToTarget(exReport, order.SessionID);
+            Session.SendToTarget(exReport);
         }
         catch (SessionNotFound ex)
         {

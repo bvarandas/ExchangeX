@@ -1,7 +1,9 @@
 ﻿using SharedX.Core.Matching;
+using SharedX.Core.Matching.OrderEngine;
+
 namespace OrderEngineX.Core.Interfaces;
 public interface IOrderEngineCache
 {
-    void AddOrder(OrderEng order);
-    bool TryDequeueOrder(out OrderEng order);
+    void AddOrder(OrderEngine order);
+    bool TryDequeueOrder(out OrderEngine    order);
 }

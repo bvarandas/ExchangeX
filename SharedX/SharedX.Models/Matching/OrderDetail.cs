@@ -1,3 +1,3 @@
 ﻿namespace SharedX.Core.Matching;
 
-public abstract class OrderDetail : OrderEng{}
+public abstract class OrderDetail : OrderEngine.OrderEngine{}

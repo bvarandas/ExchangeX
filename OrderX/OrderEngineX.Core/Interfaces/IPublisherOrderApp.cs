@@ -1,7 +1,6 @@
-﻿using SharedX.Core.Matching;
-
+﻿using SharedX.Core.Matching.OrderEngine;
 namespace OrderEngineX.Core.Interfaces;
 public interface IPublisherOrderApp
 {
-    Task AddOrderToQueue(OrderEng order);
+    Task AddOrderToQueue(OrderEngine order);
 }

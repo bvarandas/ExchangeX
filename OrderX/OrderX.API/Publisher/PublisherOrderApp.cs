@@ -3,8 +3,9 @@ using NetMQ.Sockets;
 using OrderEngineX.Core.Interfaces;
 using SharedX.Core.Specs;
 using NetMQ;
-using SharedX.Core.Matching;
 using SharedX.Core.Extensions;
+using SharedX.Core.Matching.OrderEngine;
+
 namespace OrderEngineX.API.Publisher;
 public class PublisherOrderApp : BackgroundService
 {
@@ -37,9 +38,9 @@ public class PublisherOrderApp : BackgroundService
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                while (_cache.TryDequeueOrder(out OrderEng order))
+                while (_cache.TryDequeueOrder(out OrderEngine order))
                 {
-                    var message = order.SerializeToByteArrayProtobuf<OrderEng>();
+                    var message = order.SerializeToByteArrayProtobuf<OrderEngine>();
                     _sender.SendMultipartBytes(message);
                 }
                 Thread.Sleep(10);

@@ -1,13 +1,12 @@
-﻿using MediatR;
-using SharedX.Core.Matching;
-using SharedX.Core.Enums;
-using SharedX.Core.Events;
+﻿using SharedX.Core.Events;
+using SharedX.Core.Matching.OrderEngine;
+
 namespace MacthingX.Application.Events;
 public class OrderOpenedEvent: Event
 {
-    public readonly OrderEng Order;
+    public readonly OrderEngine Order;
     public DateTime Timestamp { get; private set; }
-    public OrderOpenedEvent(OrderEng order )
+    public OrderOpenedEvent(OrderEngine order )
     {
         Order = order;
         Timestamp = DateTime.Now;

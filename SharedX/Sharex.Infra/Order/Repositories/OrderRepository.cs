@@ -2,6 +2,7 @@
 using MongoDB.Driver;
 using SharedX.Core.Enums;
 using SharedX.Core.Interfaces;
+using SharedX.Core.Matching.OrderEngine;
 using SharedX.Infra.Order.Data;
 namespace SharedX.Infra.Order.Repositories;
 public class OrderRepository : IOrderRepository
@@ -13,13 +14,13 @@ public class OrderRepository : IOrderRepository
         _context = context;
         _logger = logger;
     }
-    public async Task<bool> CreateOrdersAsync(Core.Matching.OrderEng order, CancellationToken cancellation)
+    public async Task<bool> CreateOrdersAsync(OrderEngine     order, CancellationToken cancellation)
     {
         bool result = false;
         try
         {
-            var inserts = new List<WriteModel<Core.Matching.OrderEng>>();
-            inserts.Add(new InsertOneModel<Core.Matching.OrderEng>(order));
+            var inserts = new List<WriteModel<OrderEngine>>();
+            inserts.Add(new InsertOneModel<OrderEngine>(order));
 
             var insertResult = await _context.OrderTrade.BulkWriteAsync(inserts, null, cancellation);
             result = insertResult.IsAcknowledged && insertResult.ModifiedCount > 0;
@@ -67,13 +68,13 @@ public class OrderRepository : IOrderRepository
         }
         return result;
     }
-    public async Task<IEnumerable<Core.Matching.OrderEng>> GetOrdersByAccountIdAsync(int accountId, CancellationToken cancellation)
+    public async Task<IEnumerable<OrderEngine>> GetOrdersByAccountIdAsync(int accountId, CancellationToken cancellation)
     {
-        IEnumerable<Core.Matching.OrderEng> result = null!;
+        IEnumerable<OrderEngine> result = null!;
 
         try
         {
-            var builder = Builders<Core.Matching.OrderEng>.Filter;
+            var builder = Builders<OrderEngine>.Filter;
             var filter = builder.Eq(o => o.AccountId, accountId);
 
             result = _context.OrderTrade.Find(filter).ToEnumerable();
@@ -85,12 +86,12 @@ public class OrderRepository : IOrderRepository
 
         return result;
     }
-    public async Task<IEnumerable<  Core.Matching.OrderEng>> GetOrdersOnRestartAsync(CancellationToken cancellation)
+    public async Task<IEnumerable<OrderEngine>> GetOrdersOnRestartAsync(CancellationToken cancellation)
     {
-        IEnumerable<Core.Matching.OrderEng> result = null!;
+        IEnumerable<OrderEngine> result = null!;
         try
         {
-            var builder = Builders<Core.Matching.OrderEng>.Filter;
+            var builder = Builders<OrderEngine>.Filter;
             var filter = builder.Eq(o => o.OrderStatus, OrderStatus.New)
                        | builder.Eq(o => o.OrderStatus, OrderStatus.PartiallyFilled);
 
@@ -104,16 +105,16 @@ public class OrderRepository : IOrderRepository
         }
         return result;
     }
-    public async Task<bool> UpdateOrderAsync(Core.Matching.OrderEng order, CancellationToken cancellation)
+    public async Task<bool> UpdateOrderAsync(OrderEngine order, CancellationToken cancellation)
     {
         bool result = false;
         try
         {
-            var updates = new List<WriteModel<Core.Matching.OrderEng>>();
-            var filterBuilder = Builders<Core.Matching.OrderEng>.Filter;
+            var updates = new List<WriteModel<OrderEngine>>();
+            var filterBuilder = Builders<OrderEngine>.Filter;
 
             var filter = filterBuilder.Where(x => x.OrderID == order.OrderID);
-            updates.Add(new ReplaceOneModel< Core.Matching.OrderEng>(filter, order));
+            updates.Add(new ReplaceOneModel< OrderEngine>(filter, order));
 
             var updateResult = await _context.OrderTrade.BulkWriteAsync(updates, null, cancellation);
             result = updateResult.IsAcknowledged && updateResult.ModifiedCount > 0;
