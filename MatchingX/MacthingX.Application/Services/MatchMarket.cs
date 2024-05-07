@@ -1,30 +1,24 @@
 ﻿using Microsoft.Extensions.Logging;
-using QuickFix;
 using SharedX.Core.Bus;
-using SharedX.Core.Matching;
 using SharedX.Core.Enums;
-using MatchingX.Core.Repositories;
-using SharedX.Core.Interfaces;
 using MacthingX.Application.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
-
+using MatchingX.Core.Interfaces;
 namespace MacthingX.Application.Services;
 public class MatchMarket : MatchBase, IMatchMarket
 {
-    public MatchMarket() : base()
+    public MatchMarket(ILogger<MatchBase> logger, IMediatorHandler bus, IMatchingCache matchingCache) 
+        : base(logger, bus, matchingCache)
     {
     }
-
     public void ReceiveOrder(OrderEngine order)
     {
         this.AddOrder(order);
     }
-
     protected override void AddOrder(OrderEngine order)
     {
         base.AddOrder(order);
     }
-
     protected override void CancelOrder(OrderEngine orderToCancel)
     {
         base.CancelOrder(orderToCancel);
@@ -37,10 +31,10 @@ public class MatchMarket : MatchBase, IMatchMarket
 
     protected override void MatchOrderMarket(OrderEngine order)
     {
-        if (!_buyOrders.TryGetValue(order.Symbol, out Dictionary<long, OrderEngine> buyOrder))
+        if (!_matchingCache.TryGetBuyOrders(order.Symbol, out Dictionary<long, OrderEngine> buyOrder))
             return;
 
-        if (!_sellOrders.TryGetValue(order.Symbol, out Dictionary<long, OrderEngine> sellOrder))
+        if (!_matchingCache.TryGetSellOrders(order.Symbol, out Dictionary<long, OrderEngine> sellOrder))
             return;
         
         bool cancelled = false;

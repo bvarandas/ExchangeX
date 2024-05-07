@@ -1,17 +1,13 @@
 ﻿using MacthingX.Application.Interfaces;
-using MatchingX.Core.Repositories;
+using MatchingX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
-using QuickFix;
 using SharedX.Core.Bus;
 using SharedX.Core.Enums;
-using SharedX.Core.Interfaces;
-using SharedX.Core.Matching;
 using SharedX.Core.Matching.OrderEngine;
-
 namespace MacthingX.Application.Services;
 public class MatchLimit : MatchBase, IMatchLimit
 {
-    public MatchLimit() : base()
+    public MatchLimit(ILogger<MatchBase> logger, IMediatorHandler bus, IMatchingCache matchingCache) : base(logger, bus, matchingCache)
     {
     }
     public void ReceiveOrder(OrderEngine order)
@@ -27,7 +23,6 @@ public class MatchLimit : MatchBase, IMatchLimit
     {
         base.CancelOrder(orderToCancel);
     }
-
     protected override void ReplaceOrder(OrderEngine order)
     {
         base.ReplaceOrder(order);
@@ -35,10 +30,10 @@ public class MatchLimit : MatchBase, IMatchLimit
 
     protected override void MatchOrderLimit(OrderEngine order)
     {
-        if (!_buyOrders.TryGetValue(order.Symbol, out Dictionary<long, OrderEngine> buyOrder))
+        if (!_matchingCache.TryGetBuyOrders(order.Symbol, out Dictionary<long, OrderEngine> buyOrder))
             return;
 
-        if (!_sellOrders.TryGetValue(order.Symbol, out Dictionary<long, OrderEngine> sellOrder))
+        if (!_matchingCache.TryGetSellOrders(order.Symbol, out Dictionary<long, OrderEngine> sellOrder))
             return;
 
         bool cancelled = false;
@@ -78,6 +73,4 @@ public class MatchLimit : MatchBase, IMatchLimit
     {
         throw new NotImplementedException();
     }
-
-    
 }

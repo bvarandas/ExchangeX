@@ -11,15 +11,13 @@ using TradeReportTransType = SharedX.Core.Enums.TradeReportTransType;
 using MatchingX.Core.Repositories;
 using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
+using MatchingX.Core.Interfaces;
 
 namespace MacthingX.Application.Services;
 public abstract class MatchBase : MatchLastPrice, IDisposable
 {
     protected bool _running;
     protected readonly ILogger<MatchBase> _logger;
-    protected readonly ConcurrentDictionary<string, Dictionary<long, OrderEngine>> _buyOrders;
-    protected readonly ConcurrentDictionary<string, Dictionary<long, OrderEngine>> _sellOrders;
-
     protected readonly ConcurrentQueue<OrderEngine> QueueOrderStatusChanged;
     protected readonly ConcurrentQueue<(TradeCaptureReport, TradeCaptureReport)> QueueExecutedTraded;
     
@@ -31,64 +29,43 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
 
     private readonly IOrderRepository _orderRepository;
     private readonly ITradeRepository _tradeRepository;
-    //protected MatchBase(ILogger<MatchBase> logger, 
-    //    IMediatorHandler bus, 
-    //    IOrderRepository orderRepository,
-    //    ITradeRepository tradeRepository)
-    //{
-    //    _logger = logger;
-    //    Bus = bus;
-    //    _orderRepository = orderRepository;
-    //    _tradeRepository = tradeRepository;
+    protected readonly IMatchingCache _matchingCache;
 
-    //    _buyOrders = new ConcurrentDictionary<string, Dictionary<long, Order>>();
-    //    _sellOrders = new ConcurrentDictionary<string, Dictionary<long, Order>>();
+    protected MatchBase(ILogger<MatchBase> logger, IMediatorHandler bus, IMatchingCache matchingCache)
+    {
+        _logger = logger;
+        Bus = bus;
 
-    //    QueueExecutedTraded = new ConcurrentQueue<(TradeCaptureReport, TradeCaptureReport)>();
-    //    QueueOrderStatusChanged = new ConcurrentQueue<Order>();
+        _matchingCache = matchingCache;
 
-    //    //ThreadExecutedTrade = new Thread(new ThreadStart(ExecutedTradeOutcome));
-    //    //ThreadExecutedTrade.Name = nameof(ExecutedTradeOutcome);
-    //    //ThreadExecutedTrade.Start();
+        QueueExecutedTraded = new ConcurrentQueue<(TradeCaptureReport, TradeCaptureReport)>();
+        QueueOrderStatusChanged = new ConcurrentQueue<OrderEngine>();
 
-    //    //ThreadOrdersStatus = new Thread(new ThreadStart(OrderStatusChangedOutcome));
-    //    //ThreadOrdersStatus.Name = nameof(OrderStatusChangedOutcome);
-    //    //ThreadOrdersStatus.Start();
+        ThreadExecutedTrade = new Thread(new ThreadStart(ExecutedTradeOutcome));
+        ThreadExecutedTrade.Name = nameof(ExecutedTradeOutcome);
+        ThreadExecutedTrade.Start();
 
-    //    //LoadOrdersOnRestart();
+        ThreadOrdersStatus = new Thread(new ThreadStart(OrderStatusChangedOutcome));
+        ThreadOrdersStatus.Name = nameof(OrderStatusChangedOutcome);
+        ThreadOrdersStatus.Start();
 
-    //}
+        this.LoadOrdersOnRestart();
+    }
+
     private void LoadOrdersOnRestart()
     {
         var ordersDb = _orderRepository.GetOrdersOnRestartAsync(default(CancellationToken));
+
         var buyOrders = ordersDb.Result.Where(o => o.Side == SideTrade.Buy);
         var sellOrders = ordersDb.Result.Where(o => o.Side == SideTrade.Sell);
 
-        foreach (var order in buyOrders) {
-            if (_buyOrders.TryGetValue(order.Symbol, out var orders)){
-                orders.TryAdd(order.OrderID, order);
-            }
-            else
-            {
-                var dicOrders = new Dictionary<long, OrderEngine>();
-                dicOrders.Add(order.OrderID, order);
-                _buyOrders.TryAdd(order.Symbol, dicOrders);
-            }
-        }
+        foreach (var order in buyOrders) 
+            _matchingCache.AddBuyOrder(order);
 
         foreach (var order in sellOrders)
-        {
-            if (_sellOrders.TryGetValue(order.Symbol, out var orders)){
-                orders.TryAdd(order.OrderID, order);
-            }
-            else
-            {
-                var dicOrders = new Dictionary<long, OrderEngine>();
-                dicOrders.Add(order.OrderID, order);
-                _sellOrders.TryAdd(order.Symbol, dicOrders);
-            }
-        }
+            _matchingCache.AddSellOrder(order);
     }
+
 
     private void OrderStatusChangedOutcome()
     {
@@ -154,34 +131,20 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
     {
         if (order.Side == SideTrade.Buy)
         {
-            if (_buyOrders.TryGetValue(order.Symbol, out Dictionary<long, OrderEngine> buyOrder))
+            if (_matchingCache.TryGetBuyOrders(order.Symbol, out Dictionary<long, OrderEngine> buyOrder))
             {
-                buyOrder.TryAdd(order.OrderID, order);
+                _matchingCache.AddBuyOrder(order);
                 SortBuyOrders(ref buyOrder);
             }
-            else
-            {
-                var buyOrderNew = new Dictionary<long, OrderEngine>();
-                buyOrderNew.TryAdd(order.OrderID, order);
-                _buyOrders.TryAdd(order.Symbol, buyOrderNew);
-            }
-
         }
         else if (order.Side == SideTrade.Sell)
         {
-            if (_sellOrders.TryGetValue(order.Symbol, out Dictionary<long, OrderEngine> sellOrder))
+            if (_matchingCache.TryGetSellOrders(order.Symbol, out Dictionary<long, OrderEngine> sellOrder))
             {
-                sellOrder.TryAdd(order.OrderID, order);
+                _matchingCache.AddSellOrder(order);
                 SortSellOrders(ref sellOrder);
             }
-            else
-            {
-                var sellOrderNew = new Dictionary<long, OrderEngine>();
-                sellOrderNew.TryAdd(order.OrderID, order);
-                _sellOrders.TryAdd(order.Symbol, sellOrderNew);
-            }
         }
-
         order.OrderStatus = OrderStatus.New;
         QueueOrderStatusChanged.Enqueue(order);
     }
@@ -197,25 +160,9 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
     protected virtual void ReplaceOrder(OrderEngine order)
     {
         if (order.Side == SideTrade.Buy)
-        {
-            if (_buyOrders.TryGetValue(order.Symbol, out Dictionary<long, OrderEngine> buyOrders))
-            {
-                if (buyOrders.TryGetValue(order.OrderID, out OrderEngine orderBuy))
-                {
-                    orderBuy = order;
-                }
-            }
-        }
+            _matchingCache.UpdateBuyOrder(order);
         else if (order.Side == SideTrade.Sell)
-        {
-            if (_sellOrders.TryGetValue(order.Symbol, out Dictionary<long, OrderEngine> sellOrders))
-            {
-                if (sellOrders.TryGetValue(order.OrderID, out OrderEngine orderSell))
-                {
-                    orderSell = order;
-                }
-            }
-        }
+            _matchingCache.UpdateSellOrder(order);
 
         AddOrderDetail(ref order);
 
@@ -229,13 +176,13 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
         bool canceled = false;
         if (orderToCancel.Side == SideTrade.Buy)
         {
-            if (_buyOrders.TryGetValue(orderToCancel.Symbol, out Dictionary<long, OrderEngine> buyOrders))
+            if (_matchingCache.TryGetBuyOrders(orderToCancel.Symbol, out Dictionary<long, OrderEngine> buyOrders))
             {
                 RemoveCancelledOrders(ref buyOrders, orderToCancel, ref canceled);
             }
         }else if (orderToCancel.Side == SideTrade.Sell)
         {
-            if (_sellOrders.TryGetValue(orderToCancel.Symbol, out Dictionary<long, OrderEngine> sellOrders))
+            if (_matchingCache.TryGetSellOrders(orderToCancel.Symbol, out Dictionary<long, OrderEngine> sellOrders))
             {
                 RemoveCancelledOrders(ref sellOrders, orderToCancel, ref canceled);
             }
@@ -350,7 +297,5 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
     public void Dispose()
     {
         _running = false;
-        _buyOrders.Clear();
-        _sellOrders.Clear();
     }
 }

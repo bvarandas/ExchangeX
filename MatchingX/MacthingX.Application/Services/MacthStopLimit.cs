@@ -1,4 +1,7 @@
 ﻿using MacthingX.Application.Interfaces;
+using MatchingX.Core.Interfaces;
+using Microsoft.Extensions.Logging;
+using SharedX.Core.Bus;
 using SharedX.Core.Enums;
 using SharedX.Core.Matching.OrderEngine;
 using System.Collections.Concurrent;
@@ -7,7 +10,8 @@ public class MatchStopLimit : MatchBase, IMatchStopLimit
 {
     private readonly Thread ThreadOrdersStopLimitPrice;
     private readonly ConcurrentQueue<OrderEngine> QueueOrderStopLimitPrice;
-    public MatchStopLimit() : base()
+    public MatchStopLimit(ILogger<MatchBase> logger, IMediatorHandler bus, IMatchingCache matchingCache) 
+        : base(logger, bus, matchingCache)
     {
         QueueOrderStopLimitPrice = new ConcurrentQueue<OrderEngine>();
 
@@ -52,10 +56,11 @@ public class MatchStopLimit : MatchBase, IMatchStopLimit
 
     protected override void MatchOrderLimit(OrderEngine order)
     {
-        if (_buyOrders.TryGetValue(order.Symbol, out Dictionary<long, OrderEngine> buyOrder))
+        
+        if (_matchingCache.TryGetBuyOrders(order.Symbol, out Dictionary<long, OrderEngine> buyOrder))
             return;
 
-        if (_sellOrders.TryGetValue(order.Symbol, out Dictionary<long, OrderEngine> sellOrder))
+        if (_matchingCache.TryGetSellOrders(order.Symbol, out Dictionary<long, OrderEngine> sellOrder))
             return;
         
         bool cancelled = false;

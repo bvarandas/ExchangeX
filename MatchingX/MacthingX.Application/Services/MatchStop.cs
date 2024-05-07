@@ -1,5 +1,8 @@
 ﻿using MacthingX.Application.Interfaces;
+using MassTransit;
+using MatchingX.Core.Interfaces;
 using MatchingX.Core.Repositories;
+using MatchingX.Infra.Cache;
 using Microsoft.Extensions.Logging;
 using SharedX.Core.Bus;
 using SharedX.Core.Enums;
@@ -12,7 +15,8 @@ public class MatchStop : MatchBase, IMatchStop
 {
     private readonly Thread ThreadOrdersStopPrice;
     private readonly ConcurrentQueue<OrderEngine> QueueOrderStopPrice;
-    public MatchStop() : base()
+    public MatchStop(ILogger<MatchBase> logger, IMediatorHandler bus, IMatchingCache matchingCache) 
+        : base(logger, bus, matchingCache)
     {
         QueueOrderStopPrice = new ConcurrentQueue<OrderEngine>();
 
@@ -57,7 +61,24 @@ public class MatchStop : MatchBase, IMatchStop
     }
     protected override void AddOrder(OrderEngine order)
     {
-        QueueOrderStopPrice.Enqueue(order);
+        switch(order.Execution )
+        {
+            case Execution.ToCancel when order.Side ==  SideTrade.Sell:
+
+                break;
+            case Execution.ToCancel when order.Side == SideTrade.Buy:
+
+                break;
+            case Execution.ToCancelReplace when order.Side == SideTrade.Sell:
+
+                break;
+            case Execution.ToCancelReplace when order.Side == SideTrade.Buy:
+
+                break;
+            case Execution.ToOpen:
+                QueueOrderStopPrice.Enqueue(order);
+                break;
+        }
     }
     protected override void CancelOrder(OrderEngine orderToCancel)
     {
@@ -71,9 +92,10 @@ public class MatchStop : MatchBase, IMatchStop
 
     protected override void MatchOrderMarket(OrderEngine order)
     {
-        if (!_buyOrders.TryGetValue(order.Symbol, out Dictionary<long, OrderEngine> buyOrder))
+        if (!_matchingCache.TryGetBuyOrders(order.Symbol, out Dictionary<long, OrderEngine> buyOrder))
             return;
-        if (!_sellOrders.TryGetValue(order.Symbol, out Dictionary<long, OrderEngine> sellOrder))
+        
+        if (!_matchingCache.TryGetSellOrders(order.Symbol, out Dictionary<long, OrderEngine> sellOrder))
             return;
         
         bool cancelled = false;
