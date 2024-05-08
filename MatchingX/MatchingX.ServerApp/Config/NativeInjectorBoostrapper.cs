@@ -74,9 +74,9 @@ internal class NativeInjectorBoostrapper
 
         // Domain - Commands
         services.AddSingleton<IRequestHandler<OrderFilledCommand, bool>, OrderCommandHandler>();
-        services.AddSingleton<IRequestHandler<OrderRejectedCommand, bool>, OrderCommandHandler>();
-        services.AddSingleton<IRequestHandler<OrderCanceledCommand, bool>, OrderCommandHandler>();
-        services.AddSingleton<IRequestHandler<OrderCanceledCommand, bool>, OrderCommandHandler>();
+        services.AddSingleton<IRequestHandler<OrderRejectCommand, bool>, OrderCommandHandler>();
+        services.AddSingleton<IRequestHandler<OrderCancelCommand, bool>, OrderCommandHandler>();
+        services.AddSingleton<IRequestHandler<OrderCancelCommand, bool>, OrderCommandHandler>();
 
         // Domain - Services
         services.AddSingleton<IMatchingReceiver, MatchingReceiver>();

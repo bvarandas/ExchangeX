@@ -7,8 +7,8 @@ namespace MacthingX.Application.Commands;
 
 public class OrderCommandHandler :
     IRequestHandler<OrderFilledCommand, bool>,
-    IRequestHandler<OrderRejectedCommand, bool>,
-    IRequestHandler<OrderCanceledCommand, bool>,
+    IRequestHandler<OrderRejectCommand, bool>,
+    IRequestHandler<OrderCancelCommand, bool>,
     IRequestHandler<OrderOpenedCommand, bool>
 {
     private readonly IOrderRepository _repository;
@@ -32,7 +32,7 @@ public class OrderCommandHandler :
         return await Task.FromResult(true);
     }
 
-    public async Task<bool> Handle(OrderRejectedCommand command, CancellationToken cancellationToken)
+    public async Task<bool> Handle(OrderRejectCommand command, CancellationToken cancellationToken)
     {
         await _repository.UpdateOrderAsync(command.Order, cancellationToken);
 
@@ -44,7 +44,7 @@ public class OrderCommandHandler :
         return await Task.FromResult(true);
     }
 
-    public async Task<bool> Handle(OrderCanceledCommand command, CancellationToken cancellationToken)
+    public async Task<bool> Handle(OrderCancelCommand command, CancellationToken cancellationToken)
     {
         await _repository.UpdateOrderAsync(command.Order, cancellationToken);
 

@@ -7,9 +7,7 @@ using SharedX.Core.Specs;
 using StackExchange.Redis;
 using FluentResults;
 using System.Collections.Concurrent;
-using QuickFix.Fields;
-using SharedX.Core.Matching;
-
+using MongoDB.Driver.Linq;
 namespace MatchingX.Infra.Cache;
 public class MatchingCache : IMatchingCache
 {
@@ -36,6 +34,37 @@ public class MatchingCache : IMatchingCache
 
         _buyOrders = new ConcurrentDictionary<string, Dictionary<long, OrderEngine>>();
         _sellOrders = new ConcurrentDictionary<string, Dictionary<long, OrderEngine>>();
+    }
+    public async Task<Result<OrderEngine>> GetBuyOrderByIdandSymbolAsync(long orderId, string symbol)
+    {
+        var result = new OrderEngine();
+        var key = string.Concat(keyBuyOrders, ":", symbol);
+        var hashEntry = await _dbMatching.HashGetAllAsync(key);
+
+        var order = hashEntry.GetValue(orderId);
+        
+        if ( order is null)
+            return Result.Fail(new Error($"Order {orderId} with symbol {symbol} not found"));
+        
+        result = Newtonsoft.Json.JsonConvert.DeserializeObject<OrderEngine>(order?.ToString());
+        
+        return Result.Ok(result);
+    }
+
+    public async Task<Result<OrderEngine>> GetSellOrderByIdandSymbolAsync(long orderId, string symbol)
+    {
+        var result = new OrderEngine();
+        var key = string.Concat(keySellOrders, ":", symbol);
+        var hashEntry = await _dbMatching.HashGetAllAsync(key);
+
+        var order = hashEntry.GetValue(orderId);
+
+        if (order is null)
+            return Result.Fail(new Error($"Order {orderId} with symbol {symbol} not found"));
+
+        result = Newtonsoft.Json.JsonConvert.DeserializeObject<OrderEngine>(order?.ToString());
+        
+        return Result.Ok(result);
     }
 
     public async Task<Result<Dictionary<long, OrderEngine>>> GetBuyOrderBySymbol(string symbol)
@@ -68,10 +97,13 @@ public class MatchingCache : IMatchingCache
     {
         RedisValue value = new RedisValue(Newtonsoft.Json.JsonConvert.SerializeObject(order));
         var key = string.Concat(keyBuyOrders, ":", order.Symbol);
-        await _dbMatching.HashIncrementAsync(key , value,1, CommandFlags.None);
+        await _dbMatching.HashSetAsync(key,
+            new HashEntry[]
+            {
+                new HashEntry(order.OrderID, value)
+            });
         this.SetDictionaryOrderBuyCache(order);
     }
-
 
     public async void UpdateBuyOrder(OrderEngine order)
     {
@@ -88,7 +120,11 @@ public class MatchingCache : IMatchingCache
     {
         RedisValue value = new RedisValue(Newtonsoft.Json.JsonConvert.SerializeObject(order));
         var key = string.Concat(keySellOrders, ":", order.Symbol);
-        await _dbMatching.HashIncrementAsync(key, value, 1, CommandFlags.None);
+        await _dbMatching.HashSetAsync(key,
+            new HashEntry[]
+            {
+                new HashEntry(order.OrderID, value)
+            });
         this.SetDictionaryOrderSellCache(order);
     }
 
@@ -153,4 +189,6 @@ public class MatchingCache : IMatchingCache
         }
         _sellOrders.AddOrUpdate(order.Symbol, dicOut, (key, oldValue) => oldValue);
     }
+
+    
 }

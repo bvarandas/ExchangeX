@@ -1,11 +1,8 @@
-﻿using SharedX.Core.Matching;
-using SharedX.Core.Enums;
+﻿using SharedX.Core.Enums;
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 using SharedX.Core.Bus;
 using MacthingX.Application.Commands;
-using MacthingX.Application.Events;
-using QuickFix;
 using SharedX.Core.Matching.DropCopy;
 using TradeReportTransType = SharedX.Core.Enums.TradeReportTransType;
 using MatchingX.Core.Repositories;
@@ -19,6 +16,7 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
     protected bool _running;
     protected readonly ILogger<MatchBase> _logger;
     protected readonly ConcurrentQueue<OrderEngine> QueueOrderStatusChanged;
+    protected readonly ConcurrentQueue<OrderEngine> QueueOrderIncome;
     protected readonly ConcurrentQueue<(TradeCaptureReport, TradeCaptureReport)> QueueExecutedTraded;
     
     private readonly Thread ThreadExecutedTrade;
@@ -40,6 +38,7 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
 
         QueueExecutedTraded = new ConcurrentQueue<(TradeCaptureReport, TradeCaptureReport)>();
         QueueOrderStatusChanged = new ConcurrentQueue<OrderEngine>();
+        QueueOrderIncome = new ConcurrentQueue<OrderEngine>();
 
         ThreadExecutedTrade = new Thread(new ThreadStart(ExecutedTradeOutcome));
         ThreadExecutedTrade.Name = nameof(ExecutedTradeOutcome);
@@ -65,7 +64,24 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
         foreach (var order in sellOrders)
             _matchingCache.AddSellOrder(order);
     }
+    private void OrderIncome()
+    {
+        while(true)
+        {
+            if (!QueueOrderIncome.TryDequeue(out OrderEngine order))
+                continue;
 
+            switch(order.OrderStatus)
+            {
+
+            }
+
+            if (_running)
+                break;
+
+            Thread.Sleep(10);
+        }
+    }
 
     private void OrderStatusChangedOutcome()
     {
@@ -76,17 +92,20 @@ public abstract class MatchBase : MatchLastPrice, IDisposable
 
             switch(order.OrderStatus)
             {
-                case OrderStatus.New:
-                    Bus.SendCommand(new OrderOpenedCommand(order));
+                //case OrderStatus.New:
+                //    Bus.SendCommand(new OrderOpenedCommand(order, _matchingCache));
+                //    break;
+                case OrderStatus.PartiallyFilled:
+
                     break;
                 case OrderStatus.Filled:
-                    Bus.SendCommand(new OrderFilledCommand(order));
+
                     break;
                 case OrderStatus.Rejected:
-                    Bus.SendCommand(new OrderRejectedCommand(order));
+                    //Bus.SendCommand(new OrderRejectCommand(order, _matchingCache));
                     break;
                 case OrderStatus.Cancelled:
-                    Bus.SendCommand(new OrderCanceledCommand(order));
+                    //Bus.SendCommand(new OrderCancelCommand(order, _matchingCache));
                     break;
             }
 

@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using System.ComponentModel.DataAnnotations;
+using FluentValidation.Results;
 namespace SharedX.Core.Commands;
 public abstract class Command : IRequest<bool>, INotification
 {
@@ -9,5 +9,5 @@ public abstract class Command : IRequest<bool>, INotification
     {
         Timestamp = DateTime.Now;
     }
-    //public abstract bool IsValid();
+    public abstract bool IsValid();
 }
