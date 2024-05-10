@@ -11,4 +11,8 @@ public class LoginAddCommand : Command
         Timestamp = DateTime.Now;
         this.login = login;
     }
+    public override bool IsValid()
+    {
+        throw new NotImplementedException();
+    }
 }

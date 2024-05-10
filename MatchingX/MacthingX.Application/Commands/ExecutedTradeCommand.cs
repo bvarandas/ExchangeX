@@ -11,4 +11,9 @@ public class ExecutedTradeCommand : Command
         Timestamp = DateTime.Now;
         ExecutedTrades = executedTrade;
     }
+
+    public override bool IsValid()
+    {
+        return true; //não é necessário essa validação
+    }
 }

@@ -1,11 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OrderEngineX.Core.Interfaces;
+using SharedX.Core.Entities;
 using SharedX.Core.Enums;
 using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
+using System.Text.Json;
 using OrderEng = SharedX.Core.Matching.OrderEngine;
 
 namespace OrderEngineX.Infra.Cache;
@@ -32,7 +34,7 @@ public class OrderEngineCache : IOrderEngineCache
     
         _logger = logger;
 
-        _key = new RedisKey("Orders");
+        _key = new RedisKey("OrderEngine");
 
     }
     public async void AddOrder(OrderEngine order)
@@ -43,7 +45,7 @@ public class OrderEngineCache : IOrderEngineCache
 
     private async Task SetValueOrderRedisAsync(OrderEngine order)
     {
-        RedisValue value = new RedisValue(Newtonsoft.Json.JsonConvert.SerializeObject(order));
+        RedisValue value = new RedisValue(JsonSerializer.Serialize<OrderEngine>(order));
         await _dbOrderEngine.HashIncrementAsync(_key, value);
     }
 

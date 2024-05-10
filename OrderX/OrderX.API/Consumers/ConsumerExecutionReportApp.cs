@@ -7,13 +7,14 @@ using OrderEngineX.Core.Interfaces;
 using SharedX.Core.Extensions;
 using SharedX.Core.Matching.DropCopy;
 using SharedX.Core.Specs;
-namespace OrderEngineX.Infra.Publisher;
+namespace OrderEngineX.API.Consumers;
 public class ConsumerExecutionReportApp : BackgroundService
 {
     private readonly ILogger<ConsumerExecutionReportApp> _logger;
     private PullSocket _receiver;
     private readonly ConnectionZmq _config;
     private readonly IExecutionReportCache _cache;
+    private static Thread ThreadReceiverExecutionReport = null!;
     public ConsumerExecutionReportApp(ILogger<ConsumerExecutionReportApp> logger,
         IOptions<ConnectionZmq> options,
         IExecutionReportCache cache)
@@ -24,19 +25,16 @@ public class ConsumerExecutionReportApp : BackgroundService
     }
     public override Task StartAsync(CancellationToken cancellationToken)
     {
-        return base.StartAsync(cancellationToken);
-    }
+        _logger.LogInformation("Initializing receiver Execution Report ZeroMQ...");
+        ThreadReceiverExecutionReport = new Thread(() => ReceiverExecutionReport(cancellationToken));
+        ThreadReceiverExecutionReport.Name = nameof(ThreadReceiverExecutionReport);
+        ThreadReceiverExecutionReport.Start();
 
-    public override Task StopAsync(CancellationToken cancellationToken)
-    {
-        _receiver.Disconnect(_config.OrderEntryToOrderEngine.Uri);
-        return base.StopAsync(cancellationToken);
+        return Task.CompletedTask;
     }
-
-    protected async override Task ExecuteAsync(CancellationToken stoppingToken)
+    private void ReceiverExecutionReport(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Iniciando o Publisher Order ZeroMQ...");
-        using ( _receiver = new PullSocket(_config.OrderEntryToOrderEngine.Uri)) 
+        using (_receiver = new PullSocket(_config.MatchingToOrderEngine.Uri))
         {
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -48,5 +46,16 @@ public class ConsumerExecutionReportApp : BackgroundService
         }
     }
 
-    
+    public override Task StopAsync(CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Finishing the publisher ZeroMQ...");
+        _receiver.Disconnect(_config.MatchingToOrderEngine.Uri);
+        _logger.LogInformation("Publisher ZeroMq...Finishing!");
+        return base.StopAsync(cancellationToken);
+    }
+
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        return Task.CompletedTask;
+    }
 }

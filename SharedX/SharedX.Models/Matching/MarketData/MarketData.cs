@@ -9,7 +9,7 @@ public class MarketData
     [ProtoMember(2)]
     public string SecurityID { get; set; } = string.Empty;
     [ProtoMember(3)]
-    public string SecuritSourceId { get; set; } = string.Empty; //8 //https://www.onixs.biz/fix-dictionary/5.0/tagnum_22.html
+    public char SecuritSourceId { get; set; }  //8 //https://www.onixs.biz/fix-dictionary/5.0/tagnum_22.html
     [ProtoMember(4)]
     public ushort EntryID { get; set; }  //0 (bid) or 1 (ask)
     [ProtoMember(5)]

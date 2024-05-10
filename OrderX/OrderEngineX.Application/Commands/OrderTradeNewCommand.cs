@@ -1,13 +1,18 @@
-﻿using SharedX.Core.Commands;
-using SharedX.Core.Models;
+﻿using OrderEngineX.Application.Commands;
+using OrderEngineX.Application.Validations;
+using SharedX.Core.Matching.OrderEngine;
 namespace MarketDataX.Application.Commands;
-public class OrderTradeNewCommand : Command
+public class OrderTradeNewCommand : OrderEngineCommand
 {
-    public OrderModel Order { get; set; }
-    public DateTime Timestamp { get; private set; }
-    public OrderTradeNewCommand(OrderModel Order)
+    public OrderTradeNewCommand(OrderEngine Order)
     {
         this.Order = Order;
         Timestamp = DateTime.Now;
+    }
+
+    public override bool IsValid()
+    {
+        ValidationResult = new NewOrderSingleValidation().Validate(this);
+        return ValidationResult.IsValid;
     }
 }

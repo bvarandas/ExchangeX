@@ -1,15 +1,16 @@
-﻿using SharedX.Core.Commands;
-using SharedX.Core.Enums;
-using SharedX.Core.Models;
-
+﻿using OrderEngineX.Application.Validations;
+using SharedX.Core.Matching.OrderEngine;
 namespace OrderEngineX.Application.Commands;
-public class OrderTradeModifyCommand : Command
+public class OrderTradeModifyCommand : OrderEngineCommand
 {
-    public OrderModel Order { get; set; }
-    public DateTime Timestamp { get; private set; }
-    public OrderTradeModifyCommand(OrderModel Order)
-    {
-        this.Order = Order;
+    public OrderTradeModifyCommand(OrderEngine order)
+    {   
+        Order = order;
         Timestamp = DateTime.Now;
+    }
+    public override bool IsValid()
+    {
+        ValidationResult = new OrderCancelReplaceRequestValidation().Validate(this);
+        return ValidationResult.IsValid;
     }
 }

@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 
 namespace MacthingX.Application.Events;
 public class ExecutionReportHandler : 
-    INotificationHandler<OrderFilledCommand>,
     INotificationHandler<OrderOpenedEvent>,
     INotificationHandler<OrderRejectedEvent>,
     INotificationHandler<OrderCanceledEvent>
@@ -21,14 +20,7 @@ public class ExecutionReportHandler :
         _dropCopyCache = dropCopyCache;
         _marketDataCache = marketDataCache;
     }
-    public Task Handle(OrderFilledCommand notification, CancellationToken cancellationToken)
-    {
-        _marketDataCache.AddIncremental(notification.Order.ToMarketData());
-        _dropCopyCache.AddExecutionReport(notification.Order.ToExecutionReport());
-
-        return Task.CompletedTask;
-    }
-
+    
     public Task Handle(OrderOpenedEvent notification, CancellationToken cancellationToken)
     {
         _marketDataCache.AddIncremental(notification.Order.ToMarketData());

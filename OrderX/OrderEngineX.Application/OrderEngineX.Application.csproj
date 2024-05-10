@@ -9,10 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\OrderEntryX\OrderEntryX.Infra\OrderEntryX.Infra.csproj" />
     <ProjectReference Include="..\..\SharedX\SharedX.Models\SharedX.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Validations\" />
+    <ProjectReference Include="..\OrderEngineX.Core\OrderEngineX.Core.csproj" />
   </ItemGroup>
 
 </Project>

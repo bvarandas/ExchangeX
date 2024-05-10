@@ -1,13 +1,9 @@
 ﻿using MacthingX.Application.Interfaces;
 using MassTransit;
 using MatchingX.Core.Interfaces;
-using MatchingX.Core.Repositories;
-using MatchingX.Infra.Cache;
 using Microsoft.Extensions.Logging;
 using SharedX.Core.Bus;
 using SharedX.Core.Enums;
-using SharedX.Core.Interfaces;
-using SharedX.Core.Matching;
 using SharedX.Core.Matching.OrderEngine;
 using System.Collections.Concurrent;
 namespace MacthingX.Application.Services;
@@ -15,14 +11,21 @@ public class MatchStop : MatchBase, IMatchStop
 {
     private readonly Thread ThreadOrdersStopPrice;
     private readonly ConcurrentQueue<OrderEngine> QueueOrderStopPrice;
-    public MatchStop(ILogger<MatchBase> logger, IMediatorHandler bus, IMatchingCache matchingCache) 
-        : base(logger, bus, matchingCache)
+    private readonly IMarketDataCache _cacheMarketData;
+    private readonly ConcurrentDictionary<long, OrderEngine> DicOrdersToCancel;
+    public MatchStop(ILogger<MatchBase> logger, IMediatorHandler bus, 
+        IMatchingCache matchingCache, 
+        IMarketDataCache marketDataCache,
+        ITradeOrderService tradeOrder) 
+        : base(logger, bus, matchingCache, marketDataCache, tradeOrder)
     {
         QueueOrderStopPrice = new ConcurrentQueue<OrderEngine>();
-
+        
         ThreadOrdersStopPrice = new Thread(new ThreadStart(OrderStopVerifyReachPrice));
         ThreadOrdersStopPrice.Name = nameof(OrderStopVerifyReachPrice);
         ThreadOrdersStopPrice.Start();
+
+        DicOrdersToCancel = new ConcurrentDictionary<long, OrderEngine>();
     }
 
     public void ReceiveOrder(OrderEngine order)
@@ -36,10 +39,18 @@ public class MatchStop : MatchBase, IMatchStop
         {
             if (QueueOrderStopPrice.TryDequeue(out OrderEngine order))
             {
-                if (!_lastPrice.TryGetValue(order.Symbol, out decimal price))
+                if (DicOrdersToCancel.TryGetValue(order.OrderID, out OrderEngine orderFound))
+                {
+                    DicOrdersToCancel.Remove(order.OrderID, out OrderEngine orderRemoved);
+                    continue;
+                }
+
+                decimal price = _cacheMarketData.GetPrice(symbol: order.Symbol).Result;
+
+                if (!price.Equals(0))
                 {
                     QueueOrderStopPrice.Enqueue(order);
-                    Thread.Sleep(10);
+                    Thread.Sleep(500);
                     continue;
                 }
 
@@ -48,15 +59,16 @@ public class MatchStop : MatchBase, IMatchStop
                     case (OrderType.Stop, SideTrade.Sell) when order.StopPrice >= price:
                     case (OrderType.Stop, SideTrade.Buy) when order.StopPrice <= price:
                         // Adicionar no book e mandar ordem market
-                        base.AddOrder(order);
+                        _tradeOrder.AddOrder(order);
                         this.MatchOrderMarket(order);
                         break;
                     default:
                         QueueOrderStopPrice.Enqueue(order);
+                        
                         break;
                 }
             }
-            Thread.Sleep(10);
+            Thread.Sleep(500);
         }
     }
     protected override void AddOrder(OrderEngine order)
@@ -82,52 +94,47 @@ public class MatchStop : MatchBase, IMatchStop
     }
     protected override void CancelOrder(OrderEngine orderToCancel)
     {
-        base.CancelOrder(orderToCancel);
+        DicOrdersToCancel.TryAdd(orderToCancel.OrderID, orderToCancel);
+        _tradeOrder.CancelOrder(orderToCancel);
     }
 
     protected override void ReplaceOrder(OrderEngine order)
     {
-        base.ReplaceOrder(order);
+        _tradeOrder.ReplaceOrder(order);
     }
 
     protected override void MatchOrderMarket(OrderEngine order)
     {
-        if (!_matchingCache.TryGetBuyOrders(order.Symbol, out Dictionary<long, OrderEngine> buyOrder))
-            return;
-        
-        if (!_matchingCache.TryGetSellOrders(order.Symbol, out Dictionary<long, OrderEngine> sellOrder))
-            return;
-        
         bool cancelled = false;
         if (order.Side == SideTrade.Buy)
         {
-            var orderToTrade = sellOrder.FirstOrDefault(sell=>sell.Value.Quantity == order.Quantity);
+            var sellOrders = _matchingCache.GetSellOrderBySymbol(order.Symbol).Result.Value;
+            var orderToTrade = sellOrders.FirstOrDefault(sell=>sell.Value.Quantity == order.Quantity);
 
             if (!orderToTrade.Equals(default(KeyValuePair<long, OrderEngine>)))
             {
-                CreateTradeCapture(order, orderToTrade.Value);
-
-                RemoveTradedOrders(ref buyOrder, ref sellOrder, order, orderToTrade.Value);
+                _tradeOrder.CreateTradeCapture(order, orderToTrade.Value);
+                _tradeOrder.RemoveTradedOrdersAsync(order, orderToTrade.Value);
             }else
             {
                 if (order.TimeInForce == TimeInForce.FOK)
-                    RemoveCancelledOrders(ref sellOrder, order, ref cancelled);
+                    cancelled = _tradeOrder.RemoveCancelledOrdersAsync( order).Result;
             }
         }
         else if (order.Side == SideTrade.Sell)
         {
-            var orderToTrade = buyOrder.FirstOrDefault(kvp => kvp.Value.Quantity == order.Quantity);
+            var buyOrders = _matchingCache.GetBuyOrderBySymbol(order.Symbol).Result.Value;
+            var orderToTrade = buyOrders.FirstOrDefault(kvp => kvp.Value.Quantity == order.Quantity);
 
             if (!orderToTrade.Equals(default(KeyValuePair<long, OrderEngine>)))
             {
-                CreateTradeCapture(orderToTrade.Value, order);
-
-                RemoveTradedOrders(ref buyOrder, ref sellOrder, orderToTrade.Value, order);
+                _tradeOrder.CreateTradeCapture(orderToTrade.Value, order);
+                _tradeOrder.RemoveTradedOrdersAsync(orderToTrade.Value, order);
             }
             else
             {
                 if (order.TimeInForce == TimeInForce.FOK)
-                    RemoveCancelledOrders(ref buyOrder, order, ref cancelled);
+                    cancelled = _tradeOrder.RemoveCancelledOrdersAsync(order).Result;
             }
         }
     }

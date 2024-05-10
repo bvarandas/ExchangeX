@@ -14,7 +14,7 @@ public class OrderRepository : IOrderRepository
         _context = context;
         _logger = logger;
     }
-    public async Task<bool> CreateOrdersAsync(OrderEngine     order, CancellationToken cancellation)
+    public async Task<bool> CreateOrdersAsync(OrderEngine  order, CancellationToken cancellation)
     {
         bool result = false;
         try
@@ -110,14 +110,31 @@ public class OrderRepository : IOrderRepository
         bool result = false;
         try
         {
-            var updates = new List<WriteModel<OrderEngine>>();
-            var filterBuilder = Builders<OrderEngine>.Filter;
+            var builder = Builders<OrderEngine>.Filter;
+            var filter = builder.Where(x => x.OrderID == order.OrderID);
 
-            var filter = filterBuilder.Where(x => x.OrderID == order.OrderID);
-            updates.Add(new ReplaceOneModel< OrderEngine>(filter, order));
+            var orderSingle = await _context.OrderTrade.Find(filter).SingleAsync(cancellation);
 
-            var updateResult = await _context.OrderTrade.BulkWriteAsync(updates, null, cancellation);
-            result = updateResult.IsAcknowledged && updateResult.ModifiedCount > 0;
+            if (orderSingle.OrderDetails is null)
+                orderSingle.OrderDetails = new List<OrderEngineDetail>();
+
+            orderSingle.OrderDetails.Add((OrderEngineDetail)order);
+
+            var resultReplace = await _context.OrderTrade.ReplaceOneAsync(
+                null,
+            replacement: orderSingle,
+            options: new ReplaceOptions { IsUpsert = true },
+            cancellation);
+
+
+            //var updates = new List<WriteModel<OrderEngine>>();
+            //var filterBuilder = Builders<OrderEngine>.Filter;
+
+            //var filter = filterBuilder.Where(x => x.OrderID == order.OrderID);
+            //updates.Add(new ReplaceOneModel< OrderEngine>(filter, order));
+
+            //var updateResult = await _context.OrderTrade.BulkWriteAsync(updates, null, cancellation);
+            //result = updateResult.IsAcknowledged && updateResult.ModifiedCount > 0;
         }
         catch (ArgumentNullException ex)
         {

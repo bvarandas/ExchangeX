@@ -140,7 +140,7 @@ internal class FixServerApp : MessageCracker, IFixServerApp
 
     public void OnMessage(QuickFix.FIX44.NewOrderSingle newOrder, SessionID sessionID)
     {
-        OrderEngine order = newOrder.ToOrder(sessionID);
+        OrderEngine order = newOrder.ToOrderEngine(sessionID);
         order.Execution = Execution.ToOpen;
         _cache.AddOrderEntryAsync(order);
     }

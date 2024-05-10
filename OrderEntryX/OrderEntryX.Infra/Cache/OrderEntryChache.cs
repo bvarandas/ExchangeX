@@ -6,8 +6,8 @@ using SharedX.Core.Specs;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
 using SharedX.Core;
-using System.Text.Json.Nodes;
 using SharedX.Core.Matching.OrderEngine;
+using System.Text.Json;
 
 namespace DropCopyX.Infra.Cache;
 public class OrderEntryChache : IOrderEntryChache
@@ -36,7 +36,7 @@ public class OrderEntryChache : IOrderEntryChache
     }
     private async Task SetValueRedis(OrderEngine order)
     {
-        var jsonString = Newtonsoft.Json.JsonConvert.SerializeObject(order);
+        var jsonString = JsonSerializer.Serialize<OrderEngine>(order);
         RedisValue value = new RedisValue();
         await _dbOrderEntry.SetAddAsync(key, value);
     }

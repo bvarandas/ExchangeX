@@ -6,13 +6,14 @@ using NetMQ;
 using SharedX.Core.Extensions;
 using SharedX.Core.Matching.OrderEngine;
 
-namespace OrderEngineX.API.Publisher;
+namespace OrderEngineX.API.Publishers;
 public class PublisherOrderApp : BackgroundService
 {
     private readonly ILogger<PublisherOrderApp> _logger;
     private PushSocket _sender;
     private readonly ConnectionZmq _config;
     private readonly IOrderEngineCache _cache;
+    private static Thread ThreadSenderOrder = null!;
     public PublisherOrderApp(ILogger<PublisherOrderApp> logger,
         IOptions<ConnectionZmq> options,
         IOrderEngineCache cache)
@@ -23,16 +24,16 @@ public class PublisherOrderApp : BackgroundService
     }
     public override Task StartAsync(CancellationToken cancellationToken)
     {
-        return base.StartAsync(cancellationToken);
+        ThreadSenderOrder = new Thread(() => SenderOrder(cancellationToken));
+        ThreadSenderOrder.Name = nameof(ThreadSenderOrder);
+        ThreadSenderOrder.Start();
+
+        return Task.CompletedTask;
     }
-    public override Task StopAsync(CancellationToken cancellationToken)
+
+    private void SenderOrder(CancellationToken stoppingToken)
     {
-        _sender.Disconnect(_config.OrderEngineToMatching.Uri);
-        return base.StopAsync(cancellationToken);
-    }
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        _logger.LogInformation("Iniciando o Publisher DropCopy ZeroMQ...");
+        _logger.LogInformation("Initializing the Publisher Orders ZeroMQ...");
 
         using (_sender = new PushSocket(_config.OrderEngineToMatching.Uri))
         {
@@ -46,5 +47,17 @@ public class PublisherOrderApp : BackgroundService
                 Thread.Sleep(10);
             }
         }
+    }
+
+    public override Task StopAsync(CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Finishing the publisher ZeroMQ...");
+        _sender.Disconnect(_config.OrderEngineToMatching.Uri);
+        _logger.LogInformation("Publisher ZeroMq...Finishing!");
+        return base.StopAsync(cancellationToken);
+    }
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        return Task.CompletedTask;
     }
 }

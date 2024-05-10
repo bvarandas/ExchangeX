@@ -12,7 +12,7 @@ public static class MatchingExtensions
         var marketdata = new MarketData();
         marketdata.Symbol = order.Symbol;
         marketdata.SecurityID = "";
-        marketdata.SecuritSourceId = "8";
+        marketdata.SecuritSourceId = '8';
         marketdata.EntryID = (order.Side == SideTrade.Buy ? '0' : '1');
         marketdata.EntryType = (order.OrderStatus == OrderStatus.PartiallyFilled || order.OrderStatus == OrderStatus.Filled) ? '2' : (order.Side == SideTrade.Buy ? '0' : '1');
         marketdata.EntryPx = order.Price;

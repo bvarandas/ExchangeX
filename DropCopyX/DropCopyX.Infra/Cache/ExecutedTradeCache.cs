@@ -1,12 +1,15 @@
 ﻿using DropCopyX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NRedisStack.Graph;
 using SharedX.Core;
 using SharedX.Core.Enums;
 using SharedX.Core.Matching.DropCopy;
 using SharedX.Core.Specs;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
+using System.Text.Json;
+
 namespace DropCopyX.Infra.Cache;
 public class ExecutedTradeCache : IExecutedTradeCache
 {
@@ -36,9 +39,11 @@ public class ExecutedTradeCache : IExecutedTradeCache
     }
     private async Task SetValueRedis(TradeCaptureReport trade)
     {
-        RedisValue value = new RedisValue(Newtonsoft.Json.JsonConvert.SerializeObject(trade));
-
-        await _dbMatching.HashIncrementAsync(keyExecutedTrade, value, trade.TradeId);
+        RedisValue value = new RedisValue(JsonSerializer.Serialize<TradeCaptureReport>(trade));
+        await _dbMatching.HashSetAsync(keyExecutedTrade, new HashEntry[]
+        {
+            new HashEntry(trade.TradeId, value)
+        });
     }
 
     public long GetLastTradeId()
@@ -50,7 +55,7 @@ public class ExecutedTradeCache : IExecutedTradeCache
             return 0;
         return (long)execId;
     }
-    public async void SerLastTradeId(long tradeId)
+    public async void SetLastTradeId(long tradeId)
     {
         RedisValue value = new RedisValue(tradeId.ToString());
         await _dbMatching.HashIncrementAsync(keyTradeId, value);

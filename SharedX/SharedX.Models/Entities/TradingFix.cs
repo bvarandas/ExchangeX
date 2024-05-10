@@ -1,5 +1,7 @@
 ﻿using ProtoBuf;
 using SharedX.Core.Enums;
+using System.Text.Json.Serialization;
+
 namespace SharedX.Core.Entities;
 [ProtoContract]
 public class NewOrderSingleFix
@@ -44,7 +46,7 @@ public class PartyIDs
 }
 
 [ProtoContract]
-public class OrderCancelRequestFix
+public class OrderCancelRequestFix 
 {
     [ProtoMember(1)]
     public long OrderID { get; set; }
@@ -56,7 +58,7 @@ public class OrderCancelRequestFix
     public string Symbol { get; set; }=string.Empty;
 }
 [ProtoContract]
-public class OrderCancelReplaceRequestFix
+public class OrderCancelReplaceRequestFix 
 {
     [ProtoMember(1)]
     public long OrderID { get; set; }
@@ -84,7 +86,7 @@ public class OrderCancelReplaceRequestFix
     public string ExpireTime { get; set; } = string.Empty;
 }
 [ProtoContract]
-public class OrderMassCancelRequestFix
+public class OrderMassCancelRequestFix 
 {
     [ProtoMember(1)]
     public long ClOrdID { get; set; }
@@ -97,7 +99,7 @@ public class OrderMassCancelRequestFix
 
 }
 [ProtoContract]
-public class BusinessMessageRejectFix
+public class BusinessMessageRejectFix : ReportFix
 {
     [ProtoMember(1)]
     public int BusinessRejectReason { get; set; }
@@ -110,7 +112,7 @@ public class BusinessMessageRejectFix
 }
 
 [ProtoContract]
-public class OrderCancelRejectFix
+public class OrderCancelRejectFix : ReportFix
 {
     [ProtoMember(1)]
     public long OrderID { get; set; }
@@ -127,7 +129,7 @@ public class OrderCancelRejectFix
 }
 
 [ProtoContract]
-public class OrderMassCancelReportFix
+public class OrderMassCancelReportFix: ReportFix
 {
     [ProtoMember(1)]
     public long ClOrdID { get; set; }
@@ -145,8 +147,8 @@ public class OrderMassCancelReportFix
     public IList<TargetParty> TagetPartyIds { get; set; } = null!;
     [ProtoMember(8)]
     public string Text { get; set; }
-
 }
+
 [ProtoContract]
 public class TargetParty
 {
@@ -158,3 +160,14 @@ public class TargetParty
     public int TargetPartyRole { get; set; } //https://www.onixs.biz/fix-dictionary/5.0.sp2/tagNum_452.html
 }
 
+[ProtoContract]
+[JsonDerivedType(typeof(ReportFix), typeDiscriminator: "ReportFix")]
+[JsonDerivedType(typeof(OrderMassCancelReportFix), typeDiscriminator: "OrderMassCancelReportFix")]
+[JsonDerivedType(typeof(OrderCancelRejectFix), typeDiscriminator: "OrderMassCancelReportFix")]
+[JsonDerivedType(typeof(BusinessMessageRejectFix), typeDiscriminator: "OrderMassCancelReportFix")]
+public class ReportFix
+{
+    [ProtoMember(1)]
+    public long ExecId {  get; set; }
+
+}

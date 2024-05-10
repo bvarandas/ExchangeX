@@ -1,29 +1,47 @@
-﻿using OrderEngineX.Application.Events;
-using MediatR;
+﻿using MediatR;
+using OrderEngineX.Core.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace OrderEngineX.Application.Events;
 
 public class OrderTradeEventHandler :
     IRequestHandler<OrderTradeNewEvent, bool>,
     IRequestHandler<OrderTradeModifyEvent, bool>,
-    IRequestHandler<OrderTradeCancelEvent, bool>
+    IRequestHandler<OrderTradeCancelEvent, bool>,
+    IRequestHandler<OrderTradeRejectEvent, bool>
 {
-    public OrderTradeEventHandler()
+    private readonly IOrderReportCache _reportCache;
+    private readonly IOrderEngineCache _orderCache;
+    private readonly ILogger<OrderTradeEventHandler> _logger;
+    public OrderTradeEventHandler(IOrderEngineCache orderCache, 
+        IOrderReportCache reportCache, 
+        ILogger<OrderTradeEventHandler> logger)
     {
-
+        _logger = logger;
+        _orderCache = orderCache;
+        _reportCache = reportCache;
     }
     public Task<bool> Handle(OrderTradeNewEvent request, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        _orderCache.AddOrder(request.Order);
+        return Task.FromResult(true);
     }
 
     public Task<bool> Handle(OrderTradeModifyEvent request, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        _orderCache.AddOrder(request.Order);
+        return Task.FromResult(true);
     }
 
     public Task<bool> Handle(OrderTradeCancelEvent request, CancellationToken cancellationToken)
     {
+        _orderCache.AddOrder(request.Order);
+        return Task.FromResult(true);
+    }
+
+    public Task<bool> Handle(OrderTradeRejectEvent request, CancellationToken cancellationToken)
+    {
+        _reportCache.AddReport(request.Report);
         throw new NotImplementedException();
     }
 }

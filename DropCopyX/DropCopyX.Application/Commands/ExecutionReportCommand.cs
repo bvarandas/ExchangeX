@@ -11,4 +11,9 @@ public class ExecutionReportCommand : Command
         Timestamp = DateTime.Now;
         ExecutionReports = executionReport;
     }
+
+    public override bool IsValid()
+    {
+        throw new NotImplementedException();
+    }
 }

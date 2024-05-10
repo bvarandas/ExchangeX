@@ -2,12 +2,14 @@
 using MarketDataX.Application.Commands;
 using MassTransit;
 using MediatR;
+using OrderEngineX.API.Consumers;
+using OrderEngineX.API.Publishers;
 using OrderEngineX.Application.Commands;
 using OrderEngineX.Application.Events;
 using OrderEngineX.Core.Interfaces;
+using OrderEngineX.Core.Notifications;
 using OrderEngineX.Infra.Cache;
-using OrderEngineX.Infra.Publisher;
-using OrderX.API.Consumer;
+using OrderX.API.Consumers;
 using SharedX.Core.Bus;
 using SharedX.Core.Specs;
 namespace DropCopyX.ServerApp;
@@ -22,7 +24,7 @@ internal class NativeInjectorBoostrapper
 
         services.AddMassTransit(x =>
         {
-            x.AddConsumer<ConsumerOrdersApp>();
+            x.AddConsumer<ConsumerOrdersBusApp>();
             x.UsingRabbitMq((context, cfg) =>
             {
                 string hostname = config["QueueCommandSettings:Hostname"]!;
@@ -64,6 +66,8 @@ internal class NativeInjectorBoostrapper
         }));
 
         // Domain - Events
+        services.AddSingleton<INotificationHandler<DomainNotification>, DomainNotificationHandler>();
+
         services.AddSingleton<IRequestHandler<OrderTradeNewEvent, bool>, OrderTradeEventHandler>();
         services.AddSingleton<IRequestHandler<OrderTradeModifyEvent, bool>, OrderTradeEventHandler>();
         services.AddSingleton<IRequestHandler<OrderTradeCancelEvent, bool>, OrderTradeEventHandler>();
@@ -76,8 +80,11 @@ internal class NativeInjectorBoostrapper
         // Infra - Data
         services.AddSingleton<IExecutionReportCache, ExecutionReportCache>();
         services.AddSingleton<IOrderEngineCache, OrderEngineCache>();
+        services.AddSingleton<IOrderReportCache, OrderReportCache>();
 
         services.AddHostedService<ConsumerExecutionReportApp>();
-        //services.AddHostedService<PublisherFixApp>();
+        services.AddHostedService<PublisherOrderReportApp>();
+        services.AddHostedService<PublisherOrderApp>();
+        services.AddHostedService<ConsumerOrdersApp>();
     }
 }

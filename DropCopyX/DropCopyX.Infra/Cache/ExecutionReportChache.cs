@@ -2,11 +2,14 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SharedX.Core;
+using SharedX.Core.Entities;
 using SharedX.Core.Enums;
 using SharedX.Core.Matching.DropCopy;
 using SharedX.Core.Specs;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
+using System.Text.Json;
+
 namespace DropCopyX.Infra.Cache;
 public class ExecutionReportChache : IExecutionReportChache
 {
@@ -33,8 +36,11 @@ public class ExecutionReportChache : IExecutionReportChache
     }
     private async Task SetValueRedis(ExecutionReport report)
     {
-        RedisValue value = new RedisValue(Newtonsoft.Json.JsonConvert.SerializeObject(report));
-        await _dbExecutionReport.HashIncrementAsync(keyExecutionReport, value);
+        RedisValue value = new RedisValue(JsonSerializer.Serialize<ExecutionReport>(report));
+        await _dbExecutionReport.HashSetAsync(keyExecutionReport, new HashEntry[]
+        {
+            new HashEntry(report.ExecID, value)
+        });
     }
     public bool TryDequeueExecutionReport(out ExecutionReport report)
     {

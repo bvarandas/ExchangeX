@@ -1,14 +1,17 @@
-﻿using SharedX.Core.Commands;
-using SharedX.Core.Models;
-
+﻿using OrderEngineX.Application.Commands;
+using OrderEngineX.Application.Validations;
+using SharedX.Core.Matching.OrderEngine;
 namespace MarketDataX.Application.Commands;
-public class OrderTradeCancelCommand : Command
+public class OrderTradeCancelCommand : OrderEngineCommand
 {
-    public OrderModel Order { get; set; }
-    public DateTime Timestamp { get; private set; }
-    public OrderTradeCancelCommand(OrderModel orderModel )
+    public OrderTradeCancelCommand(OrderEngine order)
     {
-        Order = orderModel;
+        Order = order;
         Timestamp = DateTime.Now;
+    }
+    public override bool IsValid()
+    {
+        ValidationResult = new OrderCancelRequestValidation().Validate(this);
+        return ValidationResult.IsValid;
     }
 }

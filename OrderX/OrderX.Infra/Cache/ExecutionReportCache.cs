@@ -1,17 +1,17 @@
 ﻿using Microsoft.Extensions.Logging;
 using OrderEngineX.Core.Interfaces;
-using OrderEngineX.Infra.Publisher;
 using SharedX.Core.Matching.DropCopy;
 using System.Collections.Concurrent;
 namespace OrderEngineX.Infra.Cache;
 public class ExecutionReportCache : IExecutionReportCache
 {
     private readonly ConcurrentQueue<ExecutionReport> _executionReportQueue;
-    private readonly ILogger<ConsumerExecutionReportApp> _logger;
+    private readonly ILogger<ExecutionReportCache> _logger;
 
-    public ExecutionReportCache()
+    public ExecutionReportCache(ILogger<ExecutionReportCache> logger)
     {
         _executionReportQueue = new ConcurrentQueue<ExecutionReport>();
+        _logger = logger;
     }
     public void AddQueueExecutionReport(ExecutionReport execution)
     {

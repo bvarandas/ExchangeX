@@ -1,12 +1,11 @@
 ﻿using SharedX.Core.Events;
-using SharedX.Core.Models;
-
+using SharedX.Core.Matching.OrderEngine;
 namespace OrderEngineX.Application.Events;
 public class OrderTradeNewEvent: Event
 {
-    public readonly OrderModel Order;
+    public readonly OrderEngine Order;
     public DateTime Timestamp { get; private set; }
-    public OrderTradeNewEvent(OrderModel order )
+    public OrderTradeNewEvent(OrderEngine order )
     {
         Order = order;
         Timestamp = DateTime.Now;

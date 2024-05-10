@@ -1,12 +1,15 @@
 ﻿using MatchingX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SharedX.Core.Entities;
 using SharedX.Core.Enums;
 using SharedX.Core.Matching.DropCopy;
 using SharedX.Core.Specs;
 using StackExchange.Redis;
 using System;
 using System.Collections.Concurrent;
+using System.Text.Json;
+
 namespace MatchingX.Infra.Cache;
 public class DropCopyCache : IDropCopyCache
 {
@@ -53,13 +56,13 @@ public class DropCopyCache : IDropCopyCache
 
     private async Task SetValueTradeCaptureReportRedisAsync(TradeCaptureReport report)
     {
-        RedisValue value = new RedisValue(Newtonsoft.Json.JsonConvert.SerializeObject(report));
+        RedisValue value = new RedisValue(JsonSerializer.Serialize<TradeCaptureReport>(report));
         _dbMatching.HashIncrement(keyTradeCapture, value);
     }
 
     private async Task SetValueExecutionReportRedisAsync(ExecutionReport report)
     {
-        RedisValue value = new RedisValue(Newtonsoft.Json.JsonConvert.SerializeObject(report));
+        RedisValue value = new RedisValue(JsonSerializer.Serialize<ExecutionReport>(report));
         _dbMatching.HashIncrement(keyExecuteReport, value);
     }
 

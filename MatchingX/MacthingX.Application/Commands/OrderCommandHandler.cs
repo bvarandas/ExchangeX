@@ -6,10 +6,9 @@ using SharedX.Core.Interfaces;
 namespace MacthingX.Application.Commands;
 
 public class OrderCommandHandler :
-    IRequestHandler<OrderFilledCommand, bool>,
-    IRequestHandler<OrderRejectCommand, bool>,
+    IRequestHandler<OrderOpenedCommand, bool>,
     IRequestHandler<OrderCancelCommand, bool>,
-    IRequestHandler<OrderOpenedCommand, bool>
+    IRequestHandler<OrderCancelReplaceCommand, bool>
 {
     private readonly IOrderRepository _repository;
     private readonly IMediatorHandler _bus;
@@ -18,30 +17,6 @@ public class OrderCommandHandler :
     {
         _repository = repository;
         _bus = bus;
-    }
-
-    public async Task<bool> Handle(OrderFilledCommand command, CancellationToken cancellationToken)
-    {
-        await _repository.CreateOrdersAsync(command.Order, cancellationToken);
-
-        //if (Comit()) TODO: Fazer Unit of Work
-        //{
-        await _bus.RaiseEvent(new OrderFilledEvent(command.Order));
-        //}
-
-        return await Task.FromResult(true);
-    }
-
-    public async Task<bool> Handle(OrderRejectCommand command, CancellationToken cancellationToken)
-    {
-        await _repository.UpdateOrderAsync(command.Order, cancellationToken);
-
-        //if (Comit()) TODO: Fazer Unit of Work
-        //{
-        await _bus.RaiseEvent(new OrderRejectedEvent(command.Order));
-        //}
-
-        return await Task.FromResult(true);
     }
 
     public async Task<bool> Handle(OrderCancelCommand command, CancellationToken cancellationToken)
@@ -57,6 +32,18 @@ public class OrderCommandHandler :
     }
 
     public async Task<bool> Handle(OrderOpenedCommand command, CancellationToken cancellationToken)
+    {
+        await _repository.UpdateOrderAsync(command.Order, cancellationToken);
+
+        //if (Comit()) TODO: Fazer Unit of Work
+        //{
+        await _bus.RaiseEvent(new OrderCanceledEvent(command.Order));
+        //}
+
+        return await Task.FromResult(true);
+    }
+
+    public async Task<bool> Handle(OrderCancelReplaceCommand command, CancellationToken cancellationToken)
     {
         await _repository.UpdateOrderAsync(command.Order, cancellationToken);
 

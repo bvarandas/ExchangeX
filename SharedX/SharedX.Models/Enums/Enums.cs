@@ -37,6 +37,7 @@ public enum RedisDataBases
     //MatchingSecurity= 4,            // marketdata
     //MatchingSnapshotIncrement = 5,  // marketdata
     OrderEngine=1,                  // OrderEngine
+    OrderReport=2,
 }
 //public enum Redis
 public enum TradeReportTransType

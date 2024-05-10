@@ -10,4 +10,9 @@ public class OrderMassCancelRequestCommand : Command
         Timestamp = DateTime.Now;
         this.Order = order;
     }
+
+    public override bool IsValid()
+    {
+        throw new NotImplementedException();
+    }
 }

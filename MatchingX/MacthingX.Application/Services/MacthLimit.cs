@@ -7,7 +7,12 @@ using SharedX.Core.Matching.OrderEngine;
 namespace MacthingX.Application.Services;
 public class MatchLimit : MatchBase, IMatchLimit
 {
-    public MatchLimit(ILogger<MatchBase> logger, IMediatorHandler bus, IMatchingCache matchingCache) : base(logger, bus, matchingCache)
+    public MatchLimit(ILogger<MatchBase> logger, 
+        IMediatorHandler bus, 
+        IMatchingCache matchingCache,
+        IMarketDataCache marketDataCache,
+        ITradeOrderService tradeOrder) 
+        : base(logger, bus, matchingCache, marketDataCache, tradeOrder )
     {
     }
     public void ReceiveOrder(OrderEngine order)
@@ -17,54 +22,49 @@ public class MatchLimit : MatchBase, IMatchLimit
 
     protected override void AddOrder(OrderEngine order)
     {
-        base.AddOrder(order);
+        _tradeOrder.AddOrder(order);
     }
     protected override void CancelOrder(OrderEngine orderToCancel)
     {
-        base.CancelOrder(orderToCancel);
+        _tradeOrder.CancelOrder(orderToCancel);
     }
-    protected override void ReplaceOrder(OrderEngine order)
+    protected override void ReplaceOrder(OrderEngine orderToReplace)
     {
-        base.ReplaceOrder(order);
+        _tradeOrder.ReplaceOrder(orderToReplace);
     }
 
     protected override void MatchOrderLimit(OrderEngine order)
     {
-        if (!_matchingCache.TryGetBuyOrders(order.Symbol, out Dictionary<long, OrderEngine> buyOrder))
-            return;
-
-        if (!_matchingCache.TryGetSellOrders(order.Symbol, out Dictionary<long, OrderEngine> sellOrder))
-            return;
-
         bool cancelled = false;
-        if (order.Side == SharedX.Core.Enums.SideTrade.Buy)
+        if (order.Side == SideTrade.Buy)
         {
-            var orderToTrade = sellOrder.FirstOrDefault(kvp => kvp.Value.Price <= order.Price &&
+            var sellOrders = _matchingCache.GetSellOrderBySymbol(order.Symbol).Result.Value;
+            var orderToTrade = sellOrders.FirstOrDefault(kvp => kvp.Value.Price <= order.Price &&
                                                                kvp.Value.Quantity == order.Quantity);
             if (!orderToTrade.Equals(default(KeyValuePair<long, OrderEngine>)))
             {
-                CreateTradeCapture(order, orderToTrade.Value);
-                RemoveTradedOrders(ref buyOrder, ref sellOrder, order, orderToTrade.Value);
+                _tradeOrder.CreateTradeCapture(order, orderToTrade.Value);
+                _tradeOrder.RemoveTradedOrdersAsync(order, orderToTrade.Value);
             }else
             {
                 if (order.TimeInForce == TimeInForce.FOK)
-                    RemoveCancelledOrders(ref buyOrder, order, ref cancelled);
+                    cancelled = _tradeOrder.RemoveCancelledOrdersAsync(order).Result;
             }
-
         }
-        else if (order.Side == SharedX.Core.Enums.SideTrade.Sell)
+        else if (order.Side == SideTrade.Sell)
         {
-            var orderToTrade = buyOrder.FirstOrDefault(kvp => kvp.Value.Price >= order.Price &&
+            var buyOrders = _matchingCache.GetBuyOrderBySymbol(order.Symbol).Result.Value;
+            var orderToTrade = buyOrders.FirstOrDefault(kvp => kvp.Value.Price >= order.Price &&
                                                                kvp.Value.Quantity == order.Quantity);
             if (!orderToTrade.Equals(default(KeyValuePair<long, OrderEngine>)))
             {
-                CreateTradeCapture(orderToTrade.Value, order);
-                RemoveTradedOrders(ref buyOrder, ref sellOrder, orderToTrade.Value, order);
+                _tradeOrder.CreateTradeCapture(orderToTrade.Value, order);
+                _tradeOrder.RemoveTradedOrdersAsync(orderToTrade.Value, order);
             }
             else
             {
                 if (order.TimeInForce == TimeInForce.FOK)
-                    RemoveCancelledOrders(ref sellOrder, order, ref cancelled);
+                    cancelled = _tradeOrder.RemoveCancelledOrdersAsync(order).Result;
             }
         }
     }

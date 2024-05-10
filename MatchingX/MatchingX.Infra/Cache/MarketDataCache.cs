@@ -1,17 +1,20 @@
 ﻿using MatchingX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using QuickFix.Fields;
 using SharedX.Core.Enums;
 using SharedX.Core.Matching.MarketData;
 using SharedX.Core.Specs;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
+using System.Text.Json;
+
 namespace MatchingX.Infra.Cache;
 public class MarketDataCache : IMarketDataCache
 {
     private static ConcurrentQueue<Security> SecurityQueue;
     private static ConcurrentQueue<MarketData> IncrementalQueue;
-    
+    private static ConcurrentDictionary<string, decimal> _LastPrice;
     private readonly ConnectionRedis _config;
     private readonly ConnectionMultiplexer _redis;
     private readonly IDatabase _dbMatching;
@@ -24,6 +27,8 @@ public class MarketDataCache : IMarketDataCache
         _config = config.Value;
 
         IncrementalQueue = new ConcurrentQueue<MarketData>();
+        SecurityQueue = new ConcurrentQueue<Security>();
+        _LastPrice = new ConcurrentDictionary<string, decimal>();
 
         _redis = ConnectionMultiplexer.Connect(_config.ConnectionString, options => {
             options.ReconnectRetryPolicy = new ExponentialRetry(5000, 1000 * 60);
@@ -41,14 +46,43 @@ public class MarketDataCache : IMarketDataCache
 
     private async Task SetValueRedis(Security security)
     {
-        RedisValue value = new RedisValue(Newtonsoft.Json.JsonConvert.SerializeObject(security));
-        await _dbMatching.HashIncrementAsync(keySecurity, value);
+        RedisValue value = new RedisValue(JsonSerializer.Serialize<Security>(security));
+        await _dbMatching.HashSetAsync(keySecurity, new HashEntry[]
+        {
+            new HashEntry(security.SecurityID, value)
+        });
     }
+    public async Task<decimal> GetPrice(string symbol)
+    {
+        RedisValue value = new RedisValue(symbol);
+        var marketHash = await _dbMatching.HashGetAsync(keyMarketData, value);
+        if (marketHash.HasValue)
+        {
+            var marketData = JsonSerializer.Deserialize<MarketData>(marketHash);
+            return marketData!.EntryPx;
+        }
+        return 0;
+    }
+    public async Task<MarketData> GetMarketDataBySymbol(string symbol)
+    {
+        var marketData = new MarketData();
+        RedisValue value = new RedisValue(symbol);
+        var marketHash = await _dbMatching.HashGetAsync(keyMarketData, value);
+        if (marketHash.HasValue)
+        {
+            marketData = JsonSerializer.Deserialize<MarketData>(marketHash);
 
+        }
+        return default(MarketData)!;
+    }
     private async Task SetValueRedis(MarketData marketData)
     {
-        RedisValue value = new RedisValue(Newtonsoft.Json.JsonConvert.SerializeObject(marketData));
-        await _dbMatching.HashIncrementAsync(keyMarketData, value);
+        RedisValue value = new RedisValue(JsonSerializer.Serialize<MarketData>(marketData));
+        
+        await _dbMatching.HashSetAsync(keyMarketData, new HashEntry[]
+        {
+            new HashEntry(marketData.Symbol, value)
+        });
     }
 
     public bool TryDequeueMarketData(out MarketData marketData)

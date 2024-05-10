@@ -10,27 +10,60 @@ public class MatchStopLimit : MatchBase, IMatchStopLimit
 {
     private readonly Thread ThreadOrdersStopLimitPrice;
     private readonly ConcurrentQueue<OrderEngine> QueueOrderStopLimitPrice;
-    public MatchStopLimit(ILogger<MatchBase> logger, IMediatorHandler bus, IMatchingCache matchingCache) 
-        : base(logger, bus, matchingCache)
+    private readonly ConcurrentDictionary<long, OrderEngine> DicOrdersToCancel;
+    public MatchStopLimit(ILogger<MatchBase> logger, 
+        IMediatorHandler bus, 
+        IMatchingCache matchingCache, 
+        IMarketDataCache marketDataCache,
+        ITradeOrderService tradeOrder ) 
+        : base(logger, bus, matchingCache, marketDataCache, tradeOrder)
     {
         QueueOrderStopLimitPrice = new ConcurrentQueue<OrderEngine>();
 
         ThreadOrdersStopLimitPrice = new Thread(new ThreadStart(OrderStopLimitVerifyReachPrice));
         ThreadOrdersStopLimitPrice.Name = nameof(OrderStopLimitVerifyReachPrice);
         ThreadOrdersStopLimitPrice.Start();
+
+        DicOrdersToCancel = new ConcurrentDictionary<long, OrderEngine>();
     }
+
+    protected override void AddOrder(OrderEngine order)
+    {
+        QueueOrderStopLimitPrice.Enqueue(order);
+        
+    }
+
     public void ReceiveOrder(OrderEngine order)
     {
         this.AddOrder(order);
     }
 
-    protected void OrderStopLimitVerifyReachPrice()
+    protected override void ReplaceOrder(OrderEngine order)
+    {
+        _tradeOrder.ReplaceOrder(order);
+    }
+
+    protected override void CancelOrder(OrderEngine orderToCancel)
+    {
+        DicOrdersToCancel.TryAdd(orderToCancel.OrderID, orderToCancel);
+        _tradeOrder.CancelOrder(orderToCancel);
+    }
+
+    protected async void OrderStopLimitVerifyReachPrice()
     {
         while (true)
         {
             if (QueueOrderStopLimitPrice.TryDequeue(out OrderEngine order))
             {
-                if (!_lastPrice.TryGetValue(order.Symbol, out decimal price))
+                if (DicOrdersToCancel.TryGetValue(order.OrderID, out OrderEngine orderFound))
+                {
+                    DicOrdersToCancel.Remove(order.OrderID, out OrderEngine orderRemoved);
+                    continue;
+                }
+
+                var price =await _marketDataCache.GetPrice(order.Symbol);
+
+                if (!price.Equals(0))
                 {
                     QueueOrderStopLimitPrice.Enqueue(order);
                     Thread.Sleep(10);
@@ -42,7 +75,7 @@ public class MatchStopLimit : MatchBase, IMatchStopLimit
                     case (OrderType.StopLimit, SideTrade.Sell) when order.StopPrice >= price:
                     case (OrderType.StopLimit, SideTrade.Buy) when order.StopPrice <= price:
                         // Adicionar no book e mandar ordem Limit
-                        base.AddOrder(order);
+                        this.AddOrder(order);
                         this.MatchOrderLimit(order);
                         break;
                     default:
@@ -56,41 +89,37 @@ public class MatchStopLimit : MatchBase, IMatchStopLimit
 
     protected override void MatchOrderLimit(OrderEngine order)
     {
-        
-        if (_matchingCache.TryGetBuyOrders(order.Symbol, out Dictionary<long, OrderEngine> buyOrder))
-            return;
-
-        if (_matchingCache.TryGetSellOrders(order.Symbol, out Dictionary<long, OrderEngine> sellOrder))
-            return;
-        
+       
         bool cancelled = false;
-        if (order.Side == SharedX.Core.Enums.SideTrade.Buy)
+        if (order.Side == SideTrade.Buy)
         {
-            var orderToTrade = sellOrder.FirstOrDefault(kvp => kvp.Value.Price <= order.Price && 
+            var sellOrders = _matchingCache.GetSellOrderBySymbol(order.Symbol).Result.Value;
+            var orderToTrade = sellOrders.FirstOrDefault(kvp => kvp.Value.Price <= order.Price && 
                                                                kvp.Value.Quantity == order.Quantity);
             if (!orderToTrade.Equals(default(KeyValuePair<long, OrderEngine>)))
             {
-                CreateTradeCapture(order, orderToTrade.Value);
-                RemoveTradedOrders(ref buyOrder, ref sellOrder, order, orderToTrade.Value);
+                _tradeOrder.CreateTradeCapture(order, orderToTrade.Value);
+                _tradeOrder.RemoveTradedOrdersAsync(order, orderToTrade.Value);
             }else
             {
                 if (order.TimeInForce == TimeInForce.FOK)
-                    RemoveCancelledOrders(ref buyOrder, order, ref cancelled);
+                    cancelled = _tradeOrder.RemoveCancelledOrdersAsync(order).Result;
             }
         }
-        else if (order.Side == SharedX.Core.Enums.SideTrade.Sell)
+        else if (order.Side == SideTrade.Sell)
         {
-            var orderToTrade = buyOrder.FirstOrDefault(kvp => kvp.Value.Price >= order.Price && 
+            var buyOrders = _matchingCache.GetBuyOrderBySymbol(order.Symbol).Result.Value;
+            var orderToTrade = buyOrders.FirstOrDefault(kvp => kvp.Value.Price >= order.Price && 
                                                                kvp.Value.Quantity == order.Quantity);
             if (!orderToTrade.Equals(default(KeyValuePair<long, OrderEngine>)))
             {
-                CreateTradeCapture(orderToTrade.Value, order);
-                RemoveTradedOrders(ref buyOrder, ref sellOrder, orderToTrade.Value, order);
+                _tradeOrder.CreateTradeCapture(orderToTrade.Value, order);
+                _tradeOrder.RemoveTradedOrdersAsync(orderToTrade.Value, order);
             }
             else
             {
                 if (order.TimeInForce == TimeInForce.FOK)
-                    RemoveCancelledOrders(ref sellOrder, order, ref cancelled);
+                    cancelled = _tradeOrder.RemoveCancelledOrdersAsync(order).Result;
             }
         }
     }

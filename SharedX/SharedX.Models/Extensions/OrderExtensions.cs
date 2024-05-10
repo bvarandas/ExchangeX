@@ -1,7 +1,6 @@
 ﻿using QuickFix;
 using QuickFix.Fields;
 using QuickFix.FIX44;
-using SharedX.Core.Matching;
 using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Models;
 namespace SharedX.Core.Extensions;
@@ -33,13 +32,13 @@ public static class OrderExtensions
         return order;
     }
 
-    public static OrderEngine ToOrder(this NewOrderSingle newOrder, SessionID sessionID)
+    public static OrderEngine ToOrderEngine(this NewOrderSingle newOrder, SessionID sessionID)
     {
         var order = new OrderEngine();
 
         var stopPrice = newOrder.StopPx;
 
-        if (stopPrice.Obj !=0)
+        if (newOrder.IsSetStopPx())
             order.StopPrice = newOrder.StopPx.getValue();
 
         order.AccountId =long.Parse( newOrder.Account.getValue());
@@ -49,7 +48,6 @@ public static class OrderExtensions
         order.TimeInForce = (Enums.TimeInForce)Enum.Parse(typeof(Enums.TimeInForce), newOrder.TimeInForce.getValue().ToString());
         order.TransactTime = newOrder.TransactTime.getValue();
         
-
         if (newOrder.IsSetExpireDate())
             order.ExpireDate = newOrder.ExpireDate.getValue();
         
@@ -74,6 +72,4 @@ public static class OrderExtensions
 
         return order;
     }
-
-
 }

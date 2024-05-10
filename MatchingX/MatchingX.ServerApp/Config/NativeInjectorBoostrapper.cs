@@ -73,10 +73,10 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IRequestHandler<GetOrderQuery, IEnumerable<OrderEngine>>, GetOrderQueryHandler>();
 
         // Domain - Commands
-        services.AddSingleton<IRequestHandler<OrderFilledCommand, bool>, OrderCommandHandler>();
-        services.AddSingleton<IRequestHandler<OrderRejectCommand, bool>, OrderCommandHandler>();
+        services.AddSingleton<IRequestHandler<OrderOpenedCommand, bool>, OrderCommandHandler>();
+        services.AddSingleton<IRequestHandler<OrderCancelReplaceCommand, bool>, OrderCommandHandler>();
         services.AddSingleton<IRequestHandler<OrderCancelCommand, bool>, OrderCommandHandler>();
-        services.AddSingleton<IRequestHandler<OrderCancelCommand, bool>, OrderCommandHandler>();
+        
 
         // Domain - Services
         services.AddSingleton<IMatchingReceiver, MatchingReceiver>();
@@ -84,7 +84,8 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IMatchStop,        MatchStop>();
         services.AddSingleton<IMatchStopLimit,   MatchStopLimit>();
         services.AddSingleton<IMatchMarket,      MatchMarket>();
-        
+        services.AddSingleton<ITradeOrderService, TradeOrderService>();
+
 
         // Infra - Data
         services.AddSingleton<IDropCopyCache, DropCopyCache>();

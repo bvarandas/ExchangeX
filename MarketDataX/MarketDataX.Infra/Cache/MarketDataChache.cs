@@ -1,12 +1,15 @@
 ﻿using MarketDataX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NRedisStack.Graph;
 using QuickFix.Fields;
 using SharedX.Core.Enums;
 using SharedX.Core.Matching.MarketData;
 using SharedX.Core.Specs;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
+using System.Text.Json;
+
 namespace MarketDataX.Infra.Cache;
 public class MarketDataChache : IMarketDataChache
 {
@@ -15,7 +18,7 @@ public class MarketDataChache : IMarketDataChache
     private readonly IDatabase _dbMarketData;
     private readonly ILogger<MarketDataChache> _logger;
     private static ConcurrentQueue<MarketData> IncrementalQueue;
-    private RedisKey key = new RedisKey("Incremental");
+    private RedisKey _key = new RedisKey("Incremental");
     public MarketDataChache(ILogger<MarketDataChache> logger, IOptions<ConnectionRedis> config)
     {
         _config = config.Value;
@@ -33,8 +36,12 @@ public class MarketDataChache : IMarketDataChache
     }
     private async Task SetValueRedis(MarketData market)
     {
-        RedisValue value = new RedisValue(Newtonsoft.Json.JsonConvert.SerializeObject(market));
-        await _dbMarketData.SetAddAsync(key, value);
+        RedisValue value = new RedisValue(JsonSerializer.Serialize<MarketData>(market));
+
+        await _dbMarketData.HashSetAsync(_key, new HashEntry[]
+        {
+            new HashEntry(market.Id, value)
+        });
     }
     public MarketData TryDequeueMarketData()
     {
