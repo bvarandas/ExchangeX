@@ -215,9 +215,7 @@ public abstract class OrderValidation<T> :
                     return true;
                 case OrderStatus.Cancelled:
                     return false;
-                case OrderStatus.PartiallyFilled:
-                    return true;
-                case OrderStatus.Filled: 
+                case OrderStatus.Trade: 
                     return false;
             }
         }

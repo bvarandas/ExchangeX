@@ -1,32 +1,62 @@
-﻿using MediatR;
+﻿using MatchingX.Core.Interfaces;
+using MediatR;
+using SharedX.Core.Enums;
+using SharedX.Core.Interfaces;
 
 namespace MacthingX.Application.Events;
-
 public class OrderEventHandler :    
     INotificationHandler<OrderCanceledEvent>,
-    INotificationHandler<OrderFilledEvent>,
+    INotificationHandler<OrderTradedEvent>,
     INotificationHandler<OrderOpenedEvent>,
     INotificationHandler<OrderRejectedEvent>
-
 {
-    public OrderEventHandler() { }
-    public Task Handle(OrderCanceledEvent notification, CancellationToken cancellationToken)
+    private readonly IMatchingCache _matchCache;
+    private readonly IOrderStopCache _orderStopCache;
+    public OrderEventHandler(IMatchingCache orderCache, IOrderStopCache orderStopCache) 
     {
-        throw new NotImplementedException();
+        _matchCache = orderCache;
+        _orderStopCache = orderStopCache;
+    }
+    public async Task Handle(OrderCanceledEvent @event, CancellationToken cancellationToken)
+    {
+        await _matchCache.DeleteSellOrderAsync(@event.Order.Symbol, @event.Order.OrderID);
+
+        if (@event.Order.OrderType == OrderType.StopLimit || 
+            @event.Order.OrderType == OrderType.Stop)
+        {
+            await _orderStopCache.DeleteOrderAsync(@event.Order.Symbol, @event.Order.OrderID);
+        }
     }
 
-    public Task Handle(OrderFilledEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(OrderTradedEvent @event, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        await _matchCache.DeleteSellOrderAsync(@event.Order.Symbol, @event.Order.OrderID);
+
+        if (@event.Order.OrderType == OrderType.StopLimit ||
+            @event.Order.OrderType == OrderType.Stop)
+        {
+            await _orderStopCache.DeleteOrderAsync(@event.Order.Symbol, @event.Order.OrderID);
+        }
     }
 
-    public Task Handle(OrderOpenedEvent notification, CancellationToken cancellationToken)
+    public Task Handle(OrderOpenedEvent @event, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        if (@event.Order.Side == SideTrade.Buy)
+            _matchCache.UpsertBuyOrder(@event.Order);
+        else if (@event.Order.Side == SideTrade.Sell)
+            _matchCache.UpsertSellOrder(@event.Order);
+
+        return Task.CompletedTask;
     }
 
-    public Task Handle(OrderRejectedEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(OrderRejectedEvent @event, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        await _matchCache.DeleteSellOrderAsync(@event.Order.Symbol, @event.Order.OrderID);
+
+        if (@event.Order.OrderType == OrderType.StopLimit ||
+            @event.Order.OrderType == OrderType.Stop)
+        {
+            await _orderStopCache.DeleteOrderAsync(@event.Order.Symbol, @event.Order.OrderID);
+        }
     }
 }

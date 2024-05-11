@@ -1,11 +1,10 @@
 ﻿using MacthingX.Application.Commands;
+using MacthingX.Application.Events;
 using MacthingX.Application.Extensions;
 using MacthingX.Application.Interfaces;
-using MassTransit;
 using MatchingX.Core.Interfaces;
 using MatchingX.Core.Repositories;
 using Microsoft.Extensions.Logging;
-using QuickFix.Fields;
 using SharedX.Core.Bus;
 using SharedX.Core.Enums;
 using SharedX.Core.Interfaces;
@@ -14,7 +13,7 @@ using SharedX.Core.Matching.OrderEngine;
 using System.Collections.Concurrent;
 
 namespace MacthingX.Application.Services;
-
+public delegate void PriceChangedEventHandler(object sender, OrderPriceEventArgs args);
 public class TradeOrderService : ITradeOrderService, IDisposable
 {
     protected bool _running;
@@ -27,12 +26,12 @@ public class TradeOrderService : ITradeOrderService, IDisposable
     protected static long TradeId;
 
     protected readonly ConcurrentQueue<OrderEngine> QueueOrderStatusChanged;
-    protected readonly ConcurrentQueue<OrderEngine> QueueOrderIncome;
     protected readonly ConcurrentQueue<(TradeCaptureReport, TradeCaptureReport)> QueueExecutedTraded;
 
     private readonly Thread ThreadExecutedTrade;
     private readonly Thread ThreadOrdersStatus;
-    
+    public event PriceChangedEventHandler PriceChanged;
+
     public TradeOrderService(ILogger<TradeOrderService> logger, IMediatorHandler bus, IMatchingCache matchingCache, IMarketDataCache marketDataCache)
     {
         _logger = logger;
@@ -42,7 +41,6 @@ public class TradeOrderService : ITradeOrderService, IDisposable
 
         QueueExecutedTraded = new ConcurrentQueue<(TradeCaptureReport, TradeCaptureReport)>();
         QueueOrderStatusChanged = new ConcurrentQueue<OrderEngine>();
-        QueueOrderIncome = new ConcurrentQueue<OrderEngine>();
 
         ThreadExecutedTrade = new Thread(new ThreadStart(ExecutedTradeOutcome));
         ThreadExecutedTrade.Name = nameof(ExecutedTradeOutcome);
@@ -53,48 +51,25 @@ public class TradeOrderService : ITradeOrderService, IDisposable
         ThreadOrdersStatus.Start();
     }
 
-    private void OrderIncome()
-    {
-        while (true)
-        {
-            if (!QueueOrderIncome.TryDequeue(out OrderEngine order))
-            {
-                Thread.Sleep(10);
-                continue;
-            }
-            switch (order.OrderStatus)
-            {
-
-            }
-
-            if (_running)
-                break;
-
-            Thread.Sleep(10);
-        }
-    }
-
     private void OrderStatusChangedOutcome()
     {
         while (true)
         {
             if (QueueOrderStatusChanged.TryDequeue(out OrderEngine order))
             {
-
                 switch (order.OrderStatus)
                 {
-                    case OrderStatus.PartiallyFilled:
-
-                        break;
-                    case OrderStatus.Filled:
-
+                    case OrderStatus.Trade:
+                        Bus.SendCommand(new OrderTradeCommand(order, _matchingCache));
                         break;
                     case OrderStatus.Cancelled:
-                        //Bus.SendCommand(new OrderCancelCommand(order, _matchingCache));
+                        Bus.SendCommand(new OrderCancelCommand(order, _matchingCache));
                         break;
                 }
 
                 _marketDataCache.AddIncremental(order.ToMarketData());
+
+                TriggerPriceChanged(order);
 
                 if (_running)
                     break;
@@ -103,7 +78,11 @@ public class TradeOrderService : ITradeOrderService, IDisposable
             }
         }
     }
-
+    private void TriggerPriceChanged(OrderEngine order)
+    {
+        if (PriceChanged is not null)
+            PriceChanged(this, new OrderPriceEventArgs(order));
+    }
     private void ExecutedTradeOutcome()
     {
         while (true)
@@ -118,7 +97,7 @@ public class TradeOrderService : ITradeOrderService, IDisposable
         }
     }
 
-    public void CancelOrder(OrderEngine orderToCancel)
+    public bool CancelOrder(OrderEngine orderToCancel)
     {
         bool cancelled = false;
         if (orderToCancel.Side == SideTrade.Buy)
@@ -134,6 +113,10 @@ public class TradeOrderService : ITradeOrderService, IDisposable
             orderToCancel.OrderStatus = OrderStatus.Cancelled;
             AddOrderDetail(ref orderToCancel);
         }
+        if (cancelled)
+            QueueOrderStatusChanged.Enqueue(orderToCancel);
+
+        return cancelled;
     }
 
     public async Task<bool> RemoveCancelledOrdersAsync(OrderEngine orderToCancel)
@@ -229,8 +212,9 @@ public class TradeOrderService : ITradeOrderService, IDisposable
         return (tradeBuyer, tradeSeller);
     }
 
-    public void ReplaceOrder(OrderEngine order)
+    public bool ReplaceOrder(OrderEngine order)
     {
+        bool replaced = false;
         AddOrderDetail(ref order);
 
         if (order.Side == SideTrade.Buy)
@@ -240,6 +224,8 @@ public class TradeOrderService : ITradeOrderService, IDisposable
 
         order.OrderStatus = OrderStatus.New;
         QueueOrderStatusChanged.Enqueue(order);
+        replaced = true;
+        return replaced;
     }
 
     protected virtual void AddOrderDetail(ref OrderEngine order)
@@ -264,20 +250,21 @@ public class TradeOrderService : ITradeOrderService, IDisposable
         pair => pair.Key, pair => pair.Value);
     }
 
-    public void AddOrder(OrderEngine order)
+    public bool AddOrder(OrderEngine order)
     {
+        bool added = false;
         if (order.Side == SideTrade.Buy)
         {
             _matchingCache.UpsertBuyOrder(order);
-            //SortBuyOrders(ref buyOrder);
         }
         else if (order.Side == SideTrade.Sell)
         {
             _matchingCache.UpsertSellOrder(order);
-            //SortSellOrders(ref sellOrder);
         }
         order.OrderStatus = OrderStatus.New;
         QueueOrderStatusChanged.Enqueue(order);
+        added = true;
+        return added;
     }
 
     public void Dispose()

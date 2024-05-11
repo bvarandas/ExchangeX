@@ -92,9 +92,7 @@ public class OrderRepository : IOrderRepository
         try
         {
             var builder = Builders<OrderEngine>.Filter;
-            var filter = builder.Eq(o => o.OrderStatus, OrderStatus.New)
-                       | builder.Eq(o => o.OrderStatus, OrderStatus.PartiallyFilled);
-
+            var filter = builder.Eq(o => o.OrderStatus, OrderStatus.New);
             var orders = await _context.OrderTrade.FindAsync(filter);
 
             result = orders.ToEnumerable();

@@ -2,8 +2,10 @@
 namespace MatchingX.Core.Interfaces;
 public  interface IMatch
 {
+    void ReceiveOrder(OrderEngine order);
     bool AddOrder(OrderEngine order);
     bool ReplaceOrder(OrderEngine order);
     bool CancelOrder(OrderEngine orderToCancel);
-    bool MatchOrder(OrderEngine order);
+    Task<bool> MatchBuyOrderAsync(OrderEngine order);
+    Task<bool> MatchSellOrderAsync(OrderEngine order);
 }

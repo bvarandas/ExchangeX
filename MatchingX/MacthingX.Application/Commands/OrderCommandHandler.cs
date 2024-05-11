@@ -2,18 +2,26 @@
 using MediatR;
 using SharedX.Core.Bus;
 using SharedX.Core.Interfaces;
+using SharedX.Core.Enums;
+using MatchingX.Application.Commands;
+using MatchingX.Core.Notifications;
 
 namespace MacthingX.Application.Commands;
 
 public class OrderCommandHandler :
+    CommandHandler,
     IRequestHandler<OrderOpenedCommand, bool>,
     IRequestHandler<OrderCancelCommand, bool>,
-    IRequestHandler<OrderCancelReplaceCommand, bool>
+    IRequestHandler<OrderCancelReplaceCommand, bool>,
+    IRequestHandler<OrderTradeCommand, bool>
 {
     private readonly IOrderRepository _repository;
     private readonly IMediatorHandler _bus;
 
-    public OrderCommandHandler(IOrderRepository repository, IMediatorHandler bus)
+    public OrderCommandHandler(IOrderRepository repository, 
+        IMediatorHandler bus,
+        INotificationHandler<DomainNotification> notifications)
+        :base(bus, notifications)
     {
         _repository = repository;
         _bus = bus;
@@ -21,24 +29,23 @@ public class OrderCommandHandler :
 
     public async Task<bool> Handle(OrderCancelCommand command, CancellationToken cancellationToken)
     {
+        if (!command.IsValid())
+        {
+            
+        }
         await _repository.UpdateOrderAsync(command.Order, cancellationToken);
 
-        //if (Comit()) TODO: Fazer Unit of Work
-        //{
         await _bus.RaiseEvent(new OrderCanceledEvent(command.Order));
-        //}
 
         return await Task.FromResult(true);
     }
 
     public async Task<bool> Handle(OrderOpenedCommand command, CancellationToken cancellationToken)
     {
+
         await _repository.UpdateOrderAsync(command.Order, cancellationToken);
 
-        //if (Comit()) TODO: Fazer Unit of Work
-        //{
-        await _bus.RaiseEvent(new OrderCanceledEvent(command.Order));
-        //}
+        await _bus.RaiseEvent(new OrderOpenedEvent(command.Order));
 
         return await Task.FromResult(true);
     }
@@ -47,11 +54,17 @@ public class OrderCommandHandler :
     {
         await _repository.UpdateOrderAsync(command.Order, cancellationToken);
 
-        //if (Comit()) TODO: Fazer Unit of Work
-        //{
         await _bus.RaiseEvent(new OrderCanceledEvent(command.Order));
-        //}
 
+        return await Task.FromResult(true);
+    }
+
+    public async Task<bool> Handle(OrderTradeCommand command, CancellationToken cancellationToken)
+    {
+        await _repository.UpdateOrderAsync(command.Order, cancellationToken);
+
+        await _bus.RaiseEvent(new OrderTradedEvent(command.Order));
+        
         return await Task.FromResult(true);
     }
 }

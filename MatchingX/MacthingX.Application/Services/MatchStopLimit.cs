@@ -1,6 +1,4 @@
-﻿using MacthingX.Application.Events;
-using MacthingX.Application.Interfaces;
-using MassTransit;
+﻿using MacthingX.Application.Interfaces;
 using MatchingX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using SharedX.Core.Bus;
@@ -8,29 +6,29 @@ using SharedX.Core.Enums;
 using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
 using System.Collections.Concurrent;
-
 namespace MacthingX.Application.Services;
-public class MatchStop : IMatchStop, IMatch
+public class MatchStopLimit :  IMatchStopLimit
 {
+    protected readonly IOrderStopCache _orderStopCache;
     private readonly ConcurrentDictionary<long, OrderEngine> DicOrdersToCancel;
     protected readonly ITradeOrderService _tradeOrder;
     protected readonly IMatchingCache _matchingCache;
-    protected readonly IOrderStopCache _orderStopCache;
-
-    public MatchStop(ILogger<MatchStop> logger, IMediatorHandler bus, 
+    public MatchStopLimit(ILogger<MatchStopLimit> logger, 
+        IMediatorHandler bus, 
         IMatchingCache matchingCache,
         IOrderStopCache orderStopCache,
-        ITradeOrderService tradeOrder) 
+        ITradeOrderService tradeOrder)
     {
         DicOrdersToCancel = new ConcurrentDictionary<long, OrderEngine>();
 
+        _orderStopCache = orderStopCache;
         _tradeOrder = tradeOrder;
         _matchingCache = matchingCache;
-        _orderStopCache = orderStopCache;
         _tradeOrder.PriceChanged += TradeOrder_PriceChanged;
+        
     }
 
-    private async void TradeOrder_PriceChanged(object sender, OrderPriceEventArgs args)
+    private async void TradeOrder_PriceChanged(object sender, Events.OrderPriceEventArgs args)
     {
         var order = args.Order;
         decimal price = order.Price;
@@ -86,12 +84,14 @@ public class MatchStop : IMatchStop, IMatch
                 break;
         }
         return true;
+
     }
 
     public void ReceiveOrder(OrderEngine order)
     {
         this.AddOrder(order);
     }
+
     public bool ReplaceOrder(OrderEngine order)
     {
         return _tradeOrder.ReplaceOrder(order);
@@ -103,18 +103,16 @@ public class MatchStop : IMatchStop, IMatch
         DicOrdersToCancel.TryAdd(orderToCancel.OrderID, orderToCancel);
         _tradeOrder.CancelOrder(orderToCancel);
         cancelled = _orderStopCache.DeleteOrderAsync(orderToCancel.Symbol, orderToCancel.OrderID).Result;
-
         return cancelled;
     }
 
+    
     public async Task<bool> MatchBuyOrderAsync(OrderEngine order)
     {
         bool cancelled = false;
         var sellOrders = _matchingCache.GetSellOrderBySymbol(order.Symbol).Result.Value;
-        var orderToTrade = sellOrders
-            .OrderBy(p=>p.Value.Price)
-            .FirstOrDefault(sell => sell.Value.Quantity == order.Quantity);
-
+        var orderToTrade = sellOrders.FirstOrDefault(kvp => kvp.Value.Price <= order.Price &&
+                                                           kvp.Value.Quantity == order.Quantity);
         if (!orderToTrade.Equals(default(KeyValuePair<long, OrderEngine>)))
         {
             _tradeOrder.CreateTradeCapture(order, orderToTrade.Value);
@@ -127,15 +125,12 @@ public class MatchStop : IMatchStop, IMatch
         }
         return true;
     }
-
     public async Task<bool> MatchSellOrderAsync(OrderEngine order)
     {
         bool cancelled = false;
         var buyOrders = _matchingCache.GetBuyOrderBySymbol(order.Symbol).Result.Value;
-        var orderToTrade = buyOrders
-            .OrderByDescending(p=>p.Value.Price)
-            .FirstOrDefault(kvp => kvp.Value.Quantity == order.Quantity);
-
+        var orderToTrade = buyOrders.FirstOrDefault(kvp => kvp.Value.Price >= order.Price &&
+                                                           kvp.Value.Quantity == order.Quantity);
         if (!orderToTrade.Equals(default(KeyValuePair<long, OrderEngine>)))
         {
             _tradeOrder.CreateTradeCapture(orderToTrade.Value, order);
@@ -148,4 +143,5 @@ public class MatchStop : IMatchStop, IMatch
         }
         return true;
     }
+
 }

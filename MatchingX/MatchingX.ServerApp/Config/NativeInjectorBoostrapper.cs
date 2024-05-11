@@ -64,7 +64,7 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<INotificationHandler<ExecutedTradeEvent>, ExecutedTradeEventHandler>();
 
         services.AddSingleton<INotificationHandler<OrderCanceledEvent>, OrderEventHandler>();
-        services.AddSingleton<INotificationHandler<OrderFilledEvent>, OrderEventHandler>();
+        services.AddSingleton<INotificationHandler<OrderTradedEvent>, OrderEventHandler>();
         services.AddSingleton<INotificationHandler<OrderOpenedEvent>, OrderEventHandler>();
         services.AddSingleton<INotificationHandler<OrderRejectedEvent>, OrderEventHandler>();
 
@@ -76,7 +76,7 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IRequestHandler<OrderOpenedCommand, bool>, OrderCommandHandler>();
         services.AddSingleton<IRequestHandler<OrderCancelReplaceCommand, bool>, OrderCommandHandler>();
         services.AddSingleton<IRequestHandler<OrderCancelCommand, bool>, OrderCommandHandler>();
-        
+        services.AddSingleton<IRequestHandler<OrderTradeCommand, bool>, OrderCommandHandler>();
 
         // Domain - Services
         services.AddSingleton<IMatchingReceiver, MatchingReceiver>();

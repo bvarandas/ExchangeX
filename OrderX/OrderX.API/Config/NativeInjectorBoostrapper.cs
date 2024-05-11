@@ -11,7 +11,10 @@ using OrderEngineX.Core.Notifications;
 using OrderEngineX.Infra.Cache;
 using OrderX.API.Consumers;
 using SharedX.Core.Bus;
+using SharedX.Core.Interfaces;
 using SharedX.Core.Specs;
+using Sharex.Infra.Order.Cache;
+
 namespace DropCopyX.ServerApp;
 internal class NativeInjectorBoostrapper
 {
@@ -81,6 +84,7 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IExecutionReportCache, ExecutionReportCache>();
         services.AddSingleton<IOrderEngineCache, OrderEngineCache>();
         services.AddSingleton<IOrderReportCache, OrderReportCache>();
+        services.AddSingleton<IOrderStopCache, OrderStopCache>();
 
         services.AddHostedService<ConsumerExecutionReportApp>();
         services.AddHostedService<PublisherOrderReportApp>();

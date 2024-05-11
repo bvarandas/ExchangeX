@@ -102,6 +102,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderEngineX.Application", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sharex.Infra", "SharedX\Sharex.Infra\Sharex.Infra.csproj", "{5F5862A9-99CC-4D73-B686-9FA57B840E43}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarketDataAPI", "MarketDataX\MarketDataAPI\MarketDataAPI.csproj", "{D65FD111-EA29-4664-A943-1870302B748C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -244,6 +246,10 @@ Global
 		{5F5862A9-99CC-4D73-B686-9FA57B840E43}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5F5862A9-99CC-4D73-B686-9FA57B840E43}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5F5862A9-99CC-4D73-B686-9FA57B840E43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D65FD111-EA29-4664-A943-1870302B748C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D65FD111-EA29-4664-A943-1870302B748C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D65FD111-EA29-4664-A943-1870302B748C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D65FD111-EA29-4664-A943-1870302B748C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -292,6 +298,7 @@ Global
 		{E93CDCF1-D2FA-4C11-93AC-DD91E8E21125} = {57FA8603-E66C-4463-9739-6CFE4EE1B437}
 		{D4EFFFA2-9953-4930-9186-C20568F59923} = {57FA8603-E66C-4463-9739-6CFE4EE1B437}
 		{5F5862A9-99CC-4D73-B686-9FA57B840E43} = {D4A4B122-083A-41F3-B894-242B416509E2}
+		{D65FD111-EA29-4664-A943-1870302B748C} = {2170D935-0210-445D-B3F0-4876844BAA2E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8A7B5B6E-83FE-4591-A58F-528F40DBD09C}
