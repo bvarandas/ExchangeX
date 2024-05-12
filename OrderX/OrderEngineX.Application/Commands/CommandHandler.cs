@@ -49,7 +49,10 @@ public class CommandHandler
     {
         foreach (var failure in failures)
         {
-
+            if (report is OrderCancelRejectFix)
+            {
+                //((OrderCancelRejectFix)report).CxlRejReason= failure.ErrorMessage
+            }
         }
     }
 }

@@ -5,6 +5,7 @@ public class OrderCancelReplaceRequestValidation : OrderValidation<OrderCancelRe
 {
     public OrderCancelReplaceRequestValidation(IMatchingCache matchingCache) : base(matchingCache)
     {
+        ValidateReplaceOrder();
         ValidateCancelReplaceOrder();
     }
 }

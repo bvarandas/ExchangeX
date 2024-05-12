@@ -31,8 +31,10 @@ public class OrderCommandHandler :
     {
         if (!command.IsValid())
         {
-            
+            NotifyValidationErrors(command);
+            return await Task.FromResult(false);
         }
+
         await _repository.UpdateOrderAsync(command.Order, cancellationToken);
 
         await _bus.RaiseEvent(new OrderCanceledEvent(command.Order));
@@ -42,6 +44,11 @@ public class OrderCommandHandler :
 
     public async Task<bool> Handle(OrderOpenedCommand command, CancellationToken cancellationToken)
     {
+        if (!command.IsValid())
+        {
+            NotifyValidationErrors(command);
+            return await Task.FromResult(false);
+        }
 
         await _repository.UpdateOrderAsync(command.Order, cancellationToken);
 
@@ -52,6 +59,11 @@ public class OrderCommandHandler :
 
     public async Task<bool> Handle(OrderCancelReplaceCommand command, CancellationToken cancellationToken)
     {
+        if (!command.IsValid())
+        {
+            NotifyValidationErrors(command);
+            return await Task.FromResult(false);
+        }
         await _repository.UpdateOrderAsync(command.Order, cancellationToken);
 
         await _bus.RaiseEvent(new OrderCanceledEvent(command.Order));
@@ -61,6 +73,12 @@ public class OrderCommandHandler :
 
     public async Task<bool> Handle(OrderTradeCommand command, CancellationToken cancellationToken)
     {
+        if (!command.IsValid())
+        {
+            NotifyValidationErrors(command);
+            return await Task.FromResult(false);
+        }
+
         await _repository.UpdateOrderAsync(command.Order, cancellationToken);
 
         await _bus.RaiseEvent(new OrderTradedEvent(command.Order));

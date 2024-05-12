@@ -69,8 +69,7 @@ public abstract class OrderEngineValidation<T> :
         ValidateTimeInForce();
         ValidateSide();
     }
-
-
+    
     private void ValidateSymbol()
     {
         RuleFor(o => o.Order.Symbol)
