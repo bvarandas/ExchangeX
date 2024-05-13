@@ -14,7 +14,7 @@ public static class MatchingExtensions
         marketdata.SecurityID = "";
         marketdata.SecuritSourceId = '8';
         marketdata.EntryID = (order.Side == SideTrade.Buy ? '0' : '1');
-        marketdata.EntryType = (order.OrderStatus == OrderStatus.Trade ) ? '2' : (order.Side == SideTrade.Buy ? '0' : '1');
+        marketdata.EntryType = (order.OrderStatus == OrderStatus.Filled || order.OrderStatus == OrderStatus.PartiallyFilled) ? '2' : (order.Side == SideTrade.Buy ? '0' : '1');
         marketdata.EntryPx = order.Price;
         marketdata.EntrySize = order.Quantity;
         marketdata.EntryDate = order.TransactTime.ToString("yyyyMMdd");
@@ -27,7 +27,7 @@ public static class MatchingExtensions
     }
     public static ExecutionReport ToExecutionReport(this OrderEngine order)
     {
-        var isTrade=  (order.OrderStatus == OrderStatus.Trade);
+        var isTrade=  (order.OrderStatus == OrderStatus.Filled || order.OrderStatus== OrderStatus.PartiallyFilled);
         var ep = new ExecutionReport();
         ep.OrderID = order.OrderID;
         ep.OrigCLOrdID = order.ClOrdID;

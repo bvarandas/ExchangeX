@@ -43,9 +43,19 @@ public class MatchMarket : IMatchMarket, IMatch
     {
         bool cancelled = false;
         var sellOrders = _matchingCache.GetSellOrderBySymbol(order.Symbol).Result.Value;
-        var orderToTrade = sellOrders
-            .OrderBy(p => p.Value.Price)
-            .FirstOrDefault(sell => sell.Value.Quantity == order.Quantity);
+        var orderToTrade = new KeyValuePair<long, OrderEngine>();
+
+        if (order.TimeInForce != TimeInForce.FOK)
+        {
+            orderToTrade = sellOrders
+                .OrderBy(p => p.Value.Price)
+                .FirstOrDefault(kvp => (kvp.Value.LeavesQuantity >= order.MinQty || kvp.Value.LeavesQuantity >= order.Quantity));
+
+        }
+        else if (order.TimeInForce == TimeInForce.FOK)
+            orderToTrade = sellOrders
+                .OrderBy(p => p.Value.Price)
+                .FirstOrDefault(kvp => ( kvp.Value.LeavesQuantity == order.Quantity));
 
         if (!orderToTrade.Equals(default(KeyValuePair<long, OrderEngine>)))
         {
@@ -64,9 +74,19 @@ public class MatchMarket : IMatchMarket, IMatch
     {
         bool cancelled = false;
         var buyOrders = _matchingCache.GetBuyOrderBySymbol(order.Symbol).Result.Value;
-        var orderToTrade = buyOrders
-            .OrderByDescending(p=>p.Value.Price)
-            .FirstOrDefault(buy => buy.Value.Quantity == order.Quantity);
+        var orderToTrade = new KeyValuePair<long, OrderEngine>();
+
+        if (order.TimeInForce != TimeInForce.FOK)
+        {
+            orderToTrade = buyOrders
+            .OrderByDescending(p => p.Value.Price)
+            .FirstOrDefault(buy =>  buy.Value.LeavesQuantity >= order.Quantity);
+        }else if (order.TimeInForce == TimeInForce.FOK)
+        {
+            orderToTrade = buyOrders
+            .OrderByDescending(p => p.Value.Price)
+            .FirstOrDefault(buy => buy.Value.LeavesQuantity == order.Quantity);
+        }
 
         if (!orderToTrade.Equals(default(KeyValuePair<long, OrderEngine>)))
         {

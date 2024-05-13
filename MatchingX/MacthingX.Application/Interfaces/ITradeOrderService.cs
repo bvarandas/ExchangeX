@@ -10,6 +10,5 @@ public interface ITradeOrderService
     bool ReplaceOrder(OrderEngine orderToReplace);
     Task<bool> RemoveCancelledOrdersAsync(OrderEngine orderToCancel);
     Task<bool> RemoveTradedOrdersAsync(OrderEngine buyOrder, OrderEngine sellOrder);
-    TradeCaptureReport CreateTradeCaptureCancelled(OrderEngine order);
     (TradeCaptureReport, TradeCaptureReport) CreateTradeCapture(OrderEngine orderBuyer, OrderEngine orderSeller);
 }

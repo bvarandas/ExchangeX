@@ -35,6 +35,7 @@ public abstract class OrderValidation<T> :
         ValidatePriceMarket();
         ValidateTimeInForceFOK();
         ValidateTimeInForceGTC();
+        ValidateTimeInForceIOC();
     }
 
     protected void ValidateOrderCancelRequest()
@@ -116,6 +117,7 @@ public abstract class OrderValidation<T> :
         ValidatePriceMarket();
         ValidateTimeInForceFOK();
         ValidateTimeInForceGTC();
+        ValidateTimeInForceIOC();
         /*
          0 = Too late to cancel
          1 = Unknown order
@@ -244,6 +246,15 @@ public abstract class OrderValidation<T> :
             .WithErrorCode("5");
     }
 
+    private void ValidateTimeInForceIOC()
+    {
+        RuleFor(o => o.Order.MinQty)
+            .Must(p => p > 0)
+            .When(p => p.Order.TimeInForce == TimeInForce.IOC)
+            .WithMessage("5-Invalid MinQty to order with timeinforce IOC")
+            .WithErrorCode("5");
+    }
+
     private void ValidateReplaceTimeInForce()
     {
         RuleFor(o => o.Order.TimeInForce)
@@ -296,12 +307,26 @@ public abstract class OrderValidation<T> :
             {
                 case OrderStatus.Rejected:
                     return false;
+                    break;
                 case OrderStatus.New:
                     return true;
+                    break;
                 case OrderStatus.Cancelled:
                     return false;
-                case OrderStatus.Trade: 
+                    break;
+                case OrderStatus.Filled: 
                     return false;
+                    break;
+                case OrderStatus.PartiallyFilled:
+                    return true;
+                    break;
+                case OrderStatus.PendingCancel:
+                    return false;
+                    break;
+                case OrderStatus.PendindReplace:
+                    return false;
+                    break;
+
             }
         }
 

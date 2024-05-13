@@ -63,6 +63,8 @@ public class MatchingCache : IMatchingCache
         var result =new Dictionary<long, OrderEngine>();
         var key = string.Concat(keyBuyOrders, ":", symbol);
         var hashEntry = await _dbMatching.HashGetAllAsync(key);
+
+        //hashEntry.MaxBy(c=>c.Value.)
         foreach (var item in hashEntry)
         {
             var value = JsonSerializer.Deserialize<OrderEngine>(item.Value);
@@ -122,5 +124,4 @@ public class MatchingCache : IMatchingCache
         var result = await _dbMatching.HashDeleteAsync(key, value);
         return result;
     }
-
 }

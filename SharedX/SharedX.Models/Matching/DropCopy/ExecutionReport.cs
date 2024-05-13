@@ -58,7 +58,8 @@ public class ExecutionReport
     public string ExpireTime { get; set; }
     [ProtoMember(26)]
     public char AccoutType {  get; set; }
-    
+    [ProtoMember(27)]
+    public decimal MinQty{ get; set; }
 
     public ExecutionReport() { }
 }

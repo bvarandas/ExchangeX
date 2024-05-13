@@ -15,9 +15,13 @@ public enum OrderType
 public enum OrderStatus
 {
     New = '0',
+    PartiallyFilled ='1',
+    Filled='2',
     Cancelled ='4',
+    PendingCancel='6',
     Rejected='8',
-    Trade = 'F'
+    PendindReplace = 'E',
+
 }
 public enum TimeInForce
 {

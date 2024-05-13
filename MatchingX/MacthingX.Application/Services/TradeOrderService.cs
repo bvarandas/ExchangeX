@@ -2,6 +2,7 @@
 using MacthingX.Application.Events;
 using MacthingX.Application.Extensions;
 using MacthingX.Application.Interfaces;
+using MassTransit.Futures.Contracts;
 using MatchingX.Core.Interfaces;
 using MatchingX.Core.Repositories;
 using Microsoft.Extensions.Logging;
@@ -23,10 +24,9 @@ public class TradeOrderService : ITradeOrderService, IDisposable
     protected readonly IMatchingCache _matchingCache;
     protected readonly IMarketDataCache _marketDataCache;
     protected readonly IMediatorHandler Bus;
-    protected static long TradeId;
-
     protected readonly ConcurrentQueue<OrderEngine> QueueOrderStatusChanged;
     protected readonly ConcurrentQueue<(TradeCaptureReport, TradeCaptureReport)> QueueExecutedTraded;
+    
 
     private readonly Thread ThreadExecutedTrade;
     private readonly Thread ThreadOrdersStatus;
@@ -59,8 +59,14 @@ public class TradeOrderService : ITradeOrderService, IDisposable
             {
                 switch (order.OrderStatus)
                 {
-                    case OrderStatus.Trade:
-                        Bus.SendCommand(new OrderTradeCommand(order, _matchingCache));
+                    case OrderStatus.New:
+                        Bus.SendCommand(new OrderOpenedCommand(order, _matchingCache));
+                        break;
+                    case OrderStatus.Filled:
+                        Bus.SendCommand(new OrderFilledCommand(order, _matchingCache));
+                        break;
+                    case OrderStatus.PartiallyFilled:
+                        Bus.SendCommand(new OrderPartiallyFilledCommand(order, _matchingCache));
                         break;
                     case OrderStatus.Cancelled:
                         Bus.SendCommand(new OrderCancelCommand(order, _matchingCache));
@@ -111,7 +117,6 @@ public class TradeOrderService : ITradeOrderService, IDisposable
         if (cancelled)
         {
             orderToCancel.OrderStatus = OrderStatus.Cancelled;
-            AddOrderDetail(ref orderToCancel);
         }
         if (cancelled)
             QueueOrderStatusChanged.Enqueue(orderToCancel);
@@ -139,33 +144,112 @@ public class TradeOrderService : ITradeOrderService, IDisposable
 
         return buyRemoved && sellRemoved;
     }
-    public TradeCaptureReport CreateTradeCaptureCancelled(OrderEngine order)
+
+    public (ExecutionReport, ExecutionReport) CreateExecutionReport(OrderEngine orderBuyer, OrderEngine orderSeller) 
     {
-        var trade = new TradeCaptureReport()
-        {
-            TradeReportTransType = 1,
-            TrdType = 0,
-            CopyMsgIndicator = 'Y',
-            PreviouslyReported = 'N',
-            TradeId = TradeId,
-            NoSides = 1,
-            OrderId = order.OrderID.ToString(),
-            ClOrderId = order.ClOrdID.ToString(),
-            LastQty = order.LastQuantity,
-            LastPx = order.LastPrice,
-            Symbol = order.Symbol,
-            Side = (char)order.Side,
-            Price = order.Price,
-            TransactTime = order.TransactTime,
-            TradeDate = DateTime.Now.ToString("yyyyMMdd"),
-            AccountType = order.Account.AccountType,
-        };
-        return trade;
+        var trade = _tradeRepository.GetTradeIdAsync(default(CancellationToken));
+        var tradeId = trade.Result.TradeId;
+        var now = DateTime.Now; 
+
+        var reportBuyer = new ExecutionReport();
+        var reportSeller = new ExecutionReport();
+
+        var buyQtyExecuted = reportBuyer.LeavesQuantity>= reportSeller.LeavesQuantity? reportSeller.LeavesQuantity: reportBuyer.LeavesQuantity;
+        var sellQtyExecuted = reportSeller.LeavesQuantity >= reportBuyer.LeavesQuantity? reportBuyer.LeavesQuantity: reportSeller.LeavesQuantity;
+
+        var netBuy = reportBuyer.LeavesQuantity - reportSeller.LeavesQuantity;
+        var netSell = reportSeller.LeavesQuantity - reportBuyer.LeavesQuantity;
+
+        reportBuyer.LeavesQuantity = netBuy <= 0 ? 0 : netBuy;
+        reportSeller.LeavesQuantity = netSell <= 0 ?0 : netSell;
+
+        reportBuyer.LastPrice = orderBuyer.Price != 0 ? orderBuyer.Price : orderSeller.Price;
+        reportSeller.LastPrice = orderBuyer.Price != 0 ? orderBuyer.Price : orderSeller.Price;
+
+        // Status
+        reportBuyer.OrderStatus = reportBuyer.LeavesQuantity == 0 ? OrderStatus.Filled : OrderStatus.PartiallyFilled;
+        reportSeller.OrderStatus = reportSeller.LeavesQuantity == 0 ? OrderStatus.Filled : OrderStatus.PartiallyFilled;
+
+        reportBuyer.LastQuantity = buyQtyExecuted;
+        reportSeller.LastQuantity = sellQtyExecuted;
+
+        reportBuyer.MinQty = orderBuyer.MinQty;
+        reportBuyer.ParticipatorId = orderBuyer.ParticipatorId;
+        reportBuyer.AccoutType = '1'; //1= Client and 3 = HOuse
+        reportBuyer.ExpireTime = orderBuyer.ExpireTime;
+        reportBuyer.ExpireDate = orderBuyer.ExpireDate;
+        reportBuyer.TimeInForce = orderBuyer.TimeInForce;
+        reportBuyer.StopPrice = orderBuyer.StopPrice;
+        reportBuyer.Symbol = orderBuyer.Symbol;
+        reportBuyer.Quantity = orderBuyer.Quantity;
+        reportBuyer.Side = SideTrade.Buy;
+        reportBuyer.OrigCLOrdID = orderBuyer.ClOrdID;
+        reportBuyer.OrderID = orderBuyer.OrderID;
+        reportBuyer.TrdMatchID = tradeId;
+        reportBuyer.ExecID = tradeId;
+        reportBuyer.Price = orderBuyer.Price;
+        reportBuyer.ExecType = 'F';      // Fully or partially 
+        
+        reportSeller.MinQty = orderSeller.MinQty;
+        reportSeller.ParticipatorId = orderSeller.ParticipatorId;
+        reportSeller.AccoutType = '1'; //1= Client and 3 = HOuse
+        reportSeller.ExpireTime = orderSeller.ExpireTime;
+        reportSeller.ExpireDate = orderSeller.ExpireDate;
+        reportSeller.TimeInForce = orderSeller.TimeInForce;
+        reportSeller.StopPrice = orderSeller.StopPrice;
+        reportSeller.Symbol = orderSeller.Symbol;
+        reportSeller.Quantity = orderSeller.Quantity;
+        reportSeller.Side = SideTrade.Sell;
+        reportSeller.OrigCLOrdID = orderSeller.ClOrdID;
+        reportSeller.OrderID = orderSeller.OrderID;
+        reportSeller.TrdMatchID = tradeId;
+        reportSeller.ExecID = tradeId;
+        reportSeller.Price = orderSeller.Price;
+        reportSeller.ExecType = 'F';      // Fully or partially 
+
+        //Orders
+        orderBuyer.OrderStatus = reportBuyer.OrderStatus;
+        orderSeller.OrderStatus = reportSeller.OrderStatus;
+
+        orderBuyer.LeavesQuantity = reportBuyer.LeavesQuantity;
+        orderSeller.LeavesQuantity = reportSeller.LeavesQuantity;
+
+        orderBuyer.LastPrice = reportBuyer.LastPrice;
+        orderSeller.LastPrice = reportSeller.LastPrice;
+
+        orderBuyer.LastQuantity = buyQtyExecuted;
+        orderSeller.LastQuantity = sellQtyExecuted;
+
+        orderBuyer.TransactTime = now;
+        orderSeller.TransactTime = now;
+
+        QueueOrderStatusChanged.Enqueue(orderBuyer);
+        QueueOrderStatusChanged.Enqueue(orderSeller);
+
+        return (reportBuyer, reportSeller);
     }
     public (TradeCaptureReport, TradeCaptureReport) CreateTradeCapture(OrderEngine orderBuyer, OrderEngine orderSeller)
     {
         var trade = _tradeRepository.GetTradeIdAsync(default(CancellationToken));
-        TradeId = trade.Result.TradeId;
+        var tradeId = trade.Result.TradeId;
+
+        var orderStatus = OrderStatus.Filled;
+        if (orderBuyer.LastQuantity != orderSeller.LastQuantity)
+        {
+            orderStatus = OrderStatus.PartiallyFilled;
+        }else if (orderBuyer.LastQuantity == orderSeller.LastQuantity)
+        {
+            orderStatus = OrderStatus.PartiallyFilled;
+        }
+        /// novo Status das ordens
+        orderBuyer.OrderStatus = orderStatus;
+        orderSeller.OrderStatus = orderStatus;
+
+        //// novas quantidades das ordens
+        //orderBuyer.LastQuantity = 
+        //orderBuyer.LastQuantity = orderSeller.
+
+
 
         var tradeBuyer = new TradeCaptureReport()
         {
@@ -173,7 +257,7 @@ public class TradeOrderService : ITradeOrderService, IDisposable
             TrdType = 0,
             CopyMsgIndicator = 'Y',
             PreviouslyReported = 'N',
-            TradeId = TradeId,
+            TradeId = tradeId,
             NoSides = 1,
             OrderId = orderBuyer.OrderID.ToString(),
             ClOrderId = orderBuyer.ClOrdID.ToString(),
@@ -193,7 +277,7 @@ public class TradeOrderService : ITradeOrderService, IDisposable
             TrdType = 0,
             CopyMsgIndicator = 'Y',
             PreviouslyReported = 'N',
-            TradeId = TradeId,
+            TradeId = tradeId,
             NoSides = 1,
             OrderId = orderSeller.OrderID.ToString(),
             ClOrderId = orderSeller.ClOrdID.ToString(),
@@ -215,7 +299,6 @@ public class TradeOrderService : ITradeOrderService, IDisposable
     public bool ReplaceOrder(OrderEngine order)
     {
         bool replaced = false;
-        AddOrderDetail(ref order);
 
         if (order.Side == SideTrade.Buy)
             _matchingCache.UpsertBuyOrder(order);
@@ -226,14 +309,6 @@ public class TradeOrderService : ITradeOrderService, IDisposable
         QueueOrderStatusChanged.Enqueue(order);
         replaced = true;
         return replaced;
-    }
-
-    protected virtual void AddOrderDetail(ref OrderEngine order)
-    {
-        if (order.OrderDetails is null)
-            order.OrderDetails = new List<OrderEngineDetail>();
-
-        order.OrderDetails.Add((OrderEngineDetail)order);
     }
 
     public void SortBuyOrders(ref Dictionary<long, OrderEngine> buyOrders)
@@ -250,6 +325,7 @@ public class TradeOrderService : ITradeOrderService, IDisposable
         pair => pair.Key, pair => pair.Value);
     }
 
+    
     public bool AddOrder(OrderEngine order)
     {
         bool added = false;

@@ -55,7 +55,8 @@ public class MatchLimit :  IMatchLimit, IMatch
         {
             orderToTrade = sellOrders
                 .OrderBy(p => p.Value.Price)
-                .FirstOrDefault(kvp => kvp.Value.Price <= order.Price && (kvp.Value.LeavesQuantity >= order.MinQty || kvp.Value.LeavesQuantity >= order.Quantity));
+                .FirstOrDefault(kvp => kvp.Value.Price <= order.Price && 
+                 kvp.Value.LeavesQuantity >= order.Quantity);
 
         }else  if (order.TimeInForce == TimeInForce.FOK)
             orderToTrade = sellOrders
@@ -81,10 +82,22 @@ public class MatchLimit :  IMatchLimit, IMatch
     {
         bool cancelled = false;
         var buyOrders = _matchingCache.GetBuyOrderBySymbol(order.Symbol).Result.Value;
-        var orderToTrade = buyOrders
+        var orderToTrade = new KeyValuePair<long, OrderEngine>();
+
+        if (order.TimeInForce != TimeInForce.FOK)
+        {
+            orderToTrade = buyOrders
+            .OrderByDescending(p => p.Value.Price)
+            .FirstOrDefault(kvp => kvp.Value.Price >= order.Price && 
+                            kvp.Value.LeavesQuantity >= order.Quantity);
+        }
+        else if (order.TimeInForce == TimeInForce.FOK)
+        {
+            orderToTrade = buyOrders
             .OrderByDescending(p => p.Value.Price)
             .FirstOrDefault(kvp => kvp.Value.Price >= order.Price &&
-                                                           kvp.Value.Quantity == order.Quantity);
+                            kvp.Value.LeavesQuantity == order.Quantity);
+        }
         if (!orderToTrade.Equals(default(KeyValuePair<long, OrderEngine>)))
         {
             _tradeOrder.CreateTradeCapture(orderToTrade.Value, order);
