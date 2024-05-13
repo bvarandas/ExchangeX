@@ -22,7 +22,8 @@ public enum OrderStatus
 public enum TimeInForce
 {
     GTC,  // Good Till Cancel
-    FOK,  // Fill or Kill
+    FOK,  // Fill or Kill,
+    IOC,  // Immediate Or Cancelled (allows partial fills)
     DAY,  // Order will be automatically cancelled when trading day is closed
 }
 

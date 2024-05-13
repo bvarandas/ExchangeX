@@ -25,7 +25,7 @@ public class ConsumerOrdersBusApp : IConsumer<OrderEngine>
                 command = new OrderTradeCancelCommand(context.Message);
                 break;
             case Execution.ToCancelReplace:
-                command = new OrderTradeModifyCommand(context.Message);
+                command = new OrderTradeCancelReplaceCommand(context.Message);
                 break;
             case Execution.ToOpen:
                 command = new OrderTradeNewCommand(context.Message);

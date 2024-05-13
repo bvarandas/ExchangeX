@@ -9,10 +9,10 @@ public static class Constants
 
 public static class OutboxActivities
 {
-    public const string OrderEngineReceived= nameof(OrderEngineReceived);
-    public const string MatchingReceived = nameof(MatchingReceived);
+    public const string OrderEngineToMatchingSent= nameof(OrderEngineToMatchingSent);
+    public const string OrderEntryToOrderEngineSent = nameof(OrderEntryToOrderEngineSent);
 
-    //public const string OrderPartiallyFilled = nameof(OrderPartiallyFilled);
-    //public const string OrderCancelled = nameof(OrderCancelled);
-    //public const string OrderRejected= nameof(OrderRejected);
+    public const string MatchingToOrderEngineSent= nameof(MatchingToOrderEngineSent);
+    public const string MatchingToDropCopySent = nameof(MatchingToDropCopySent);
+    public const string MatchingToMarketDataSent = nameof(MatchingToMarketDataSent);
 }

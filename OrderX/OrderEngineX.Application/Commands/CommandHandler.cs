@@ -27,7 +27,7 @@ public class CommandHandler
             case OrderTradeCancelCommand:
                 report = new OrderCancelRejectFix();
                 break;
-            case OrderTradeModifyCommand:
+            case OrderTradeCancelReplaceCommand:
                 report = new BusinessMessageRejectFix();
                 break;
             case OrderTradeNewCommand:

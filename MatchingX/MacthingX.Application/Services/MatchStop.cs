@@ -148,4 +148,9 @@ public class MatchStop : IMatchStop, IMatch
         }
         return true;
     }
+
+    public bool ModifyOrder(OrderEngine order)
+    {
+        throw new NotImplementedException();
+    }
 }

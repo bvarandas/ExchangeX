@@ -7,7 +7,7 @@ using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
 using System.Collections.Concurrent;
 namespace MacthingX.Application.Services;
-public class MatchStopLimit :  IMatchStopLimit
+public class MatchStopLimit :  IMatchStopLimit, IMatch
 {
     protected readonly IOrderStopCache _orderStopCache;
     private readonly ConcurrentDictionary<long, OrderEngine> DicOrdersToCancel;
@@ -106,7 +106,11 @@ public class MatchStopLimit :  IMatchStopLimit
         return cancelled;
     }
 
-    
+    public bool ModifyOrder(OrderEngine order)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<bool> MatchBuyOrderAsync(OrderEngine order)
     {
         bool cancelled = false;
@@ -144,4 +148,5 @@ public class MatchStopLimit :  IMatchStopLimit
         return true;
     }
 
+    
 }

@@ -9,7 +9,7 @@ using OrderEngineX.Core.Interfaces;
 namespace OrderEngineX.Application.Commands;
 public class OrderTradeCommandHandler : CommandHandler,
     IRequestHandler<OrderTradeCancelCommand, bool>,
-    IRequestHandler<OrderTradeModifyCommand, bool>,
+    IRequestHandler<OrderTradeCancelReplaceCommand, bool>,
     IRequestHandler<OrderTradeNewCommand, bool>
 {
     private readonly IOrderRepository _repository;
@@ -34,13 +34,17 @@ public class OrderTradeCommandHandler : CommandHandler,
         return true;
     }
 
-    public async Task<bool> Handle(OrderTradeModifyCommand command, CancellationToken cancellationToken)
+    public async Task<bool> Handle(OrderTradeCancelReplaceCommand command, CancellationToken cancellationToken)
     {
         if (!command.IsValid())
         {
             NotifyValidationErrors(command);
             return false;
         }
+        //// Primeiro, verificar se a ordem é igual e só muda 
+        //var idOrder = _repository.GetOrderIdAsync(cancellationToken).Result;
+        //command.Order.OrderID = idOrder;
+
         await _bus.RaiseEvent(new OrderTradeModifyEvent(command.Order));
         return true;
     }

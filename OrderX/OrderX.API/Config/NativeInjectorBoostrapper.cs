@@ -77,7 +77,7 @@ internal class NativeInjectorBoostrapper
 
         // Domain - Command
         services.AddSingleton<IRequestHandler<OrderTradeCancelCommand, bool>, OrderTradeCommandHandler>();
-        services.AddSingleton<IRequestHandler<OrderTradeModifyCommand, bool>, OrderTradeCommandHandler>();
+        services.AddSingleton<IRequestHandler<OrderTradeCancelReplaceCommand, bool>, OrderTradeCommandHandler>();
         services.AddSingleton<IRequestHandler<OrderTradeNewCommand, bool>, OrderTradeCommandHandler>();
 
         // Infra - Data

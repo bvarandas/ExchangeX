@@ -1,9 +1,9 @@
 ﻿using OrderEngineX.Application.Validations;
 using SharedX.Core.Matching.OrderEngine;
 namespace OrderEngineX.Application.Commands;
-public class OrderTradeModifyCommand : OrderEngineCommand
+public class OrderTradeCancelReplaceCommand : OrderEngineCommand
 {
-    public OrderTradeModifyCommand(OrderEngine order)
+    public OrderTradeCancelReplaceCommand(OrderEngine order)
     {   
         Order = order;
         Timestamp = DateTime.Now;

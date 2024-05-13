@@ -57,7 +57,7 @@ public class ConsumerOrdersApp : BackgroundService
                 command = new OrderTradeCancelCommand(order);
                 break;
             case Execution.ToCancelReplace:
-                command = new OrderTradeModifyCommand(order);
+                command = new OrderTradeCancelReplaceCommand(order);
                 break;
             case Execution.ToOpen:
                 command = new OrderTradeNewCommand(order);

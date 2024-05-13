@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using QuickFix.Fields;
 using SharedX.Core.Enums;
 using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
@@ -86,6 +87,24 @@ public class OrderRepository : IOrderRepository
 
         return result;
     }
+
+    public async Task<OrderEngine> GetOrderByIdAsync(long orderId, CancellationToken cancellation)
+    {
+        OrderEngine result = null!;
+        try
+        {
+            var builder = Builders<OrderEngine>.Filter;
+            var filter = builder.Eq(o => o.OrderID, orderId);
+            result = await _context.OrderTrade.Find(filter).SingleAsync(cancellation);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+        }
+
+        return result;
+    }
+
     public async Task<IEnumerable<OrderEngine>> GetOrdersOnRestartAsync(CancellationToken cancellation)
     {
         IEnumerable<OrderEngine> result = null!;
@@ -103,7 +122,7 @@ public class OrderRepository : IOrderRepository
         }
         return result;
     }
-    public async Task<bool> UpdateOrderAsync(OrderEngine order, CancellationToken cancellation)
+    public async Task<bool> UpdateOrderDetailAsync(OrderEngine order, OrderEngineDetail oderDetail, CancellationToken cancellation)
     {
         bool result = false;
         try
@@ -116,23 +135,35 @@ public class OrderRepository : IOrderRepository
             if (orderSingle.OrderDetails is null)
                 orderSingle.OrderDetails = new List<OrderEngineDetail>();
 
-            orderSingle.OrderDetails.Add((OrderEngineDetail)order);
+            orderSingle.OrderDetails.Add(oderDetail);
 
             var resultReplace = await _context.OrderTrade.ReplaceOneAsync(
                 null,
             replacement: orderSingle,
             options: new ReplaceOptions { IsUpsert = true },
             cancellation);
+        }
+        catch (ArgumentNullException ex)
+        {
+            _logger.LogError(ex.Message, ex);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+        }
+        return result;
+    }
 
-
-            //var updates = new List<WriteModel<OrderEngine>>();
-            //var filterBuilder = Builders<OrderEngine>.Filter;
-
-            //var filter = filterBuilder.Where(x => x.OrderID == order.OrderID);
-            //updates.Add(new ReplaceOneModel< OrderEngine>(filter, order));
-
-            //var updateResult = await _context.OrderTrade.BulkWriteAsync(updates, null, cancellation);
-            //result = updateResult.IsAcknowledged && updateResult.ModifiedCount > 0;
+    public async Task<bool> UpdateOrderAsync(OrderEngine order,  CancellationToken cancellation)
+    {
+        bool result = false;
+        try
+        {
+            var resultReplace = await _context.OrderTrade.ReplaceOneAsync(
+                null,
+            replacement: order,
+            options: new ReplaceOptions { IsUpsert = true },
+            cancellation);
         }
         catch (ArgumentNullException ex)
         {

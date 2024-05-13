@@ -5,6 +5,7 @@ using SharedX.Core.Interfaces;
 using SharedX.Core.Enums;
 using MatchingX.Application.Commands;
 using MatchingX.Core.Notifications;
+using SharedX.Core.Matching.OrderEngine;
 
 namespace MacthingX.Application.Commands;
 
@@ -44,12 +45,13 @@ public class OrderCommandHandler :
 
     public async Task<bool> Handle(OrderOpenedCommand command, CancellationToken cancellationToken)
     {
+        
         if (!command.IsValid())
         {
             NotifyValidationErrors(command);
             return await Task.FromResult(false);
         }
-
+        
         await _repository.UpdateOrderAsync(command.Order, cancellationToken);
 
         await _bus.RaiseEvent(new OrderOpenedEvent(command.Order));
@@ -64,7 +66,7 @@ public class OrderCommandHandler :
             NotifyValidationErrors(command);
             return await Task.FromResult(false);
         }
-        await _repository.UpdateOrderAsync(command.Order, cancellationToken);
+        await _repository.CreateOrdersAsync(command.Order, cancellationToken);
 
         await _bus.RaiseEvent(new OrderCanceledEvent(command.Order));
 
@@ -73,11 +75,26 @@ public class OrderCommandHandler :
 
     public async Task<bool> Handle(OrderTradeCommand command, CancellationToken cancellationToken)
     {
+
         if (!command.IsValid())
         {
             NotifyValidationErrors(command);
             return await Task.FromResult(false);
         }
+        var order = command.Order;
+        var orderDetail = new OrderEngineDetail();
+
+        var orderData = await _repository.GetOrderByIdAsync(command.Order.OrderID, cancellationToken);
+        var lastOrderDetail = orderData.OrderDetails.LastOrDefault();
+
+        orderDetail.Symbol = order.Symbol;
+        orderDetail.OrderID = order.OrderID;
+        orderDetail.LastPrice = order.LastPrice;
+        orderDetail.CumQty += lastOrderDetail.CumQty;
+        orderDetail.LeavesQuantity = order.Quantity - orderDetail.CumQty;
+        orderDetail.LastQuantity = order.LastQuantity;
+        
+        order.OrderDetails.Add(orderDetail);
 
         await _repository.UpdateOrderAsync(command.Order, cancellationToken);
 

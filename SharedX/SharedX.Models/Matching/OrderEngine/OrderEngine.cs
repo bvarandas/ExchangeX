@@ -12,20 +12,18 @@ public class OrderEngine : BaseEntity
     [ProtoMember(1)]
     public string Symbol { get; set; } = string.Empty;
     [ProtoMember(2)]
-    public decimal Quantity { get; set; }
+    public decimal Quantity { get; set; } // Original Order Qty- Removed (modification) Qty
     [ProtoMember(3)]
-    public decimal LeavesQuantity { get; set; }
+    public decimal LeavesQuantity { get; set; } //Remaining open quantity F OrdStatus(39) =    [4(Canceled) or C(Expired) or 8(Rejected)] Then LeavesQty(151) = 0 Else  LeavesQty(151) = OrderQty(38) - CumQty(14)
     [ProtoMember(4)]
-    public decimal LastQuantity { get; set; }
-    [ProtoMember(5)]
     public SideTrade Side { get; set; }
-    [ProtoMember(6)]
+    [ProtoMember(5)]
     public OrderType OrderType { get; set; }
-    [ProtoMember(7)]
+    [ProtoMember(6)]
     public TimeInForce TimeInForce { get; set; }
-    [ProtoMember(8)]
+    [ProtoMember(7)]
     public virtual OrderStatus OrderStatus { get; set; }
-    [ProtoMember(9)]
+    [ProtoMember(8)]
     public long ParticipatorId { get; set; }
     [ProtoMember(10)]
     public long OrderID { get; set; }
@@ -41,8 +39,6 @@ public class OrderEngine : BaseEntity
     public string ExpireTime { get; set; } = string.Empty;
     [ProtoMember(16)]
     public decimal Price { get; set; }
-    [ProtoMember(17)]
-    public decimal LastPrice { get; set; }
     [ProtoMember(18)]
     public decimal StopPrice { get; set; }
     [ProtoMember(19)]
@@ -54,5 +50,11 @@ public class OrderEngine : BaseEntity
     [ProtoMember(22)]
     public Execution Execution { get; set; }
     [ProtoMember(23)]
+    public decimal MinQty { get; set; }
+    [ProtoMember(24)]
+    public decimal LastPrice { get; set; }
+    [ProtoMember(25)]
+    public decimal LastQuantity { get; set; }
+    [ProtoMember(26)]
     public IList<OrderEngineDetail> OrderDetails { get; set; } = null!;
 }

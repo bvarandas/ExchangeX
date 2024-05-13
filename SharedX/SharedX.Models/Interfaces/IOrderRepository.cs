@@ -6,7 +6,9 @@ public interface IOrderRepository
 {
     Task<IEnumerable<OrderEngine>> GetOrdersOnRestartAsync(CancellationToken cancellation);
     Task<IEnumerable<OrderEngine>> GetOrdersByAccountIdAsync(int accountId, CancellationToken cancellation);
+    Task<OrderEngine> GetOrderByIdAsync(long orderId, CancellationToken cancellation);
     Task<bool> CreateOrdersAsync(OrderEngine order, CancellationToken cancellation);
+    Task<bool> UpdateOrderDetailAsync(OrderEngine order, OrderEngineDetail oderDetail, CancellationToken cancellation);
     Task<bool> UpdateOrderAsync(OrderEngine order, CancellationToken cancellation);
     Task<long> GetOrderIdAsync(CancellationToken cancellation);
 }

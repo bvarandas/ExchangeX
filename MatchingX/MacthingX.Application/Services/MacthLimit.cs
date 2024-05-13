@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using SharedX.Core.Bus;
 using SharedX.Core.Enums;
 using SharedX.Core.Matching.OrderEngine;
-
 namespace MacthingX.Application.Services;
 public class MatchLimit :  IMatchLimit, IMatch
 {
@@ -41,15 +40,29 @@ public class MatchLimit :  IMatchLimit, IMatch
         _tradeOrder.ReplaceOrder(orderToReplace);
         return true;
     }
+    public bool ModifyOrder(OrderEngine order)
+    {
+        throw new NotImplementedException();
+    }
 
     public async Task<bool> MatchBuyOrderAsync(OrderEngine order)
     {
         bool cancelled = false;
         var sellOrders = _matchingCache.GetSellOrderBySymbol(order.Symbol).Result.Value;
-        var orderToTrade = sellOrders
-            .OrderBy(p=>p.Value.Price)
-            .FirstOrDefault(kvp => kvp.Value.Price <= order.Price &&
-                                                           kvp.Value.Quantity == order.Quantity);
+        var orderToTrade = new KeyValuePair<long, OrderEngine>();
+
+        if (order.TimeInForce != TimeInForce.FOK)
+        {
+            orderToTrade = sellOrders
+                .OrderBy(p => p.Value.Price)
+                .FirstOrDefault(kvp => kvp.Value.Price <= order.Price && (kvp.Value.LeavesQuantity >= order.MinQty || kvp.Value.LeavesQuantity >= order.Quantity));
+
+        }else  if (order.TimeInForce == TimeInForce.FOK)
+            orderToTrade = sellOrders
+                .OrderBy(p => p.Value.Price)
+                .FirstOrDefault(kvp => kvp.Value.Price <= order.Price && kvp.Value.Quantity == order.Quantity);
+
+
         if (!orderToTrade.Equals(default(KeyValuePair<long, OrderEngine>)))
         {
             _tradeOrder.CreateTradeCapture(order, orderToTrade.Value);
@@ -60,6 +73,7 @@ public class MatchLimit :  IMatchLimit, IMatch
             if (order.TimeInForce == TimeInForce.FOK)
                 cancelled = _tradeOrder.RemoveCancelledOrdersAsync(order).Result;
         }
+
         return true;
     }
 
@@ -83,4 +97,6 @@ public class MatchLimit :  IMatchLimit, IMatch
         }
         return true;
     }
+
+    
 }

@@ -33,7 +33,8 @@ public abstract class OrderValidation<T> :
         ValidateStopPx();
         ValidatePriceLimit();
         ValidatePriceMarket();
-        ValidateTimeInForce();
+        ValidateTimeInForceFOK();
+        ValidateTimeInForceGTC();
     }
 
     protected void ValidateOrderCancelRequest()
@@ -113,7 +114,8 @@ public abstract class OrderValidation<T> :
         ValidateStopPx();
         ValidatePriceLimit();
         ValidatePriceMarket();
-        ValidateTimeInForce();
+        ValidateTimeInForceFOK();
+        ValidateTimeInForceGTC();
         /*
          0 = Too late to cancel
          1 = Unknown order
@@ -224,14 +226,24 @@ public abstract class OrderValidation<T> :
             .WithMessage("5-Invalid StopPx to order stop or stoplimit")
             .WithErrorCode("5"); 
     }
-    private void ValidateTimeInForce()
+    private void ValidateTimeInForceFOK()
     {
         RuleFor(o => o.Order.TimeInForce)
             .Must(p => p== TimeInForce.FOK)
             .When(p => p.Order.OrderType == OrderType.Market|| p.Order.OrderType == OrderType.Stop)
-            .WithMessage("5-Invalid TimeInForce to order market or stop")
+            .WithMessage("5-Invalid TimeInForce FOK to order market or stop")
             .WithErrorCode("5");
     }
+
+    private void ValidateTimeInForceGTC()
+    {
+        RuleFor(o => o.Order.TimeInForce)
+            .Must(p => p == TimeInForce.GTC)
+            .When(p => p.Order.OrderType == OrderType.Market || p.Order.OrderType == OrderType.Stop)
+            .WithMessage("5-Invalid TimeInForce GTC to order market or stop")
+            .WithErrorCode("5");
+    }
+
     private void ValidateReplaceTimeInForce()
     {
         RuleFor(o => o.Order.TimeInForce)

@@ -27,7 +27,8 @@ public abstract class OrderEngineValidation<T> :
         ValidateStopPx();
         ValidatePriceLimit();
         ValidatePriceMarket();
-        ValidateTimeInForce();
+        ValidateTimeInForceFOK();
+        ValidateTimeInForceIOC();
     }
 
     protected void ValidateOrderCancelRequest()
@@ -66,8 +67,9 @@ public abstract class OrderEngineValidation<T> :
         ValidateStopPx();
         ValidatePriceLimit();
         ValidatePriceMarket();
-        ValidateTimeInForce();
+        ValidateTimeInForceFOK();
         ValidateSide();
+        ValidateTimeInForceIOC();
     }
     
     private void ValidateSymbol()
@@ -122,13 +124,22 @@ public abstract class OrderEngineValidation<T> :
             .When(p => p.Order.OrderType == OrderType.Stop || p.Order.OrderType == OrderType.StopLimit)
             .WithMessage("5-Invalid StopPx to order stop or stoplimit");
     }
-    private void ValidateTimeInForce()
+    private void ValidateTimeInForceFOK()
     {
         RuleFor(o => o.Order.TimeInForce)
             .Must(p => p == TimeInForce.FOK)
             .When(p => p.Order.OrderType == OrderType.Market || p.Order.OrderType == OrderType.Stop)
-            .WithMessage("5-Invalid TimeInForce to order market or stop");
+            .WithMessage("5-Invalid TimeInForce FOK to order market or stop");
     }
+
+    private void ValidateTimeInForceIOC()
+    {
+        RuleFor(o => o.Order.TimeInForce)
+            .Must(p => p == TimeInForce.IOC)
+            .When(p => p.Order.MinQty == 0)
+            .WithMessage("5-Invalid TimeInForce IOC to MInQty equals zero");
+    }
+
     private void ValidateNewOrderSingleOrderId()
     {
         RuleFor(o => o.Order.OrderID)

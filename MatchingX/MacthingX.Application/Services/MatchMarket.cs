@@ -80,4 +80,9 @@ public class MatchMarket : IMatchMarket, IMatch
         }
         return true;
     }
+
+    public bool ModifyOrder(OrderEngine order)
+    {
+        throw new NotImplementedException();
+    }
 }
