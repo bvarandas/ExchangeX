@@ -21,12 +21,10 @@ public class OrderEngineRepository : IOrderEngineRepository
         {
             var builder = Builders<OrderEngine>.Filter;
             var filter = builder.Eq(o => o.OrderID, order.OrderID);
-            var single = await _context.OrderEngine.Find( filter).SingleAsync(cancellationToken);
-
-            single.OrderDetails?.Add((OrderEngineDetail)order);
+            //var single = await _context.OrderEngine.Find( filter).SingleAsync(cancellationToken);
 
             var resultReplace = await _context.OrderEngine.ReplaceOneAsync(filter,
-                replacement: single,
+                replacement: order,
                 options: new ReplaceOptions { IsUpsert = true },
                 cancellationToken);
         }

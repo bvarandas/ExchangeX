@@ -5,9 +5,7 @@ namespace MatchingX.Infra.Data;
 public class TradeContext : ITradeContext
 {
     public IMongoCollection<Trade> Trade {  get;  }
-
     public MongoClient MongoClient { get; }
-
     public TradeContext(IConfiguration configuration)
     {
         MongoClient = new MongoClient(configuration.GetValue<string>("DatabaseSettings:ConnectionString"));

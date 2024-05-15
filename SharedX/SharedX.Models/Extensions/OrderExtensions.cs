@@ -2,35 +2,34 @@
 using QuickFix.Fields;
 using QuickFix.FIX44;
 using SharedX.Core.Matching.OrderEngine;
-using SharedX.Core.Models;
 namespace SharedX.Core.Extensions;
 public static class OrderExtensions
 {
-    public static OrderEngine ToOrder(this OrderModel model)
-    {
-        var order = new OrderEngine();
-        order.OrderID = model.OrderID;
-        order.StopPrice = model.StopPrice;
-        order.LastPrice = model.Price;
-        order.AveragePrice = model.Price;
-        order.Price = model.Price;
-        order.AccountId = model.Account;
-        order.ClOrdID = model.ClOrdId;
-        order.OrderStatus = model.OrderStatus;
-        order.LastQuantity = model.Quantity;
-        order.Quantity = model.Quantity;
-        order.LeavesQuantity = 0;
-        order.OrderType = model.OrderType;
-        order.ParticipatorId = model.MpId;
-        order.TimeInForce = model.TimeInForce;
-        order.TransactTime = model.TransactTime;
-        order.Side = model.Side;
-        order.Symbol = model.Symbol;
+    //public static OrderEngine ToOrder(this OrderModel model)
+    //{
+    //    var order = new OrderEngine();
+    //    order.OrderID = model.OrderID;
+    //    order.StopPrice = model.StopPrice;
+    //    order.LastPrice = model.Price;
+    //    order.AveragePrice = model.Price;
+    //    order.Price = model.Price;
+    //    order.AccountId = model.Account;
+    //    order.ClOrdID = model.ClOrdId;
+    //    order.OrderStatus = model.OrderStatus;
+    //    order.LastQuantity = model.Quantity;
+    //    order.Quantity = model.Quantity;
+    //    order.LeavesQuantity = 0;
+    //    order.OrderType = model.OrderType;
+    //    order.ParticipatorId = model.MpId;
+    //    order.TimeInForce = model.TimeInForce;
+    //    order.TransactTime = model.TransactTime;
+    //    order.Side = model.Side;
+    //    order.Symbol = model.Symbol;
         
-        //order.Account = new Account.Limit() { AccountId = model.Account,  };
+    //    //order.Account = new Account.Limit() { AccountId = model.Account,  };
 
-        return order;
-    }
+    //    return order;
+    //}
 
     public static OrderEngine ToOrderEngine(this NewOrderSingle newOrder, SessionID sessionID)
     {

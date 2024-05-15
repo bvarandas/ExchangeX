@@ -6,6 +6,9 @@ public  class ConnectionZmq
     public PushPull MatchingToOrderEngine { get; set; } = null!;
     public PushPull OrderEntryToOrderEngine { get; set; } = null!;
     public PushPull OrderEngineToMatching { get; set; } = null!;
+    public PushPull SecurityToMatching { get; set; } = null!;
+    public PushPull SecurityToMarketData { get; set; } = null!;
+
 }
 public class PushPull
 {

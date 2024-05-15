@@ -2,24 +2,25 @@
 using MatchingX.ServerApp.Publisher;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+
 using Microsoft.Extensions.Options;
 using NetMQ;
 using NetMQ.Sockets;
+using SharedX.Core.Entities;
 using SharedX.Core.Extensions;
-using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
+
 namespace MatchingX.ServerApp.Consumer;
-public class ConsumerOrderApp : BackgroundService
+public class ConsumerSecurityApp : BackgroundService
 {
-    private readonly ILogger<ConsumerOrderApp> _logger;
+    private readonly ILogger<PublisherMarketDataApp> _logger;
     private PullSocket _receiver;
     private readonly ConnectionZmq _config;
     private readonly IMatchingReceiver _matchReceiver;
-    private static Thread ThreadReceiverOrder= null!;
-
-    public ConsumerOrderApp(ILogger<ConsumerOrderApp> logger,
+    private static Thread ThreadReceiverOrder = null!;
+    public ConsumerSecurityApp(ILogger<PublisherMarketDataApp> logger,
         IOptions<ConnectionZmq> options
-        ,IMatchingReceiver matchReceiver
+        , IMatchingReceiver matchReceiver
         )
     {
         _logger = logger;
@@ -29,7 +30,7 @@ public class ConsumerOrderApp : BackgroundService
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        return Task.CompletedTask;
+        throw new NotImplementedException();
     }
 
     public override Task StartAsync(CancellationToken cancellationToken)
@@ -52,13 +53,13 @@ public class ConsumerOrderApp : BackgroundService
     private void ReceiverOrder(CancellationToken stoppingToken)
     {
         bool isConnected = false;
-        
+
         do
         {
             try
             {
-                _logger.LogInformation($"Receiver de ordens tentando conectar..{_config.OrderEngineToMatching.Uri}");
-                using (_receiver = new PullSocket(_config.OrderEngineToMatching.Uri))
+                _logger.LogInformation($"Receiver de ordens tentando conectar..{_config.SecurityToMatching.Uri}");
+                using (_receiver = new PullSocket(_config.SecurityToMatching.Uri))
                 {
                     _logger.LogInformation("Receiver de ordens Conectado!!!");
                     isConnected = true;
@@ -66,8 +67,9 @@ public class ConsumerOrderApp : BackgroundService
                     while (!stoppingToken.IsCancellationRequested)
                     {
                         var message = _receiver.ReceiveMultipartBytes()[0];
-                        var order = message.DeserializeFromByteArrayProtobuf<OrderEngine>();
-                        _matchReceiver.ReceiveOrder(order);
+                        var security = message.DeserializeFromByteArrayProtobuf<SecurityEngine>();
+                        _matchReceiver.ReceiveSecurity(security);
+
                         Thread.Sleep(10);
                     }
                 }
@@ -79,6 +81,6 @@ public class ConsumerOrderApp : BackgroundService
             }
 
             Thread.Sleep(100);
-        }while (!isConnected);
+        } while (!isConnected);
     }
 }

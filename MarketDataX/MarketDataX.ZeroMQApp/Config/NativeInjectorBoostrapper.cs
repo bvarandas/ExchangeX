@@ -8,6 +8,8 @@ using MarketDataX.Core.Repositories;
 using MarketDataX.Infra.Data;
 using SharedX.Core.Bus;
 using SharedX.Core.Specs;
+using MarketDataX.ServerApp.Consumer;
+
 namespace DropCopyX.ServerApp;
 internal class NativeInjectorBoostrapper
 {
@@ -57,7 +59,7 @@ internal class NativeInjectorBoostrapper
         //services.AddSingleton<IOrderEntryContext, OrderEntryContext>();
         //services.AddSingleton<IOrderEntryRepository, OrderEntryRepository>();
 
-        //services.AddHostedService<PublisherOrdersApp>();
+        services.AddHostedService<ConsumerMarketDataApp>();
         services.AddHostedService<PublisherFixApp>();
     }
 }

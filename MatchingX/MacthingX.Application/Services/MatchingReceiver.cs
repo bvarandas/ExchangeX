@@ -3,6 +3,7 @@ using MacthingX.Application.Events;
 using MatchingX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using SharedX.Core.Bus;
+using SharedX.Core.Entities;
 using SharedX.Core.Enums;
 using SharedX.Core.Matching.OrderEngine;
 
@@ -35,5 +36,10 @@ public class MatchingReceiver : IMatchingReceiver
                 _mediator.SendCommand(new OrderCancelReplaceCommand(order, _matchingCache));
                 break;
         }
+    }
+
+    public void ReceiveSecurity(SecurityEngine security)
+    {
+        throw new NotImplementedException();
     }
 }

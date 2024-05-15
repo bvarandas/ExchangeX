@@ -307,25 +307,18 @@ public abstract class OrderValidation<T> :
             {
                 case OrderStatus.Rejected:
                     return false;
-                    break;
                 case OrderStatus.New:
                     return true;
-                    break;
                 case OrderStatus.Cancelled:
                     return false;
-                    break;
                 case OrderStatus.Filled: 
                     return false;
-                    break;
                 case OrderStatus.PartiallyFilled:
                     return true;
-                    break;
                 case OrderStatus.PendingCancel:
                     return false;
-                    break;
                 case OrderStatus.PendindReplace:
                     return false;
-                    break;
 
             }
         }

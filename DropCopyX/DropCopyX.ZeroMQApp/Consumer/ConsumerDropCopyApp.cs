@@ -1,7 +1,5 @@
-﻿using Amazon.Runtime.Internal.Util;
-using DropCopyX.Application.Commands;
+﻿using DropCopyX.Application.Commands;
 using DropCopyX.Core.Interfaces;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -11,7 +9,6 @@ using SharedX.Core.Bus;
 using SharedX.Core.Extensions;
 using SharedX.Core.Matching.DropCopy;
 using SharedX.Core.Specs;
-using System.Diagnostics;
 
 namespace DropCopyX.Infra.Client;
 public class ConsumerDropCopyApp : BackgroundService
@@ -21,6 +18,7 @@ public class ConsumerDropCopyApp : BackgroundService
     private PullSocket _receiver;
     private readonly IExecutionReportChache _cache;
     private readonly IMediatorHandler _mediator;
+    private static Thread ThreadReceiverDropCopy = null!;
     public ConsumerDropCopyApp(ILogger<ConsumerDropCopyApp> logger, 
         IOptions<ConnectionZmq>  options, 
         IExecutionReportChache cache, 
@@ -32,41 +30,45 @@ public class ConsumerDropCopyApp : BackgroundService
         _mediator = mediator;
     }
 
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    public override Task StartAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Iniciando o DropCopy Consumer do ZeroMQ...");
+        _logger.LogInformation("Iniciando o Receiver Marketdata ZeroMQ...");
+
+        ThreadReceiverDropCopy = new Thread(() => ReceiverDropCopy(cancellationToken));
+        ThreadReceiverDropCopy.Name = nameof(ThreadReceiverDropCopy);
+        ThreadReceiverDropCopy.Start();
+        return base.StartAsync(cancellationToken);
+    }
+
+    private void ReceiverDropCopy(CancellationToken stoppingToken)
+    {
+        _logger.LogInformation("Iniciando o DropCopy receiver do ZeroMQ...");
         var listExecutions = new List<ExecutionReport>();
-            
+
         using (_receiver = new PullSocket(_config.MatchingToDropCopy.Uri))
         {
-            var timer = new Stopwatch();
-            timer.Start();
             while (!stoppingToken.IsCancellationRequested)
             {
                 var msg = _receiver.ReceiveMultipartBytes();
                 var execution = msg[1].DeserializeFromByteArrayProtobuf<ExecutionReport>();
-                
-                _cache.AddExecutionReport(execution);
 
-                if (timer.Elapsed.TotalSeconds > 5)
-                {
-                    timer.Stop();
-                    listExecutions.Add(execution);
-                    _mediator.SendCommand(new ExecutionReportCommand(listExecutions));
-                    listExecutions.Clear();
-                }
+                _cache.AddExecutionReport(execution);
+                _mediator.SendCommand(new ExecutionReportCommand(listExecutions));
 
                 Thread.Sleep(10);
             }
         }
+    }
 
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    {
         return Task.CompletedTask;
     }
 
     public async override Task StopAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Finalizando o publisher ZeroMQ...");
+        _logger.LogInformation("Finalizando o receiver de dropcopy ZeroMQ...");
         _receiver.Disconnect(_config.MatchingToDropCopy.Uri);
-        _logger.LogInformation("Publisher ZeroMq...Finalizado!");
+        _logger.LogInformation("Receiver de dropcopy ZeroMq...Finalizado!");
     }
 }
