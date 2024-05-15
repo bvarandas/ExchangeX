@@ -1,6 +1,6 @@
 ﻿using MatchingX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
-namespace MacthingX.Application.Commands;
+namespace MacthingX.Application.Commands.Order;
 public class OrderTradeCommand : OrderEngineCommand
 {
     private readonly IMatchingCache _cache;

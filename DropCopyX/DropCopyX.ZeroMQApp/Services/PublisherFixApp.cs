@@ -3,10 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using QuickFix;
 using QuickFix.Fields;
-using SharedX.Core.Matching;
 using SharedX.Core.Matching.OrderEngine;
-using StackExchange.Redis;
-
 namespace DropCopyX.ServerApp.Services;
 internal class PublisherFixApp : BackgroundService
 {

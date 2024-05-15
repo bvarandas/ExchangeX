@@ -1,12 +1,11 @@
 ﻿using MacthingX.Application.Validations;
 using MatchingX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
-namespace MacthingX.Application.Commands;
-public class OrderCancelReplaceCommand : OrderEngineCommand
+namespace MacthingX.Application.Commands.Order;
+public class OrderCancelCommand : OrderEngineCommand
 {
     private readonly IMatchingCache _cache;
-
-    public OrderCancelReplaceCommand(OrderEngine order, IMatchingCache cache)
+    public OrderCancelCommand(OrderEngine order, IMatchingCache cache)
     {
         Timestamp = DateTime.Now;
         Order = order;
@@ -15,7 +14,7 @@ public class OrderCancelReplaceCommand : OrderEngineCommand
 
     public override bool IsValid()
     {
-        ValidationResult = new OrderCancelReplaceRequestValidation(_cache).Validate(this);
+        ValidationResult = new OrderCancelRequestValidation(_cache).Validate(this);
         return ValidationResult.IsValid;
     }
 }

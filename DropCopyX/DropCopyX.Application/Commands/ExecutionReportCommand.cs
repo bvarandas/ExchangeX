@@ -14,6 +14,6 @@ public class ExecutionReportCommand : Command
 
     public override bool IsValid()
     {
-        throw new NotImplementedException();
+        return true;
     }
 }

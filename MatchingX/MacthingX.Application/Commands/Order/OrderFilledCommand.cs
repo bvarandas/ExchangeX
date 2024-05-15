@@ -1,7 +1,7 @@
 ﻿using MatchingX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
 
-namespace MacthingX.Application.Commands;
+namespace MacthingX.Application.Commands.Order;
 
 public class OrderFilledCommand : OrderEngineCommand
 {

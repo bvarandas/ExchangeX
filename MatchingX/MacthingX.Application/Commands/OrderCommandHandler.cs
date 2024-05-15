@@ -6,6 +6,7 @@ using SharedX.Core.Enums;
 using MatchingX.Application.Commands;
 using MatchingX.Core.Notifications;
 using SharedX.Core.Matching.OrderEngine;
+using MacthingX.Application.Commands.Order;
 
 namespace MacthingX.Application.Commands;
 

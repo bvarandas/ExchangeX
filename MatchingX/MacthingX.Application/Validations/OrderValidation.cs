@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using MacthingX.Application.Commands;
+using MacthingX.Application.Commands.Order;
 using MatchingX.Core.Interfaces;
 using SharedX.Core.Enums;
 using SharedX.Core.Matching.OrderEngine;
