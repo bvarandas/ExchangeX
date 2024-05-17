@@ -10,7 +10,6 @@ public class TradeCaptureReport : DropCopyReport
     public ushort TrdType { get; set; } // only when new order 0=For order book trades, 1= For trade entry where type = Block
     [ProtoMember(3)]
     public char CopyMsgIndicator { get; set; } // indicates drop copy, always "Y"
-    
     [ProtoMember(4)]
     public ushort NoSides {  get; set; } // always 1 (One Side)
     [ProtoMember(5)]
@@ -41,7 +40,7 @@ public class TradeCaptureReport : DropCopyReport
     public DateTime? SettlementDate { get; set; }
     [ProtoMember(18)]
     public char PreviouslyReported { get; set; }
-
+    
     public TradeCaptureReport() { }
 
     public TradeCaptureReport(

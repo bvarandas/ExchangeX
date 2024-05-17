@@ -2,14 +2,13 @@
 using MongoDB.Bson;
 using ProtoBuf;
 using QuickFix;
-using SharedX.Core.Entities;
 using System.Text.Json.Serialization;
 
 namespace SharedX.Core.Matching.DropCopy;
 [ProtoContract]
-[JsonDerivedType(typeof(ReportFix), typeDiscriminator: "DropCopyReport")]
-[JsonDerivedType(typeof(OrderMassCancelReportFix), typeDiscriminator: "TradeCaptureReport")]
-[JsonDerivedType(typeof(OrderCancelRejectFix), typeDiscriminator: "ExecutionReport")]
+[JsonDerivedType(typeof(DropCopyReport), typeDiscriminator: "DropCopyReport")]
+[JsonDerivedType(typeof(TradeCaptureReport), typeDiscriminator: "TradeCaptureReport")]
+[JsonDerivedType(typeof(ExecutionReport), typeDiscriminator: "ExecutionReport")]
 public class DropCopyReport
 {
     [BsonId]

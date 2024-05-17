@@ -56,7 +56,7 @@ internal class FixServerApp : MessageCracker, IFixServerApp
 {
     private readonly ILogger<FixServerApp> _logger;
     private readonly ILoginRepository _loginRepository;
-    Session _session = null;
+    Session _session = null!;
     private readonly IOrderEntryChache _cache;
     public FixServerApp(ILogger<FixServerApp> logger, ILoginRepository loginRepository, IOrderEntryChache cache)
     {

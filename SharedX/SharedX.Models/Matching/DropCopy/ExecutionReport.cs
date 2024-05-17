@@ -1,6 +1,5 @@
 ﻿using ProtoBuf;
 using SharedX.Core.Account;
-using SharedX.Core.Entities;
 using SharedX.Core.Enums;
 namespace SharedX.Core.Matching.DropCopy;
 [ProtoContract]

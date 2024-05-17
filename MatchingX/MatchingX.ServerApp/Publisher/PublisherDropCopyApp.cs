@@ -14,6 +14,7 @@ public class PublisherDropCopyApp : BackgroundService
     private PushSocket _sender;
     private readonly ConnectionZmq _config;
     private readonly IDropCopyCache _cache;
+    private static Thread ThreadSenderReport = null!;
     public PublisherDropCopyApp(ILogger<PublisherDropCopyApp> logger, 
         IOptions<ConnectionZmq> options, 
         IDropCopyCache cache )
@@ -24,6 +25,11 @@ public class PublisherDropCopyApp : BackgroundService
     }
     public override Task StartAsync(CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Iniciando o Sender Report ZeroMQ...");
+
+        ThreadSenderReport = new Thread(() => SenderReport(cancellationToken));
+        ThreadSenderReport.Name = nameof(ThreadSenderReport);
+        ThreadSenderReport.Start();
         return base.StartAsync(cancellationToken);
     }
     public override Task StopAsync(CancellationToken cancellationToken)
@@ -31,7 +37,8 @@ public class PublisherDropCopyApp : BackgroundService
         _sender.Disconnect(_config.MatchingToDropCopy.Uri);
         return base.StopAsync(cancellationToken);
     }
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+
+    private void SenderReport(CancellationToken stoppingToken)
     {
         _logger.LogInformation("Iniciando o Publisher DropCopy ZeroMQ...");
 
@@ -48,5 +55,9 @@ public class PublisherDropCopyApp : BackgroundService
                 Thread.Sleep(10);
             }
         }
+    }
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        return Task.CompletedTask;
     }
 }

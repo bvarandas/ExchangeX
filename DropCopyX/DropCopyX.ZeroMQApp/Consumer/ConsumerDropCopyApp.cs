@@ -9,7 +9,6 @@ using SharedX.Core.Bus;
 using SharedX.Core.Extensions;
 using SharedX.Core.Matching.DropCopy;
 using SharedX.Core.Specs;
-
 namespace DropCopyX.Infra.Client;
 public class ConsumerDropCopyApp : BackgroundService
 {
@@ -29,7 +28,6 @@ public class ConsumerDropCopyApp : BackgroundService
         _cache = cache;
         _mediator = mediator;
     }
-
     public override Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Iniciando o Receiver Marketdata ZeroMQ...");
@@ -39,7 +37,6 @@ public class ConsumerDropCopyApp : BackgroundService
         ThreadReceiverDropCopy.Start();
         return base.StartAsync(cancellationToken);
     }
-
     private void ReceiverDropCopy(CancellationToken stoppingToken)
     {
         _logger.LogInformation("Iniciando o DropCopy receiver do ZeroMQ...");

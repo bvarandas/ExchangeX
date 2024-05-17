@@ -157,11 +157,11 @@ public class TradeOrderService : ITradeOrderService, IDisposable
         CreateTradeCapture(order, dicOrders);
     }
 
-    private Dictionary<long, ExecutionReport> CreateExecutionReport(OrderEngine order, Dictionary<long, OrderEngine> dicOrders) 
+    private Dictionary<long, DropCopyReport> CreateExecutionReport(OrderEngine order, Dictionary<long, OrderEngine> dicOrders) 
     {
         var now = DateTime.Now; 
 
-        var result = new Dictionary<long, ExecutionReport>();
+        var result = new Dictionary<long, DropCopyReport>();
         
         var report = new ExecutionReport();
         report.MinQty = order.MinQty;
@@ -214,9 +214,9 @@ public class TradeOrderService : ITradeOrderService, IDisposable
 
         return result;
     }
-    private Dictionary<long, TradeCaptureReport> CreateTradeCapture(OrderEngine order, Dictionary<long, OrderEngine> dicOrders)
+    private Dictionary<long, DropCopyReport> CreateTradeCapture(OrderEngine order, Dictionary<long, OrderEngine> dicOrders)
     {
-        var result =new Dictionary<long, TradeCaptureReport>();
+        var result =new Dictionary<long, DropCopyReport>();
         var report = new TradeCaptureReport()
         {
             TradeReportTransType = 0,
