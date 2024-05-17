@@ -1,4 +1,6 @@
-﻿using MacthingX.Application.Interfaces;
+﻿using MacthingX.Application.Commands.Match;
+using MacthingX.Application.Interfaces;
+using MassTransit;
 using MatchingX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using SharedX.Core.Bus;
@@ -12,10 +14,9 @@ public class MatchStopLimit :  IMatchStopLimit, IMatch
     protected readonly IOrderStopCache _orderStopCache;
     private readonly ConcurrentDictionary<long, OrderEngine> DicOrdersToCancel;
     protected readonly ITradeOrderService _tradeOrder;
-    protected readonly IMatchingCache _matchingCache;
+    protected readonly IMediatorHandler Bus;
     public MatchStopLimit(ILogger<MatchStopLimit> logger, 
-        IMediatorHandler bus, 
-        IMatchingCache matchingCache,
+        IMediatorHandler bus,
         IOrderStopCache orderStopCache,
         ITradeOrderService tradeOrder)
     {
@@ -23,9 +24,8 @@ public class MatchStopLimit :  IMatchStopLimit, IMatch
 
         _orderStopCache = orderStopCache;
         _tradeOrder = tradeOrder;
-        _matchingCache = matchingCache;
+        Bus = bus;
         _tradeOrder.PriceChanged += TradeOrder_PriceChanged;
-        
     }
 
     private async void TradeOrder_PriceChanged(object sender, Events.OrderPriceEventArgs args)
@@ -46,13 +46,13 @@ public class MatchStopLimit :  IMatchStopLimit, IMatch
                     case (OrderType.Stop, SideTrade.Sell) when order.StopPrice >= price:
                         await _orderStopCache.DeleteOrderAsync(order.Symbol, order.OrderID);
                         _tradeOrder.AddOrder(order);
-                        await this.MatchSellOrderAsync(order);
+                        await this.MatchOrderAsync(order);
 
                         break;
                     case (OrderType.Stop, SideTrade.Buy) when order.StopPrice <= price:
                         await _orderStopCache.DeleteOrderAsync(order.Symbol, order.OrderID);
                         _tradeOrder.AddOrder(order);
-                        await this.MatchBuyOrderAsync(order);
+                        await this.MatchOrderAsync(order);
                         break;
                     default:
                         break;
@@ -111,16 +111,15 @@ public class MatchStopLimit :  IMatchStopLimit, IMatch
         throw new NotImplementedException();
     }
 
-    public async Task<bool> MatchBuyOrderAsync(OrderEngine order)
+    public async Task<bool> MatchOrderAsync(OrderEngine order)
     {
         bool cancelled = false;
-        var sellOrders = _matchingCache.GetSellOrderBySymbol(order.Symbol).Result.Value;
-        var orderToTrade = sellOrders.FirstOrDefault(kvp => kvp.Value.Price <= order.Price &&
-                                                           kvp.Value.Quantity == order.Quantity);
-        if (!orderToTrade.Equals(default(KeyValuePair<long, OrderEngine>)))
+        var result = Bus.SendMatchCommand(new MatchingStopLimitCommand(order)).Result;
+
+        if (result.Item1 is OrderStatus.Filled or OrderStatus.PartiallyFilled)
         {
-            _tradeOrder.CreateTradeCapture(order, orderToTrade.Value);
-            await _tradeOrder.RemoveTradedOrdersAsync(order, orderToTrade.Value);
+            _tradeOrder.CreateReports(order, result.Item2);
+            await _tradeOrder.RemoveTradedOrdersAsync(result.Item2);
         }
         else
         {
@@ -129,24 +128,7 @@ public class MatchStopLimit :  IMatchStopLimit, IMatch
         }
         return true;
     }
-    public async Task<bool> MatchSellOrderAsync(OrderEngine order)
-    {
-        bool cancelled = false;
-        var buyOrders = _matchingCache.GetBuyOrderBySymbol(order.Symbol).Result.Value;
-        var orderToTrade = buyOrders.FirstOrDefault(kvp => kvp.Value.Price >= order.Price &&
-                                                           kvp.Value.Quantity == order.Quantity);
-        if (!orderToTrade.Equals(default(KeyValuePair<long, OrderEngine>)))
-        {
-            _tradeOrder.CreateTradeCapture(orderToTrade.Value, order);
-            await _tradeOrder.RemoveTradedOrdersAsync(orderToTrade.Value, order);
-        }
-        else
-        {
-            if (order.TimeInForce == TimeInForce.FOK)
-                cancelled = _tradeOrder.RemoveCancelledOrdersAsync(order).Result;
-        }
-        return true;
-    }
+    
 
     
 }

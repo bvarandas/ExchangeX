@@ -1,4 +1,5 @@
 ﻿using FluentResults;
+using QuickFix;
 using SharedX.Core.Matching.OrderEngine;
 namespace MatchingX.Core.Interfaces;
 public interface IMatchingCache 
@@ -11,4 +12,5 @@ public interface IMatchingCache
     Task<Result<OrderEngine>> GetSellOrderByIdandSymbolAsync(long orderId, string symbol);
     Task<bool> DeleteBuyOrderAsync(string symbol, long orderId);
     Task<bool> DeleteSellOrderAsync(string symbol, long orderId);
+    Task<bool> DeleteAllOrderAsync(Dictionary<long, OrderEngine> order);
 }

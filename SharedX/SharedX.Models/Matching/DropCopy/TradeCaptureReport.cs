@@ -1,11 +1,8 @@
 ﻿using ProtoBuf;
-using QuickFix.Fields;
-using SharedX.Core.Entities;
-
 namespace SharedX.Core.Matching.DropCopy;
 
 [ProtoContract]
-public class TradeCaptureReport : BaseEntityFix
+public class TradeCaptureReport : DropCopyReport
 {
     [ProtoMember(1)]
     public ushort TradeReportTransType { get; set; } // 0=new, 1=cancel
@@ -13,37 +10,36 @@ public class TradeCaptureReport : BaseEntityFix
     public ushort TrdType { get; set; } // only when new order 0=For order book trades, 1= For trade entry where type = Block
     [ProtoMember(3)]
     public char CopyMsgIndicator { get; set; } // indicates drop copy, always "Y"
+    
     [ProtoMember(4)]
-    public long TradeId { get; set; }
-    [ProtoMember(5)]
     public ushort NoSides {  get; set; } // always 1 (One Side)
-    [ProtoMember(6)]
+    [ProtoMember(5)]
     public ushort TradeType { get; set;}
-    [ProtoMember(7)]
+    [ProtoMember(6)]
     public string OrderId { get; set; }
-    [ProtoMember(8)]
+    [ProtoMember(7)]
     public string ClOrderId { get; set; }
-    [ProtoMember(9)]
+    [ProtoMember(8)]
     public decimal LastQty { get; set; }
-    [ProtoMember(10)]
+    [ProtoMember(9)]
     public decimal LastPx { get; set; }
-    [ProtoMember(11)]
+    [ProtoMember(10)]
     public string Symbol { get; set; }
-    [ProtoMember(12)]
+    [ProtoMember(11)]
     public char Side { get; set; } // 1= Buy, 2= Sell
-    [ProtoMember(13)]
+    [ProtoMember(12)]
     public decimal Price { get; set; } = 0;
-    [ProtoMember(14)]
+    [ProtoMember(13)]
     public DateTime TransactTime { get; set; }
-    [ProtoMember(15)]
+    [ProtoMember(14)]
     public string TradeDate { get; set; } = string.Empty;
-    [ProtoMember(16)]
+    [ProtoMember(15)]
     public ushort AccountType { get; set; }
-    [ProtoMember(17)]
+    [ProtoMember(16)]
     public bool Settlemented { get; set; }
-    [ProtoMember(18)]
+    [ProtoMember(17)]
     public DateTime? SettlementDate { get; set; }
-    [ProtoMember(19)]
+    [ProtoMember(18)]
     public char PreviouslyReported { get; set; }
 
     public TradeCaptureReport() { }

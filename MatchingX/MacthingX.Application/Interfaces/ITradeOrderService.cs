@@ -10,5 +10,6 @@ public interface ITradeOrderService
     bool ReplaceOrder(OrderEngine orderToReplace);
     Task<bool> RemoveCancelledOrdersAsync(OrderEngine orderToCancel);
     Task<bool> RemoveTradedOrdersAsync(OrderEngine buyOrder, OrderEngine sellOrder);
-    (TradeCaptureReport, TradeCaptureReport) CreateTradeCapture(OrderEngine orderBuyer, OrderEngine orderSeller);
+    Task<bool> RemoveTradedOrdersAsync(Dictionary<long,OrderEngine> dicOrders);
+    void CreateReports(OrderEngine order, Dictionary<long, OrderEngine> dicOrders);
 }

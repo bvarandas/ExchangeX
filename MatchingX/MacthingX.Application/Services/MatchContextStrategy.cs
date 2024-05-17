@@ -46,11 +46,7 @@ public class MatchContextStrategy
     public async Task<bool> MatchOrderAsync(OrderEngine order)
     {
         bool result = false;
-        if (order.Side == SideTrade.Buy)
-            result  = await this._match.MatchBuyOrderAsync(order);
-        else if (order.Side == SideTrade.Sell)
-            result = await this._match.MatchBuyOrderAsync(order);
-
+        result  = await this._match.MatchOrderAsync(order);
         return result;
     }
 }

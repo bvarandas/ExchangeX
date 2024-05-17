@@ -7,6 +7,8 @@ using SharedX.Core.Specs;
 using StackExchange.Redis;
 using FluentResults;
 using System.Text.Json;
+using QuickFix.Fields;
+
 namespace MatchingX.Infra.Cache;
 public class MatchingCache : IMatchingCache
 {
@@ -122,6 +124,17 @@ public class MatchingCache : IMatchingCache
         RedisValue value = new RedisValue(orderId.ToString());
         var key = string.Concat(keySellOrders, ":", symbol);
         var result = await _dbMatching.HashDeleteAsync(key, value);
+        return result;
+    }
+    public async Task<bool> DeleteAllOrderAsync(Dictionary<long, OrderEngine> dicOrders)
+    {
+        bool result = false;
+        foreach (var order in dicOrders.Values)
+        {
+            RedisValue value = new RedisValue(order.OrderID.ToString());
+            var key = string.Concat(keySellOrders, ":", order.Symbol);
+            result = await _dbMatching.HashDeleteAsync(key, value);
+        }
         return result;
     }
 }

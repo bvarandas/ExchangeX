@@ -6,11 +6,11 @@ using SharedX.Core.Matching.DropCopy;
 namespace MacthingX.Application.Events;
 public class ExecutedTradeEvent : Event
 {
-    public (TradeCaptureReport,TradeCaptureReport) ExecutedTrade {  get; private set; }
+    public Dictionary<long, DropCopyReport> ExecutedTrades {  get; private set; }
     public DateTime Timestamp { get; private set; }
-    public ExecutedTradeEvent((TradeCaptureReport, TradeCaptureReport) executedTrade)
+    public ExecutedTradeEvent(Dictionary<long, DropCopyReport> executedTrade)
     {
-        ExecutedTrade = executedTrade;
+        ExecutedTrades = executedTrade;
         Timestamp = DateTime.Now;
     }
 }

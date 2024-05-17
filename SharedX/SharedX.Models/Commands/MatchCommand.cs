@@ -2,10 +2,11 @@
 using FluentValidation.Results;
 using MediatR;
 using SharedX.Core.Enums;
+using SharedX.Core.Matching.OrderEngine;
 
 namespace SharedX.Core.Commands;
 
-public abstract class MatchCommand : IRequest<OrderStatus>, INotification
+public abstract class MatchCommand : IRequest<(OrderStatus, Dictionary<long, OrderEngine>)>, INotification
 {
     public DateTime Timestamp { get; private set; }
     public ValidationResult ValidationResult { get; set; }

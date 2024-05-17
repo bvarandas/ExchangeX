@@ -33,7 +33,7 @@ public static class MatchingExtensions
         ep.OrigCLOrdID = order.ClOrdID;
         ep.ClOrdID = order.ClOrdID;
         ep.ExecID = 0;
-        ep.TrdMatchID = 0;                       // verificar depois no trade
+        ep.TradeId = order.OrderID;                       
         ep.ExecType = (char)order.OrderStatus;
         ep.OrderStatus = order.OrderStatus;
         ep.OrdRejReason = "";                   // verificar depois na rejeição

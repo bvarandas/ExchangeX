@@ -1,4 +1,5 @@
-﻿using MacthingX.Application.Events;
+﻿using MacthingX.Application.Commands.Match;
+using MacthingX.Application.Events;
 using MacthingX.Application.Interfaces;
 using MassTransit;
 using MatchingX.Core.Interfaces;
@@ -14,18 +15,18 @@ public class MatchStop : IMatchStop, IMatch
 {
     private readonly ConcurrentDictionary<long, OrderEngine> DicOrdersToCancel;
     protected readonly ITradeOrderService _tradeOrder;
-    protected readonly IMatchingCache _matchingCache;
     protected readonly IOrderStopCache _orderStopCache;
+    protected readonly IMediatorHandler Bus;
 
-    public MatchStop(ILogger<MatchStop> logger, IMediatorHandler bus, 
-        IMatchingCache matchingCache,
+    public MatchStop(ILogger<MatchStop> logger, 
+        IMediatorHandler bus, 
         IOrderStopCache orderStopCache,
         ITradeOrderService tradeOrder) 
     {
         DicOrdersToCancel = new ConcurrentDictionary<long, OrderEngine>();
 
         _tradeOrder = tradeOrder;
-        _matchingCache = matchingCache;
+        Bus = bus;
         _orderStopCache = orderStopCache;
         _tradeOrder.PriceChanged += TradeOrder_PriceChanged;
     }
@@ -48,13 +49,13 @@ public class MatchStop : IMatchStop, IMatch
                     case (OrderType.Stop, SideTrade.Sell) when order.StopPrice >= price:
                         await _orderStopCache.DeleteOrderAsync(order.Symbol, order.OrderID);
                         _tradeOrder.AddOrder(order);
-                        await this.MatchSellOrderAsync(order);
+                        await this.MatchOrderAsync(order);
 
                         break;
                     case (OrderType.Stop, SideTrade.Buy) when order.StopPrice <= price:
                         await _orderStopCache.DeleteOrderAsync(order.Symbol, order.OrderID);
                         _tradeOrder.AddOrder(order);
-                        await this.MatchBuyOrderAsync(order);
+                        await this.MatchOrderAsync(order);
                         break;
                     default:
                         break;
@@ -107,39 +108,15 @@ public class MatchStop : IMatchStop, IMatch
         return cancelled;
     }
 
-    public async Task<bool> MatchBuyOrderAsync(OrderEngine order)
+    public async Task<bool> MatchOrderAsync(OrderEngine order)
     {
         bool cancelled = false;
-        var sellOrders = _matchingCache.GetSellOrderBySymbol(order.Symbol).Result.Value;
-        var orderToTrade = sellOrders
-            .OrderBy(p=>p.Value.Price)
-            .FirstOrDefault(sell => sell.Value.Quantity == order.Quantity);
+        var result = Bus.SendMatchCommand(new MatchingStopCommand(order)).Result;
 
-        if (!orderToTrade.Equals(default(KeyValuePair<long, OrderEngine>)))
+        if (result.Item1 is OrderStatus.Filled or OrderStatus.PartiallyFilled)
         {
-            _tradeOrder.CreateTradeCapture(order, orderToTrade.Value);
-            await _tradeOrder.RemoveTradedOrdersAsync(order, orderToTrade.Value);
-        }
-        else
-        {
-            if (order.TimeInForce == TimeInForce.FOK)
-                cancelled = _tradeOrder.RemoveCancelledOrdersAsync(order).Result;
-        }
-        return true;
-    }
-
-    public async Task<bool> MatchSellOrderAsync(OrderEngine order)
-    {
-        bool cancelled = false;
-        var buyOrders = _matchingCache.GetBuyOrderBySymbol(order.Symbol).Result.Value;
-        var orderToTrade = buyOrders
-            .OrderByDescending(p=>p.Value.Price)
-            .FirstOrDefault(kvp => kvp.Value.Quantity == order.Quantity);
-
-        if (!orderToTrade.Equals(default(KeyValuePair<long, OrderEngine>)))
-        {
-            _tradeOrder.CreateTradeCapture(orderToTrade.Value, order);
-            await _tradeOrder.RemoveTradedOrdersAsync(orderToTrade.Value, order);
+            _tradeOrder.CreateReports(order, result.Item2);
+            await _tradeOrder.RemoveTradedOrdersAsync(result.Item2);
         }
         else
         {

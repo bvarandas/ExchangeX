@@ -1,5 +1,7 @@
 ﻿using System.Reflection;
 using MacthingX.Application.Commands;
+using MacthingX.Application.Commands.Match;
+using MacthingX.Application.Commands.Order;
 using MacthingX.Application.Events;
 using MacthingX.Application.Interfaces;
 using MacthingX.Application.Querys;
@@ -16,6 +18,7 @@ using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SharedX.Core.Bus;
+using SharedX.Core.Enums;
 using SharedX.Core.Interfaces;
 using SharedX.Core.Matching;
 using SharedX.Core.Matching.OrderEngine;
@@ -79,6 +82,11 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IRequestHandler<OrderPartiallyFilledCommand, bool>, OrderCommandHandler>();
         services.AddSingleton<IRequestHandler<OrderFilledCommand, bool>, OrderCommandHandler>();
 
+        services.AddSingleton<IRequestHandler<MatchingLimitCommand, (OrderStatus, Dictionary<long, OrderEngine>)>, MatchingCommandHandler>();
+        services.AddSingleton<IRequestHandler<MatchingMarketCommand, (OrderStatus, Dictionary<long, OrderEngine>)>, MatchingCommandHandler>();
+        services.AddSingleton<IRequestHandler<MatchingStopLimitCommand, (OrderStatus, Dictionary<long, OrderEngine>)>, MatchingCommandHandler>();
+        services.AddSingleton<IRequestHandler<MatchingStopCommand, (OrderStatus, Dictionary<long, OrderEngine>)>, MatchingCommandHandler>();
+
         // Domain - Services
         services.AddSingleton<IMatchingReceiver, MatchingReceiver>();
         services.AddSingleton<IMatchLimit,       MatchLimit>();
@@ -100,7 +108,9 @@ internal class NativeInjectorBoostrapper
 
         services.AddSingleton<IOrderContext, OrderContext>();
         services.AddSingleton<IExecutedTradeContext ,ExecutedTradeContext >();
+        services.AddSingleton<IMatchingRepository, MatchingRepository>();
 
+        // Apps - Services
         services.AddHostedService<ConsumerOrderApp>();
         services.AddHostedService<PublisherMarketDataApp>();
         services.AddHostedService<PublisherOrderEngineApp>();

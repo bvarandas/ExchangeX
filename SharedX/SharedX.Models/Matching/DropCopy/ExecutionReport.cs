@@ -1,10 +1,10 @@
 ﻿using ProtoBuf;
 using SharedX.Core.Account;
+using SharedX.Core.Entities;
 using SharedX.Core.Enums;
-
 namespace SharedX.Core.Matching.DropCopy;
 [ProtoContract]
-public class ExecutionReport
+public class ExecutionReport : DropCopyReport
 {
     [ProtoMember(1)]
     public string Symbol { get; set; } = string.Empty;
@@ -45,21 +45,18 @@ public class ExecutionReport
     [ProtoMember(19)]
     public long ClOrdID { get; set; }
     [ProtoMember(20)]
-    public long TrdMatchID { get; set; }
-    [ProtoMember(21)]
     public char ExecType { get; set; }
-    [ProtoMember(22)]
+    [ProtoMember(21)]
     public string OrdRejReason { get; set; }
-    [ProtoMember(23)]
+    [ProtoMember(22)]
     public decimal CumQty { get; set; }
-    [ProtoMember(24)]
+    [ProtoMember(23)]
     public string ExpireDate { get; set; }
-    [ProtoMember(25)]
+    [ProtoMember(24)]
     public string ExpireTime { get; set; }
-    [ProtoMember(26)]
+    [ProtoMember(25)]
     public char AccoutType {  get; set; }
-    [ProtoMember(27)]
+    [ProtoMember(26)]
     public decimal MinQty{ get; set; }
-
     public ExecutionReport() { }
 }

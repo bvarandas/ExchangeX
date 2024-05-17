@@ -4,9 +4,9 @@ using SharedX.Core.Matching.DropCopy;
 namespace MacthingX.Application.Commands;
 public class ExecutedTradeCommand : Command
 {
-    public readonly (TradeCaptureReport, TradeCaptureReport) ExecutedTrades;
+    public readonly Dictionary<long,DropCopyReport> ExecutedTrades;
     public DateTime Timestamp { get; private set; }
-    public ExecutedTradeCommand((TradeCaptureReport, TradeCaptureReport) executedTrade)
+    public ExecutedTradeCommand(Dictionary<long, DropCopyReport> executedTrade)
     {
         Timestamp = DateTime.Now;
         ExecutedTrades = executedTrade;

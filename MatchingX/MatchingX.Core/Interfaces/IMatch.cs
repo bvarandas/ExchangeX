@@ -7,6 +7,5 @@ public  interface IMatch
     bool ReplaceOrder(OrderEngine order);
     bool ModifyOrder(OrderEngine order);
     bool CancelOrder(OrderEngine orderToCancel);
-    Task<bool> MatchBuyOrderAsync(OrderEngine order);
-    Task<bool> MatchSellOrderAsync(OrderEngine order);
+    Task<bool> MatchOrderAsync(OrderEngine order);
 }

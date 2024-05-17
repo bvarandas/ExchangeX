@@ -1,6 +1,8 @@
 ﻿using MatchingX.Core.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using SharedX.Core.Matching.DropCopy;
+
 namespace MacthingX.Application.Events;
 public class ExecutedTradeEventHandler : 
     INotificationHandler<ExecutedTradeEvent>
@@ -16,8 +18,12 @@ public class ExecutedTradeEventHandler :
     public async Task Handle(ExecutedTradeEvent notification, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Enviando executed Trade para o Cache Drop Copy");
-        _cache.AddTradeCaptureReport(notification.ExecutedTrade.Item1);
-        _cache.AddTradeCaptureReport(notification.ExecutedTrade.Item2);
-
+        foreach (var trade in notification.ExecutedTrades.Values)
+        {
+            if (trade is TradeCaptureReport)
+                _cache.AddTradeCaptureReport((TradeCaptureReport) trade);
+            else if (trade is ExecutionReport)
+                _cache.AddExecutionReport((ExecutionReport) trade);
+        }
     }
 }
