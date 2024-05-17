@@ -36,13 +36,13 @@ public enum RedisDataBases
     //OrderId = 0,
     Matching = 0,
     //MatchingTradeId= 1,             // é o execId do executionReport
-    //MatchingExecutionReport = 2,    // dropcopy
-    //MatchingExecutedTrade = 3,      // dropcopy
     //MatchingSecurity= 4,            // marketdata
     //MatchingSnapshotIncrement = 5,  // marketdata
     OrderEngine=1,                  // OrderEngine
     OrderReport=2,
     Security=3,
+    DropCopy = 4,    // dropcopy
+    
 }
 //public enum Redis
 public enum TradeReportTransType

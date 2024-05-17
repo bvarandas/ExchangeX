@@ -2,14 +2,12 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SharedX.Core;
-using SharedX.Core.Entities;
 using SharedX.Core.Enums;
 using SharedX.Core.Matching.DropCopy;
 using SharedX.Core.Specs;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
 using System.Text.Json;
-
 namespace DropCopyX.Infra.Cache;
 public class ExecutionReportChache : IExecutionReportChache
 {
@@ -18,7 +16,7 @@ public class ExecutionReportChache : IExecutionReportChache
     private readonly IDatabase _dbExecutionReport;
     private readonly ILogger<ExecutionReportChache> _logger;
     private static ConcurrentQueue<ExecutionReport> ExecutionReportQueue;
-    private RedisKey keyExecutionReport = new RedisKey(Constants.RedisExecutionReport);
+    private RedisKey keyExecutionReport = new RedisKey(Constants.RedisKeyExecutionReport);
     public ExecutionReportChache(ILogger<ExecutionReportChache> logger, IOptions<ConnectionRedis> config)
     {
         _config = config.Value;
@@ -37,7 +35,8 @@ public class ExecutionReportChache : IExecutionReportChache
     private async Task SetValueRedis(ExecutionReport report)
     {
         RedisValue value = new RedisValue(JsonSerializer.Serialize<ExecutionReport>(report));
-        await _dbExecutionReport.HashSetAsync(keyExecutionReport, new HashEntry[]
+        await _dbExecutionReport.HashSetAsync(keyExecutionReport, 
+            new HashEntry[]
         {
             new HashEntry(report.ExecID, value)
         });

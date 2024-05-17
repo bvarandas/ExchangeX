@@ -7,6 +7,8 @@ using SharedX.Core.Repositories;
 using MongoDB.Bson;
 using DropCopyX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
+using DropCopyX.Infra.Cache;
+
 namespace DropCopyX.ServerApp.Services;
 internal class FixServerApp : MessageCracker, IFixServerApp
 {
@@ -15,6 +17,8 @@ internal class FixServerApp : MessageCracker, IFixServerApp
     private readonly ILogger<FixServerApp> _logger;
     private readonly ILoginRepository _loginRepository;
     private Session _session = null!;
+    private static Thread ThreadSenderReport = null!;
+    private readonly CancellationTokenSource _tokenSource;
     public FixServerApp(ILogger<FixServerApp> logger,
         ILoginRepository loginRepository,
         IExecutedTradeCache executedTradeCache,
@@ -24,7 +28,24 @@ internal class FixServerApp : MessageCracker, IFixServerApp
         _executedTradeCache = executedTradeCache;
         _executionReportCache = executionReportCache;
         _loginRepository = loginRepository;
+
+        _tokenSource = new CancellationTokenSource();
+
+        ThreadSenderReport = new Thread(() => SenderReport(_tokenSource.Token));
+        ThreadSenderReport.Name = nameof(ThreadSenderReport);
+        ThreadSenderReport.Start();
     }
+
+    private void SenderReport(CancellationToken cancellationToken)
+    {
+        while(!cancellationToken.IsCancellationRequested)
+        {
+            
+            Thread.Sleep(10);
+        }
+    }
+
+
 
     public void FromAdmin(Message message, SessionID sessionID)
     {
@@ -102,10 +123,8 @@ internal class FixServerApp : MessageCracker, IFixServerApp
     public void OnMessage(QuickFix.FIX44.OrderMassStatusRequest message, SessionID sessionID)
     {
         var requestId = message.MassStatusReqID;
-
         //0 = All trades 
         var tradeType = message.MassStatusReqType;
-
     }
 
     public void OnMessage(QuickFix.FIX44.TradeCaptureReportRequest message, SessionID sessionID)
@@ -122,8 +141,6 @@ internal class FixServerApp : MessageCracker, IFixServerApp
         //1 = Single Security(default if not specified) 2 = Individual leg of a multi-leg security 3 = Multi - leg security
         var multiLegReportType = message.IsSetMultiLegReportingType() ?
             message.MultiLegReportingType : new MultiLegReportingType('1');
-
-
     }
 
     public void OnMessage(QuickFix.FIX44.TradeCaptureReportRequestAck message, SessionID sessionID)
@@ -226,7 +243,7 @@ internal class FixServerApp : MessageCracker, IFixServerApp
 
         try
         {
-            Session.SendToTarget(exReport, );
+            Session.SendToTarget(exReport);
         }
         catch (SessionNotFound ex)
         {

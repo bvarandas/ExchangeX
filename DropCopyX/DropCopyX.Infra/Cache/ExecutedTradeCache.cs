@@ -2,12 +2,15 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NRedisStack.Graph;
+using QuickFix.Fields.Converters;
 using SharedX.Core;
 using SharedX.Core.Enums;
 using SharedX.Core.Matching.DropCopy;
 using SharedX.Core.Specs;
 using StackExchange.Redis;
+using System;
 using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.Text.Json;
 
 namespace DropCopyX.Infra.Cache;
@@ -16,8 +19,8 @@ public class ExecutedTradeCache : IExecutedTradeCache
     private readonly IOptions<ConnectionRedis> _config;
     private readonly ConnectionMultiplexer _redis;
     private readonly ILogger<ExecutedTradeCache> _logger;
-    private readonly IDatabase _dbMatching;
-    private static ConcurrentQueue<TradeCaptureReport> ExecutedTradeQueue;
+    private readonly IDatabase _dbDropCopy;
+    private static ConcurrentQueue<TradeCaptureReport> ExecutedTradeIncrementalQueue=null!;
     
     private RedisKey keyTradeId = new RedisKey(Constants.RedisKeyTradeId);
     private RedisKey keyExecutedTrade = new RedisKey(Constants.RedisExecutedTrade);
@@ -25,22 +28,22 @@ public class ExecutedTradeCache : IExecutedTradeCache
     public ExecutedTradeCache(ILogger<ExecutedTradeCache> logger, IOptions<ConnectionRedis> config)
     {
         _logger = logger;
-        ExecutedTradeQueue = new ConcurrentQueue<TradeCaptureReport>();
+        ExecutedTradeIncrementalQueue = new ConcurrentQueue<TradeCaptureReport>();
 
         _redis = ConnectionMultiplexer.Connect(_config.Value.ConnectionString, options => {
             options.ReconnectRetryPolicy = new ExponentialRetry(5000, 1000 * 60);
         });
-        _dbMatching = _redis.GetDatabase((int)RedisDataBases.Matching);
+        _dbDropCopy = _redis.GetDatabase((int)RedisDataBases.DropCopy);
     }
     public async void AddExecutionReport(TradeCaptureReport trade)
     {
-        ExecutedTradeQueue.Enqueue(trade);
+        ExecutedTradeIncrementalQueue.Enqueue(trade);
         await SetValueRedis(trade);
     }
     private async Task SetValueRedis(TradeCaptureReport trade)
     {
         RedisValue value = new RedisValue(JsonSerializer.Serialize<TradeCaptureReport>(trade));
-        await _dbMatching.HashSetAsync(keyExecutedTrade, new HashEntry[]
+        await _dbDropCopy.HashSetAsync(keyExecutedTrade, new HashEntry[]
         {
             new HashEntry(trade.TradeId, value)
         });
@@ -48,9 +51,9 @@ public class ExecutedTradeCache : IExecutedTradeCache
 
     public long GetLastTradeId()
     {
-        var TradeId =  _dbMatching.HashGetAsync(keyTradeId, new RedisValue("TradeId") );
+        var TradeId =  _dbDropCopy.HashGetAsync(keyTradeId, new RedisValue("TradeId") );
 
-        var execId = _dbMatching.StringGet("TradeId", CommandFlags.None);
+        var execId = _dbDropCopy.StringGet("TradeId", CommandFlags.None);
         if (!execId.HasValue)
             return 0;
         return (long)execId;
@@ -58,6 +61,30 @@ public class ExecutedTradeCache : IExecutedTradeCache
     public async void SetLastTradeId(long tradeId)
     {
         RedisValue value = new RedisValue(tradeId.ToString());
-        await _dbMatching.HashIncrementAsync(keyTradeId, value);
+        await _dbDropCopy.HashIncrementAsync(keyTradeId, value);
     }
+
+    public bool TryDequeueuExecutionReport(out TradeCaptureReport executionReport)
+    {
+        executionReport = default(TradeCaptureReport)!;
+        if(ExecutedTradeIncrementalQueue.TryDequeue(out TradeCaptureReport executionFound))
+        {
+            executionReport = executionFound;
+            return true;
+        }
+        return false;
+    }
+
+    public async Task<Dictionary<long, TradeCaptureReport>> GetSnapShotTradeCaptureReport()
+    {
+        var result = new Dictionary<long, TradeCaptureReport>();
+        var trades = await _dbDropCopy.HashGetAllAsync(keyExecutedTrade);
+
+        foreach (var trade in trades)
+            result.TryAdd(long.Parse(trade.Name!), JsonSerializer.Deserialize<TradeCaptureReport>(trade.Value));
+
+
+        return result;
+    }
+
 }
