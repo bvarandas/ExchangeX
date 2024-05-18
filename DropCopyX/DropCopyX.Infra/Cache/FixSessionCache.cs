@@ -1,10 +1,16 @@
 ﻿using DropCopyX.Core.Interfaces;
+using FluentResults;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using QuickFix;
+using QuickFix.Fields;
+using QuickFix.FIX44;
 using SharedX.Core;
 using SharedX.Core.Enums;
+using SharedX.Core.Matching;
 using SharedX.Core.Specs;
 using StackExchange.Redis;
+using System.ServiceModel.Channels;
 using System.Text.Json;
 
 namespace DropCopyX.Infra.Cache;
@@ -27,4 +33,22 @@ public class FixSessionCache : IFixSessionCache
         _keyFixSession = new RedisKey(Constants.RedisDropCopyFixSession);
     }
 
+    public async void AddSessionAsync(QuickFix.FIX44.Message request, SessionID sessionID)
+    {
+        RedisValue value = new RedisValue(JsonSerializer.Serialize<QuickFix.FIX44.Message>(request));
+        var key = string.Concat(_keyFixSession, ":", sessionID);
+        await _dbDropCopy.HashSetAsync(key, new HashEntry[]
+        {
+            new HashEntry(request.Header.GetString(Tags.MsgType), value)
+        });
+    }
+
+    public async Task<bool> RemoveSessionAsync(QuickFix.FIX44.Message request, SessionID sessionID)
+    {
+        RedisValue value = new RedisValue(JsonSerializer.Serialize<QuickFix.FIX44.Message>(request));
+        var key = string.Concat(_keyFixSession, ":", sessionID);
+
+        var result = await _dbDropCopy.HashDeleteAsync(key, value);
+        return result;
+    }
 }

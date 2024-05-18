@@ -2,6 +2,7 @@
 namespace MarketDataX.Core.Interfaces;
 public interface IMarketDataChache
 {
-    void AddMarketData(MarketData marketData);
-    MarketData TryDequeueMarketData();
+    void AddMarketDataIncremental(MarketData marketData);
+    bool TryDequeueMarketData(out MarketData marketData);
+    Task<bool> AddMarketDataBook(MarketData marketData);
 }

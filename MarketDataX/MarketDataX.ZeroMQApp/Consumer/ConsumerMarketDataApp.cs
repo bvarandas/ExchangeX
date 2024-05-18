@@ -68,7 +68,9 @@ public class ConsumerMarketDataApp : BackgroundService
                     {
                         var message = _receiver.ReceiveMultipartBytes()[0];
                         var marketData = message.DeserializeFromByteArrayProtobuf<MarketData>();
-                        _cache.AddMarketData(marketData);
+                        _cache.AddMarketDataIncremental(marketData);
+                        _cache.AddMarketDataBook(marketData);
+                            
                         Thread.Sleep(10);
                     }
                 }

@@ -1,8 +1,6 @@
 ﻿using DropCopyX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NRedisStack.Graph;
-using QuickFix.Fields.Converters;
 using SharedX.Core;
 using SharedX.Core.Enums;
 using SharedX.Core.Matching.DropCopy;
@@ -10,22 +8,21 @@ using SharedX.Core.Specs;
 using StackExchange.Redis;
 using System;
 using System.Collections.Concurrent;
-using System.ComponentModel;
 using System.Text.Json;
 
 namespace DropCopyX.Infra.Cache;
-public class ExecutedTradeCache : IExecutedTradeCache
+public class TradeCaptureReportCache : IExecutedTradeCache
 {
     private readonly IOptions<ConnectionRedis> _config;
     private readonly ConnectionMultiplexer _redis;
-    private readonly ILogger<ExecutedTradeCache> _logger;
+    private readonly ILogger<TradeCaptureReportCache> _logger;
     private readonly IDatabase _dbDropCopy;
     private static ConcurrentQueue<TradeCaptureReport> ExecutedTradeIncrementalQueue=null!;
     
     private RedisKey keyTradeId = new RedisKey(Constants.RedisKeyTradeId);
     private RedisKey keyExecutedTrade = new RedisKey(Constants.RedisExecutedTrade);
 
-    public ExecutedTradeCache(ILogger<ExecutedTradeCache> logger, IOptions<ConnectionRedis> config)
+    public TradeCaptureReportCache(ILogger<TradeCaptureReportCache> logger, IOptions<ConnectionRedis> config)
     {
         _logger = logger;
         ExecutedTradeIncrementalQueue = new ConcurrentQueue<TradeCaptureReport>();

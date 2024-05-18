@@ -49,16 +49,14 @@ internal class NativeInjectorBoostrapper
             .AllowCredentials();
         }));
 
-        // Domain - Events
-        //services.AddSingleton<INotificationHandler<ExecutedTradeEvent>, ExecutedTradeEventHandler>();
-
+        // Domain - Commands
         services.AddSingleton<IRequestHandler<ExecutionReportCommand, bool>, ExecutionReportCommandHandler>();
-        //services.AddSingleton<INotificationHandler<OrderFilledEvent>, OrderEventHandler>();
-        //services.AddSingleton<INotificationHandler<OrderOpenedEvent>, OrderEventHandler>();
-        //services.AddSingleton<INotificationHandler<OrderRejectedEvent>, OrderEventHandler>();
+
+
 
         // Infra - Data
-        services.AddSingleton<IExecutedTradeCache, ExecutedTradeCache>();
+        services.AddSingleton<IFixSessionCache, FixSessionCache>();
+        services.AddSingleton<IExecutedTradeCache, TradeCaptureReportCache>();
         services.AddSingleton<IExecutionReportChache, ExecutionReportChache>();
         services.AddSingleton<IDropCopyContext, DropCopyContext>();
         services.AddSingleton<IDropCopyRepository , DropCopyRepository>();
