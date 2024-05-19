@@ -55,7 +55,8 @@ internal class NativeInjectorBoostrapper
 
 
         // Infra - Data
-        services.AddSingleton<IFixSessionCache, FixSessionCache>();
+        
+        services.AddSingleton<IFixSessionDropCopyCache, FixSessionDropCopyCache>();
         services.AddSingleton<IExecutedTradeCache, TradeCaptureReportCache>();
         services.AddSingleton<IExecutionReportChache, ExecutionReportChache>();
         services.AddSingleton<IDropCopyContext, DropCopyContext>();

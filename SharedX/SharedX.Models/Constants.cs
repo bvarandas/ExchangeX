@@ -1,14 +1,23 @@
 ﻿namespace SharedX.Core;
-public static class Constants
+public static class KeyNameRedis
 {
-    public const string RedisKeyTradeId = nameof(RedisKeyTradeId);
-    public const string RedisExecutedTrade = nameof(RedisExecutedTrade);
-    public const string RedisKeyExecutionReport = nameof(RedisKeyExecutionReport);
-    public const string RedisOrderEngine = nameof(RedisOrderEngine);
-    public const string RedisDropCopyFixSession = nameof(RedisDropCopyFixSession);
+    public const string TradeId = nameof(TradeId);
+    public const string ExecutedTrade = nameof(ExecutedTrade);
+    public const string ExecutionReport = nameof(ExecutionReport);
+    public const string OrderEngine = nameof(OrderEngine);
+    public const string DropCopyFixSession = nameof(DropCopyFixSession);
+    public const string MarketDataFixSession = nameof(MarketDataFixSession);
 }
 
-public static class OutboxActivities
+public static class RequestTypeSecurity
+{
+    public const string List = nameof(List);
+    public const string Status = nameof(Status);
+}
+
+
+
+    public static class OutboxActivities
 {
     public const string OrderEngineToMatchingSent= nameof(OrderEngineToMatchingSent);
     public const string OrderEntryToOrderEngineSent = nameof(OrderEntryToOrderEngineSent);

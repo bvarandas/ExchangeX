@@ -6,10 +6,17 @@ using SharedX.Core.Repositories;
 using MongoDB.Bson;
 using SharedX.Core.Entities;
 using SharedX.Core.Matching.MarketData;
+using StackExchange.Redis;
+using NRedisStack.Graph;
+using SharedX.Core.Matching;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System;
+using QuickFix.FIX44;
 
 namespace MarketDataX.ServerApp.Services;
 internal class FixServerApp : MessageCracker, IFixServerApp
 {
+    private readonly IFixSessionMarketDataCache _fixSessionCache;
     private Session _session = null!;
     private readonly ILogger<FixServerApp> _logger;
     private readonly ILoginRepository _loginRepository;
@@ -17,11 +24,15 @@ internal class FixServerApp : MessageCracker, IFixServerApp
     private readonly IMarketDataChache _marketDataChache;
 
     private static Thread ThreadSenderIncremental = null!;
+    
+    private static QuickFix.FIX44.MarketDataRequest _marketDataRequest = null!;
+
     private ManualResetEvent _mseSenderIncremental = new ManualResetEvent(false);
 
     public FixServerApp(ILogger<FixServerApp> logger, 
         IMarketDataChache marketDataChache,
-        ILoginRepository loginRepository)
+        ILoginRepository loginRepository,
+        IFixSessionMarketDataCache fixSessionCache)
     {
         _logger = logger;
         _marketDataChache = marketDataChache;
@@ -31,6 +42,7 @@ internal class FixServerApp : MessageCracker, IFixServerApp
         ThreadSenderIncremental.Name = nameof(ThreadSenderIncremental);
         ThreadSenderIncremental.Start();
 
+        _fixSessionCache = fixSessionCache;
     }
 
     private void SenderMarketDataIncremental(CancellationToken cancellationToken)
@@ -48,7 +60,7 @@ internal class FixServerApp : MessageCracker, IFixServerApp
         }
     }
 
-    public void FromAdmin(Message message, SessionID sessionID)
+    public void FromAdmin(QuickFix.Message message, SessionID sessionID)
     {
         //Efetuar Login
         if (message.Header.GetString(Tags.MsgType).Equals("A"))
@@ -91,7 +103,77 @@ internal class FixServerApp : MessageCracker, IFixServerApp
         }
     }
 
-    public void FromApp(Message message, SessionID sessionID)
+    public void OnMessage(QuickFix.FIX44.MarketDataRequest message, SessionID sessionID)
+    {
+        //0 = Snapshot  1 = Snapshot + Updates(Subscribe)  2= Disable
+        var subscriptionRequestType = message.SubscriptionRequestType;
+
+        //'0'	Full Book        '1' Top of Book   '2'... '100000000000'  Report best N price tiers of data
+        var marketDepth = message.MarketDepth;
+
+        //0 = Full refresh
+        var tradeType = message.MDUpdateType;
+
+        // Number of 269 (MDEntryType) fields in the request.
+        var noMDEntryTypes = message.NoMDEntryTypes;
+        var entryTypesGroup = new MarketDataRequest.NoMDEntryTypesGroup();
+
+        var entryTypeBid                = new MDEntryType('0');
+        var entryTypeOffer              = new MDEntryType('1');
+        var entryTypeTrade              = new MDEntryType('2');
+        var entryTypeOppeningPrice      = new MDEntryType('4');
+        var entryTypeClosingPrice       = new MDEntryType('5');
+        var entryTypeSettlementPrice    = new MDEntryType('6');
+        var entryTypeSessionHighPrice   = new MDEntryType('7');
+        var entryTypeSessionLowPrice    = new MDEntryType('8');
+        var entryTypeTRadeVolume        = new MDEntryType('B');
+
+        message.GetGroup(1, entryTypesGroup);
+        entryTypesGroup.Get(entryTypeBid);
+        entryTypesGroup.Get(entryTypeOffer);
+        entryTypesGroup.Get(entryTypeTrade);
+        entryTypesGroup.Get(entryTypeOppeningPrice);
+        entryTypesGroup.Get(entryTypeClosingPrice);
+        entryTypesGroup.Get(entryTypeSettlementPrice);
+        entryTypesGroup.Get(entryTypeSessionHighPrice);
+        entryTypesGroup.Get(entryTypeSessionLowPrice);
+        entryTypesGroup.Get(entryTypeTRadeVolume);
+
+        //0 = Bid  1 = Offer 2 = Trade
+        var mdEntryType = message.MDUpdateType;
+
+        _marketDataRequest = message;
+        _fixSessionCache.AddSessionAsync(message, sessionID);
+        _mseSenderIncremental.Set();
+    }
+
+    public void OnMessage(QuickFix.FIX44.SecurityListRequest message, SessionID sessionID)
+    {
+        // Unique ID for this request
+        var requestId = message.SecurityReqID;
+        //4 = All Securities (will return all instrument where status = Active
+        var tradeType = message.SecurityListRequestType;
+        // 0 = Snapshot   1 = Snapshot + Updates(Subscribe)  2 =  Disable previous Snapshot + Update Request
+        var subscriptionRequestType = message.SubscriptionRequestType;
+
+        _fixSessionCache.AddSessionAsync(message, sessionID);
+
+        //_marketDataChache.Get
+    }
+
+    public void OnMessage(QuickFix.FIX44.SecurityStatusRequest message, SessionID sessionID)
+    {
+        // Unique ID for this security request
+        var requestId = message.SecurityStatusReqID;
+        //0 = All trades 
+        var tradeType = message.Symbol;
+        // 0 = Snapshot   1 = Snapshot + Updates(Subscribe)  2 =  Disable previous Snapshot + Update Request
+        var eecurityTradingStatus = message.SubscriptionRequestType;
+
+        _fixSessionCache.AddSessionAsync(message, sessionID);
+    }
+
+    public void FromApp(QuickFix.Message message, SessionID sessionID)
     {
         Crack(message, sessionID);
     }
@@ -111,15 +193,13 @@ internal class FixServerApp : MessageCracker, IFixServerApp
 
     }
 
-    public void ToAdmin(Message message, SessionID sessionID)
+    public void ToAdmin(QuickFix.Message message, SessionID sessionID)
     {
         
     }
 
-    public void ToApp(Message message, SessionID sessionId)
+    public void ToApp(QuickFix.Message message, SessionID sessionId)
     {
         
     }
-
-    
 }

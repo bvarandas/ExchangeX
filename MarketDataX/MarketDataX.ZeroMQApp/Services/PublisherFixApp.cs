@@ -22,16 +22,13 @@ internal class PublisherFixApp : BackgroundService
             ThreadedSocketAcceptor(application, messageFactory, settings, logFactory);
     }
 
-    protected async override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation("Iniciando o Fix acceptor...");
 
         _acceptor.Start();
 
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            await Task.Delay(5000, stoppingToken);
-        }
+        return Task.CompletedTask;
     }
 
     public async override Task StopAsync(CancellationToken stoppingToken)

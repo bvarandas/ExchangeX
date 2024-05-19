@@ -19,8 +19,8 @@ public class TradeCaptureReportCache : IExecutedTradeCache
     private readonly IDatabase _dbDropCopy;
     private static ConcurrentQueue<TradeCaptureReport> ExecutedTradeIncrementalQueue=null!;
     
-    private RedisKey keyTradeId = new RedisKey(Constants.RedisKeyTradeId);
-    private RedisKey keyExecutedTrade = new RedisKey(Constants.RedisExecutedTrade);
+    private RedisKey keyTradeId = new RedisKey(KeyNameRedis.TradeId);
+    private RedisKey keyExecutedTrade = new RedisKey(KeyNameRedis.ExecutedTrade);
 
     public TradeCaptureReportCache(ILogger<TradeCaptureReportCache> logger, IOptions<ConnectionRedis> config)
     {
@@ -30,7 +30,7 @@ public class TradeCaptureReportCache : IExecutedTradeCache
         _redis = ConnectionMultiplexer.Connect(_config.Value.ConnectionString, options => {
             options.ReconnectRetryPolicy = new ExponentialRetry(5000, 1000 * 60);
         });
-        _dbDropCopy = _redis.GetDatabase((int)RedisDataBases.DropCopy);
+        _dbDropCopy = _redis.GetDatabase((int)RedisDataBases.Fix);
     }
     public async void AddExecutionReport(TradeCaptureReport trade)
     {

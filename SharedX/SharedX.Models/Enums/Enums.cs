@@ -41,8 +41,7 @@ public enum RedisDataBases
     OrderEngine=1,                  // OrderEngine
     OrderReport=2,
     Security=3,
-    DropCopy = 4,    // dropcopy
-    MarketData = 5,  // MarketData
+    Fix = 4,    // DropCopy e MarketData
     
 }
 //public enum Redis

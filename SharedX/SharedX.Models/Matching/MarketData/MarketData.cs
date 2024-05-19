@@ -4,36 +4,39 @@ namespace SharedX.Core.Matching.MarketData;
 [ProtoContract]
 public class MarketData
 {
+
     [ProtoMember(1)]
-    public string Symbol { get; set; } = string.Empty;
+    public char UpdateAction { get; set; } //'0'-New, '1'-Change, '2'-Delete
     [ProtoMember(2)]
-    public string SecurityID { get; set; } = string.Empty;
+    public string Symbol { get; set; } = string.Empty;
     [ProtoMember(3)]
-    public char SecuritSourceId { get; set; }  //8 //https://www.onixs.biz/fix-dictionary/5.0/tagnum_22.html
+    public string SecurityID { get; set; } = string.Empty;
     [ProtoMember(4)]
-    public ushort EntryID { get; set; }  //0 (bid) or 1 (ask)
+    public char SecuritSourceId { get; set; }  //8 //https://www.onixs.biz/fix-dictionary/5.0/tagnum_22.html
     [ProtoMember(5)]
-    public ushort EntryType { get; set; } ////0 (bid) or 1 (ask) 2 trade 
+    public ushort EntryID { get; set; }  //0 (bid) or 1 (ask)
     [ProtoMember(6)]
-    public decimal EntryPx { get; set; } = decimal.Zero;  /// Preço
+    public ushort EntryType { get; set; } ////0 (bid) or 1 (ask) 2 trade 
     [ProtoMember(7)]
-    public decimal EntrySize { get; set; } = decimal.Zero; // quanity
+    public decimal EntryPx { get; set; } = decimal.Zero;  /// Preço
     [ProtoMember(8)]
-    public string EntryDate { get; set; } = string.Empty; //YYYYMMDD UTC
+    public decimal EntrySize { get; set; } = decimal.Zero; // quanity
     [ProtoMember(9)]
-    public string EntryTime { get; set; } = string.Empty;  //HH:MM:SS.ssssss
+    public string EntryDate { get; set; } = string.Empty; //YYYYMMDD UTC
     [ProtoMember(10)]
-    public string QuoteCondition { get; set; } = string.Empty; // Available values:  Z  = Order Imbalance
+    public string EntryTime { get; set; } = string.Empty;  //HH:MM:SS.ssssss
     [ProtoMember(11)]
-    public string TradeCondition { get; set; } = string.Empty; //não vai ser utilizado
+    public string QuoteCondition { get; set; } = string.Empty; // Available values:  Z  = Order Imbalance
     [ProtoMember(12)]
-    public string PriceLevel { get; set; } = string.Empty; //não vai ser utilizado
+    public string TradeCondition { get; set; } = string.Empty; //não vai ser utilizado
     [ProtoMember(13)]
-    public string QuoteType { get; set; } = string.Empty;//não vai ser utilizado
+    public string PriceLevel { get; set; } = string.Empty; //não vai ser utilizado
     [ProtoMember(14)]
-    public char AggressorSide { get; set; }  //1 Comprador 2 vendedor
+    public string QuoteType { get; set; } = string.Empty;//não vai ser utilizado
     [ProtoMember(15)]
-    public char MultiLegReportingType { get; set; } //Ver mais para frente
+    public char AggressorSide { get; set; }  //1 Comprador 2 vendedor
     [ProtoMember(16)]
+    public char MultiLegReportingType { get; set; } //Ver mais para frente
+    [ProtoMember(17)]
     public long Id { get; set; }
 }

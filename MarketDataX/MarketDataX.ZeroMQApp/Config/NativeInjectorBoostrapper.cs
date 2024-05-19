@@ -9,6 +9,7 @@ using MarketDataX.Infra.Data;
 using SharedX.Core.Bus;
 using SharedX.Core.Specs;
 using MarketDataX.ServerApp.Consumer;
+using MarketDataX.Infra.Cache;
 
 namespace DropCopyX.ServerApp;
 internal class NativeInjectorBoostrapper
@@ -56,7 +57,7 @@ internal class NativeInjectorBoostrapper
         //services.AddSingleton<INotificationHandler<OrderRejectedEvent>, OrderEventHandler>();
 
         // Infra - Data
-        //services.AddSingleton<IOrderEntryContext, OrderEntryContext>();
+        services.AddSingleton<IFixSessionMarketDataCache, FixSessionMarketDataCache>();
         //services.AddSingleton<IOrderEntryRepository, OrderEntryRepository>();
 
         services.AddHostedService<ConsumerMarketDataApp>();

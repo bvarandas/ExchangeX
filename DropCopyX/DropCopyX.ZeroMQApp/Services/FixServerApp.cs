@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace DropCopyX.ServerApp.Services;
 internal class FixServerApp : MessageCracker, IFixServerApp
 {
-    private readonly IFixSessionCache _fixSessionCache;
+    private readonly IFixSessionDropCopyCache _fixSessionCache;
     private readonly IExecutedTradeCache _tradeCaptureReportCache;
     private readonly IExecutionReportChache _executionReportCache;
     private readonly ILogger<FixServerApp> _logger;
@@ -29,7 +29,7 @@ internal class FixServerApp : MessageCracker, IFixServerApp
         ILoginRepository loginRepository,
         IExecutedTradeCache executedTradeCache,
         IExecutionReportChache executionReportCache,
-        IFixSessionCache fixSessionCache)
+        IFixSessionDropCopyCache fixSessionCache)
     {
         _logger = logger;
         _tradeCaptureReportCache = executedTradeCache;

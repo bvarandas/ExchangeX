@@ -1,43 +1,41 @@
-﻿using DropCopyX.Core.Interfaces;
-using FluentResults;
+﻿
+using MarketDataX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuickFix;
 using QuickFix.Fields;
-using QuickFix.FIX44;
 using SharedX.Core;
 using SharedX.Core.Enums;
-using SharedX.Core.Matching;
 using SharedX.Core.Specs;
 using StackExchange.Redis;
-using System.ServiceModel.Channels;
 using System.Text.Json;
 
-namespace DropCopyX.Infra.Cache;
-public class FixSessionCache : IFixSessionCache
+namespace MarketDataX.Infra.Cache;
+
+public class FixSessionMarketDataCache : IFixSessionMarketDataCache
 {
     private readonly IOptions<ConnectionRedis> _config;
     private readonly ConnectionMultiplexer _redis;
-    private readonly ILogger<FixSessionCache> _logger;
-    private readonly IDatabase _dbDropCopy;
+    private readonly ILogger<FixSessionMarketDataCache> _logger;
+    private readonly IDatabase _dbFix;
 
     private readonly RedisKey _keyFixSession;
-    public FixSessionCache(ILogger<FixSessionCache> logger, IOptions<ConnectionRedis> config)
+    public FixSessionMarketDataCache(ILogger<FixSessionMarketDataCache> logger, IOptions<ConnectionRedis> config)
     {
         _logger = logger;
         _redis = ConnectionMultiplexer.Connect(_config.Value.ConnectionString, options => {
             options.ReconnectRetryPolicy = new ExponentialRetry(5000, 1000 * 60);
         });
-        _dbDropCopy = _redis.GetDatabase((int)RedisDataBases.DropCopy);
+        _dbFix = _redis.GetDatabase((int)RedisDataBases.Fix);
 
-        _keyFixSession = new RedisKey(Constants.RedisDropCopyFixSession);
+        _keyFixSession = new RedisKey(KeyNameRedis.DropCopyFixSession);
+
     }
-
     public async void AddSessionAsync(QuickFix.FIX44.Message request, SessionID sessionID)
     {
         RedisValue value = new RedisValue(JsonSerializer.Serialize<QuickFix.FIX44.Message>(request));
         var key = string.Concat(_keyFixSession, ":", sessionID);
-        await _dbDropCopy.HashSetAsync(key, new HashEntry[]
+        await _dbFix.HashSetAsync(key, new HashEntry[]
         {
             new HashEntry(request.Header.GetString(Tags.MsgType), value)
         });
@@ -48,7 +46,7 @@ public class FixSessionCache : IFixSessionCache
         RedisValue value = new RedisValue(JsonSerializer.Serialize<QuickFix.FIX44.Message>(request));
         var key = string.Concat(_keyFixSession, ":", sessionID);
 
-        var result = await _dbDropCopy.HashDeleteAsync(key, value);
+        var result = await _dbFix.HashDeleteAsync(key, value);
         return result;
     }
 }

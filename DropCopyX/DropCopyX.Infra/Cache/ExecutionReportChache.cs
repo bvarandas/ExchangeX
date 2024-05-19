@@ -16,7 +16,7 @@ public class ExecutionReportChache : IExecutionReportChache
     private readonly IDatabase _dbExecutionReport;
     private readonly ILogger<ExecutionReportChache> _logger;
     private static ConcurrentQueue<ExecutionReport> ExecutionReportQueue;
-    private RedisKey keyExecutionReport = new RedisKey(Constants.RedisKeyExecutionReport);
+    private RedisKey keyExecutionReport = new RedisKey(KeyNameRedis.ExecutionReport);
     public ExecutionReportChache(ILogger<ExecutionReportChache> logger, IOptions<ConnectionRedis> config)
     {
         _config = config.Value;

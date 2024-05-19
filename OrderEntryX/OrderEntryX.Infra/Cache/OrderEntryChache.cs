@@ -17,7 +17,7 @@ public class OrderEntryChache : IOrderEntryChache
     private readonly IDatabase _dbOrderEntry;
     private readonly ILogger<OrderEntryChache> _logger;
     private static ConcurrentQueue<OrderEngine> OrderEntryQueue=null!;
-    private RedisKey key = new RedisKey(Constants.RedisOrderEngine);
+    private RedisKey key = new RedisKey(KeyNameRedis.OrderEngine);
 
     public OrderEntryChache(ILogger<OrderEntryChache> logger, IOptions<ConnectionRedis> config)
     {

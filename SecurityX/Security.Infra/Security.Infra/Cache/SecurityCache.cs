@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using SharedX.Core.Matching.OrderEngine;
 using System.Text.Json;
 using SharedX.Core.Entities;
+using System.Collections.Concurrent;
 
 namespace SecurityX.Infra.Cache;
 
@@ -18,7 +19,7 @@ public class SecurityCache: ISecurityCache
     private readonly ILogger<SecurityCache> _logger;
     private readonly ConnectionMultiplexer _redis;
     private readonly RedisKey _key;
-
+    private readonly ConcurrentDictionary<string, SecurityEngine> _securities = null!;
     public SecurityCache(ILogger<SecurityCache> logger, IOptions<ConnectionRedis> config)
     {
         _config = config.Value;
@@ -29,6 +30,8 @@ public class SecurityCache: ISecurityCache
         _dbSecurity = _redis.GetDatabase((int)RedisDataBases.Security);
         _logger = logger;
         _key = new RedisKey("Security");
+
+        _securities = new ConcurrentDictionary<string, SecurityEngine>();
     }
 
     public async Task<Result<SecurityEngine>> GetSecurityBySymbolAsync( string symbol)

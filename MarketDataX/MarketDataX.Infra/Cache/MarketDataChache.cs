@@ -2,6 +2,7 @@
 using MarketDataX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using NRedisStack.Graph;
 using QuickFix.Fields;
 using SharedX.Core.Enums;
@@ -33,7 +34,7 @@ public class MarketDataChache : IMarketDataChache
             options.ReconnectRetryPolicy = new ExponentialRetry(5000, 1000 * 60);
         });
 
-        _dbMarketData = _redis.GetDatabase((int)RedisDataBases.MarketData);
+        _dbMarketData = _redis.GetDatabase((int)RedisDataBases.Fix);
         
         _logger = logger;
     }
@@ -62,6 +63,7 @@ public class MarketDataChache : IMarketDataChache
     {
         RedisValue value = new RedisValue(market.EntryType.ToString());
         RedisKey key = new RedisKey(string.Concat(_keyIncremental, ":", market.Symbol));
+
         await _dbMarketData.HashSetAsync(key, new HashEntry[]
         {
             new HashEntry(market.PriceLevel, value)
@@ -69,15 +71,16 @@ public class MarketDataChache : IMarketDataChache
         return true;
     }
 
-    //public async Task<Result<Dictionary<long, MarketData>>> GetSnapShotMarketData()
-    //{
-    //    var result = new Dictionary<long, MarketData>();
-    //    var snap = await _dbMarketData.HashGetAllAsync(_keyIncremental);
-    //    foreach (var data in snap)
-    //        result.TryAdd(data.Name, data);
+    public async Task<Result<Dictionary<long, MarketData>>> GetSnapShotMarketData()
+    {
+        var result = new Dictionary<long, MarketData>();
+        var snap = await _dbMarketData.HashGetAllAsync(_keyIncremental);
 
-    //            return Result.Ok(result);
-    //}
+        foreach (var data in snap)
+            result.TryAdd(long.Parse(data.Name!), JsonSerializer.Deserialize<MarketData>(data.Value!)!);
+        
+        return Result.Ok(result);
+    }
     public bool TryDequeueMarketData(out MarketData marketData)
     {
         marketData = default(MarketData)!;
