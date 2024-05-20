@@ -68,7 +68,11 @@ public class OrderEventHandler :
         else if (@event.Order.Side == SideTrade.Sell)
             _matchCache.UpsertSellOrder(@event.Order);
 
-
+        if (@event.Order.OrderType == OrderType.StopLimit ||
+            @event.Order.OrderType == OrderType.Stop)
+        {
+            _orderStopCache.UpsertOrderAsync(@event.Order);
+        }
 
     }
 }

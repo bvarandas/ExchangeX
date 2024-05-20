@@ -6,4 +6,5 @@ public interface IMatchingRepository
 {
     Task<(OrderStatus, Dictionary<long, OrderEngine>)> MatchingLimitAsync(OrderEngine orderEngine, CancellationToken cancellation);
     Task<(OrderStatus, Dictionary<long, OrderEngine>)> MatchingMarketAsync(OrderEngine orderEngine, CancellationToken cancellation);
+    Task<bool> UpsertOrderMatchingAsync(OrderEngine orderEngine, CancellationToken cancellation);
 }

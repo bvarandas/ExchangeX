@@ -6,6 +6,8 @@ using SharedX.Core.Matching;
 using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Enums;
 using StackExchange.Redis;
+using FluentResults;
+using System.Transactions;
 
 namespace MatchingX.Infra.Repositories;
 
@@ -18,6 +20,72 @@ public class MatchingRepository : IMatchingRepository
         _context = context;
         _logger = logger;
     }
+
+    public async Task<bool> UpsertOrderMatchingAsync(OrderEngine orderEngine, CancellationToken cancellation)
+    {
+        bool result = false;
+        var clientSessionOptions = new ClientSessionOptions();
+        using (var session = await _context.MongoClient.StartSessionAsync(clientSessionOptions, cancellation))
+        {
+            session.StartTransaction();
+            try
+            {
+                var resultReplace = await _context.Matching.ReplaceOneAsync(session,
+                null,
+                replacement: orderEngine,
+                options: new ReplaceOptions { IsUpsert = true },
+                cancellation);
+
+                result = resultReplace.IsAcknowledged && resultReplace.ModifiedCount > 0;
+
+                await session.CommitTransactionAsync();
+            }
+            catch (ArgumentNullException ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                await session.AbortTransactionAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                await session.AbortTransactionAsync();
+            }
+        }
+        return result;
+    } 
+
+    public async Task<bool> RemoveOrdersMatchingAsync(List<long> IdOrders, CancellationToken cancellation)
+    {
+        bool result = false;
+        var clientSessionOptions = new ClientSessionOptions();
+        using (var session = await _context.MongoClient.StartSessionAsync(clientSessionOptions, cancellation))
+        {
+            session.StartTransaction();
+            try
+            {
+                var filterDelete = Builders<OrderEngine>.Filter
+                            .In(o => o.OrderID, IdOrders);
+
+                var resultDelete = await _context.Matching.DeleteManyAsync(session, filterDelete);
+                result = resultDelete.IsAcknowledged && resultDelete.DeletedCount > 0;
+
+                await session.CommitTransactionAsync();
+            }
+            catch (ArgumentNullException ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                await session.AbortTransactionAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                await session.AbortTransactionAsync();
+            }
+        }
+        return result;
+    }
+
+
 
     public async Task<(OrderStatus, Dictionary<long, OrderEngine>)> MatchingLimitAsync(OrderEngine orderEngine,  CancellationToken cancellation)
     {
@@ -33,8 +101,7 @@ public class MatchingRepository : IMatchingRepository
             
             using (var session = await _context.MongoClient.StartSessionAsync(clientSessionOptions, cancellation))
             {
-                var transactionOptions = new TransactionOptions();
-                session.StartTransaction(transactionOptions);
+                session.StartTransaction();
                 
                 try
                 {

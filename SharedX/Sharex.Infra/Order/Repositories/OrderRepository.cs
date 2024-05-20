@@ -164,6 +164,8 @@ public class OrderRepository : IOrderRepository
             replacement: order,
             options: new ReplaceOptions { IsUpsert = true },
             cancellation);
+
+            result = resultReplace.IsAcknowledged && resultReplace.ModifiedCount > 0;
         }
         catch (ArgumentNullException ex)
         {
