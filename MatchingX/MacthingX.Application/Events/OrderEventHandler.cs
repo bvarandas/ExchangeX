@@ -8,7 +8,8 @@ public class OrderEventHandler :
     INotificationHandler<OrderCanceledEvent>,
     INotificationHandler<OrderTradedEvent>,
     INotificationHandler<OrderOpenedEvent>,
-    INotificationHandler<OrderRejectedEvent>
+    INotificationHandler<OrderRejectedEvent>,
+    INotificationHandler<OrderModifiedEvent>
 {
     private readonly IMatchingCache _matchCache;
     private readonly IOrderStopCache _orderStopCache;
@@ -58,5 +59,16 @@ public class OrderEventHandler :
         {
             await _orderStopCache.DeleteOrderAsync(@event.Order.Symbol, @event.Order.OrderID);
         }
+    }
+
+    public async Task Handle(OrderModifiedEvent @event, CancellationToken cancellationToken)
+    {
+        if (@event.Order.Side == SideTrade.Buy)
+            _matchCache.UpsertBuyOrder(@event.Order);
+        else if (@event.Order.Side == SideTrade.Sell)
+            _matchCache.UpsertSellOrder(@event.Order);
+
+
+
     }
 }

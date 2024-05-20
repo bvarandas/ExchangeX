@@ -49,4 +49,11 @@ public class MatchContextStrategy
         result  = await this._match.MatchOrderAsync(order);
         return result;
     }
+
+    public async Task<bool> CancelOrderAsync(OrderEngine order)
+    {
+        bool result = false;
+        result = this._match.CancelOrder(order);
+        return result;
+    }
 }

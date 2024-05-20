@@ -17,7 +17,7 @@ public class ConsumerSecurityApp : BackgroundService
     private PullSocket _receiver;
     private readonly ConnectionZmq _config;
     private readonly IMatchingReceiver _matchReceiver;
-    private static Thread ThreadReceiverOrder = null!;
+    private static Thread ThreadReceiverSecurity = null!;
     public ConsumerSecurityApp(ILogger<PublisherMarketDataApp> logger,
         IOptions<ConnectionZmq> options
         , IMatchingReceiver matchReceiver
@@ -37,9 +37,9 @@ public class ConsumerSecurityApp : BackgroundService
     {
         _logger.LogInformation("Iniciando o Receiver Order ZeroMQ...");
 
-        ThreadReceiverOrder = new Thread(() => ReceiverOrder(cancellationToken));
-        ThreadReceiverOrder.Name = nameof(ThreadReceiverOrder);
-        ThreadReceiverOrder.Start();
+        ThreadReceiverSecurity = new Thread(() => ReceiverSecurity(cancellationToken));
+        ThreadReceiverSecurity.Name = nameof(ThreadReceiverSecurity);
+        ThreadReceiverSecurity.Start();
 
         return Task.CompletedTask;
     }
@@ -50,7 +50,7 @@ public class ConsumerSecurityApp : BackgroundService
         await base.StopAsync(cancellationToken);
     }
 
-    private void ReceiverOrder(CancellationToken stoppingToken)
+    private void ReceiverSecurity(CancellationToken stoppingToken)
     {
         bool isConnected = false;
 

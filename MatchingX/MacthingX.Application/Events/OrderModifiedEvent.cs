@@ -1,11 +1,17 @@
 ﻿using SharedX.Core.Events;
 using SharedX.Core.Matching.OrderEngine;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace MacthingX.Application.Events;
-public class OrderOpenedEvent: Event
+
+public class OrderModifiedEvent : Event
 {
     public readonly OrderEngine Order;
-    public OrderOpenedEvent(OrderEngine order )
+    public OrderModifiedEvent(OrderEngine order)
     {
         Order = order;
         Timestamp = DateTime.Now;
