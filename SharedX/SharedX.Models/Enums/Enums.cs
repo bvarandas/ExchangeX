@@ -55,5 +55,6 @@ public enum Execution
 {
     ToOpen = 0,
     ToCancel = 1,
-    ToCancelReplace = 2
+    ToCancelReplace = 2,
+    ToModify = 3
 }

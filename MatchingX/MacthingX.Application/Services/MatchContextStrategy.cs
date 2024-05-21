@@ -3,13 +3,13 @@ using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Enums;
 using SharedX.Core.Interfaces;
 namespace MacthingX.Application.Services;
-public class MatchContextStrategy
+public class MatchContextStrategy : IMatchContextStrategy
 {
     private IMatch _match;
     private readonly IOrderRepository _orderRepository;
     private readonly IMatchingCache _matchingCache;
 
-    public MatchContextStrategy() { }
+    
     public MatchContextStrategy(IMatch match, 
         IOrderRepository orderRepository, 
         IMatchingCache matchingCache)

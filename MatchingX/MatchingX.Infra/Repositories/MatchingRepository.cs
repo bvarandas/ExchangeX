@@ -228,7 +228,7 @@ public class MatchingRepository : IMatchingRepository
             
             using (var session = await _context.MongoClient.StartSessionAsync(clientSessionOptions, cancellation))
             {
-                var transactionOptions = new TransactionOptions();
+                var transactionOptions = new MongoDB.Driver.TransactionOptions();
                 session.StartTransaction(transactionOptions);
                 try
                 {

@@ -1,6 +1,5 @@
-﻿using SharedX.Core.Matching.OrderEngine;
+﻿using MatchingX.Core.Interfaces;
 namespace MacthingX.Application.Interfaces;
-public interface IMatchLimit
+public interface IMatchLimit: IMatch
 {
-    void ReceiveOrder(OrderEngine order);
 }

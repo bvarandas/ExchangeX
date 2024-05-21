@@ -6,40 +6,38 @@ using SharedX.Core.Bus;
 using SharedX.Core.Enums;
 using SharedX.Core.Matching.OrderEngine;
 namespace MacthingX.Application.Services;
-public class MatchLimit :  IMatchLimit, IMatch
+public class MatchLimit :  IMatchLimit
 {
     protected readonly ITradeOrderService _tradeOrder;
     protected readonly IMediatorHandler Bus;
-    public MatchLimit(ILogger<MatchLimit> logger, 
-        IMediatorHandler bus, 
-        ITradeOrderService tradeOrder) 
+    public MatchLimit(ILogger<MatchLimit> logger, IMediatorHandler bus, ITradeOrderService tradeOrder) 
     {
         _tradeOrder = tradeOrder;
         Bus = bus;
     }
     public void ReceiveOrder(OrderEngine order)
     {
-        this.AddOrder(order);
-    }
-
-    public bool AddOrder(OrderEngine order)
-    {
-        _tradeOrder.AddOrder(order);
-        return true;
+        switch (order.Execution)
+        {
+            case Execution.ToCancel:
+                this.CancelOrder(order);
+                break;
+            case Execution.ToModify:
+                this.ModifyOrder(order);
+                break;
+            case Execution.ToOpen:
+                _tradeOrder.AddOrder(order);
+                break;
+        }
     }
     public bool CancelOrder(OrderEngine orderToCancel)
     {
         _tradeOrder.CancelOrder(orderToCancel);
         return true;
     }
-    public bool ReplaceOrder(OrderEngine orderToReplace)
-    {
-        _tradeOrder.ReplaceOrder(orderToReplace);
-        return true;
-    }
     public bool ModifyOrder(OrderEngine order)
     {
-        throw new NotImplementedException();
+        return _tradeOrder.ModifyOrder(order).Result;
     }
 
     public async Task<bool> MatchOrderAsync(OrderEngine order)

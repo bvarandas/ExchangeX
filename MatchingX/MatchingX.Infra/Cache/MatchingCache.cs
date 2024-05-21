@@ -88,7 +88,7 @@ public class MatchingCache : IMatchingCache
         return Result.Ok(result);
     }
     
-    public async void UpsertBuyOrder(OrderEngine order)
+    public async Task<bool> UpsertBuyOrder(OrderEngine order)
     {
         RedisValue value = new RedisValue(JsonSerializer.Serialize<OrderEngine>(order));
         var key = string.Concat(keyBuyOrders, ":", order.Symbol);
@@ -97,9 +97,10 @@ public class MatchingCache : IMatchingCache
             {
                 new HashEntry(order.OrderID, value)
             });
+        return true;
     }
 
-    public async void UpsertSellOrder(OrderEngine order)
+    public async Task<bool> UpsertSellOrder(OrderEngine order)
     {
         RedisValue value = new RedisValue(JsonSerializer.Serialize<OrderEngine>(order));
         var key = string.Concat(keySellOrders, ":", order.Symbol);
@@ -108,6 +109,7 @@ public class MatchingCache : IMatchingCache
             {
                 new HashEntry(order.OrderID, value)
             });
+        return true;
     }
 
     public async Task<bool> DeleteBuyOrderAsync(string symbol, long orderId)
@@ -137,4 +139,5 @@ public class MatchingCache : IMatchingCache
         }
         return result;
     }
+
 }

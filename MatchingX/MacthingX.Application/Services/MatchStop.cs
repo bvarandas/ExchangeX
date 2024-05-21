@@ -1,27 +1,21 @@
 ﻿using MacthingX.Application.Commands.Match;
 using MacthingX.Application.Events;
 using MacthingX.Application.Interfaces;
-using MassTransit;
-using MatchingX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using SharedX.Core.Bus;
 using SharedX.Core.Enums;
 using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
 using System.Collections.Concurrent;
-
 namespace MacthingX.Application.Services;
-public class MatchStop : IMatchStop, IMatch
+public class MatchStop : IMatchStop
 {
     private readonly ConcurrentDictionary<long, OrderEngine> DicOrdersToCancel;
     protected readonly ITradeOrderService _tradeOrder;
     protected readonly IOrderStopCache _orderStopCache;
     protected readonly IMediatorHandler Bus;
 
-    public MatchStop(ILogger<MatchStop> logger, 
-        IMediatorHandler bus, 
-        IOrderStopCache orderStopCache,
-        ITradeOrderService tradeOrder) 
+    public MatchStop(ILogger<MatchStop> logger, IMediatorHandler bus, IOrderStopCache orderStopCache, ITradeOrderService tradeOrder) 
     {
         DicOrdersToCancel = new ConcurrentDictionary<long, OrderEngine>();
 
@@ -64,40 +58,22 @@ public class MatchStop : IMatchStop, IMatch
         }
     }
 
-    public bool AddOrder(OrderEngine order)
+    public void ReceiveOrder(OrderEngine order)
     {
         switch (order.Execution)
         {
-            case Execution.ToCancel when order.Side == SideTrade.Sell:
+            case Execution.ToCancel:
                 this.CancelOrder(order);
                 break;
-            case Execution.ToCancel when order.Side == SideTrade.Buy:
-                this.CancelOrder(order);
-                break;
-            case Execution.ToCancelReplace when order.Side == SideTrade.Sell:
-                this.CancelOrder(order);
-                this.ReplaceOrder(order);
-                break;
-            case Execution.ToCancelReplace when order.Side == SideTrade.Buy:
-                this.CancelOrder(order);
-                this.ReplaceOrder(order);
+            case Execution.ToModify:
+                this.ModifyOrder(order);
                 break;
             case Execution.ToOpen:
                 _orderStopCache.UpsertOrderAsync(order);
                 break;
         }
-        return true;
     }
-
-    public void ReceiveOrder(OrderEngine order)
-    {
-        this.AddOrder(order);
-    }
-    public bool ReplaceOrder(OrderEngine order)
-    {
-        return _tradeOrder.ReplaceOrder(order);
-    }
-
+    
     public bool CancelOrder(OrderEngine orderToCancel)
     {
         bool cancelled = false;
@@ -128,6 +104,6 @@ public class MatchStop : IMatchStop, IMatch
 
     public bool ModifyOrder(OrderEngine order)
     {
-        throw new NotImplementedException();
+        return _tradeOrder.ModifyOrder(order).Result;
     }
 }

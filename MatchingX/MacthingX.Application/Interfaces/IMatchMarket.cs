@@ -1,6 +1,5 @@
-﻿using SharedX.Core.Matching.OrderEngine;
+﻿using MatchingX.Core.Interfaces;
 namespace MacthingX.Application.Interfaces;
-public interface IMatchMarket
+public interface IMatchMarket: IMatch
 {
-    void ReceiveOrder(OrderEngine order);
 }

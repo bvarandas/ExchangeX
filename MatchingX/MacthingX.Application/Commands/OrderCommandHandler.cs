@@ -7,6 +7,7 @@ using MatchingX.Application.Commands;
 using MatchingX.Core.Notifications;
 using SharedX.Core.Matching.OrderEngine;
 using MacthingX.Application.Commands.Order;
+using MacthingX.Application.Services;
 
 namespace MacthingX.Application.Commands;
 
@@ -20,7 +21,7 @@ public class OrderCommandHandler :
 {
     private readonly IOrderRepository _repository;
     private readonly IMediatorHandler _bus;
-
+    
     public OrderCommandHandler(IOrderRepository repository, 
         IMediatorHandler bus,
         INotificationHandler<DomainNotification> notifications)
@@ -28,6 +29,7 @@ public class OrderCommandHandler :
     {
         _repository = repository;
         _bus = bus;
+        
     }
 
     public async Task<bool> Handle(OrderOpenedCommand command, CancellationToken cancellationToken)

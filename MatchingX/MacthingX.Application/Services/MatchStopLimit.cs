@@ -1,6 +1,5 @@
 ﻿using MacthingX.Application.Commands.Match;
 using MacthingX.Application.Interfaces;
-using MassTransit;
 using MatchingX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using SharedX.Core.Bus;
@@ -9,7 +8,7 @@ using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
 using System.Collections.Concurrent;
 namespace MacthingX.Application.Services;
-public class MatchStopLimit :  IMatchStopLimit, IMatch
+public class MatchStopLimit :  IMatchStopLimit
 {
     protected readonly IOrderStopCache _orderStopCache;
     private readonly ConcurrentDictionary<long, OrderEngine> DicOrdersToCancel;
@@ -61,40 +60,20 @@ public class MatchStopLimit :  IMatchStopLimit, IMatch
         }
     }
 
-    public bool AddOrder(OrderEngine order)
+    public void ReceiveOrder(OrderEngine order)
     {
         switch (order.Execution)
         {
-            case Execution.ToCancel when order.Side == SideTrade.Sell:
+            case Execution.ToCancel:
                 this.CancelOrder(order);
                 break;
-            case Execution.ToCancel when order.Side == SideTrade.Buy:
-                this.CancelOrder(order);
-                break;
-            case Execution.ToCancelReplace when order.Side == SideTrade.Sell:
-                this.CancelOrder(order);
-                this.ReplaceOrder(order);
-                break;
-            case Execution.ToCancelReplace when order.Side == SideTrade.Buy:
-                this.CancelOrder(order);
-                this.ReplaceOrder(order);
+            case Execution.ToModify:
+                this.ModifyOrder(order);
                 break;
             case Execution.ToOpen:
-                _orderStopCache.UpsertOrderAsync(order);
+                _tradeOrder.AddOrder(order);
                 break;
         }
-        return true;
-
-    }
-
-    public void ReceiveOrder(OrderEngine order)
-    {
-        this.AddOrder(order);
-    }
-
-    public bool ReplaceOrder(OrderEngine order)
-    {
-        return _tradeOrder.ReplaceOrder(order);
     }
 
     public bool CancelOrder(OrderEngine orderToCancel)
@@ -108,7 +87,7 @@ public class MatchStopLimit :  IMatchStopLimit, IMatch
 
     public bool ModifyOrder(OrderEngine order)
     {
-        throw new NotImplementedException();
+        return _tradeOrder.ModifyOrder(order).Result;
     }
 
     public async Task<bool> MatchOrderAsync(OrderEngine order)
@@ -128,7 +107,4 @@ public class MatchStopLimit :  IMatchStopLimit, IMatch
         }
         return true;
     }
-    
-
-    
 }

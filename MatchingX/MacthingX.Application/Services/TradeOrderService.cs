@@ -106,14 +106,7 @@ public class TradeOrderService : ITradeOrderService, IDisposable
     public bool CancelOrder(OrderEngine orderToCancel)
     {
         bool cancelled = false;
-        if (orderToCancel.Side == SideTrade.Buy)
-        {
-            cancelled = RemoveCancelledOrdersAsync(orderToCancel).Result;
-        }
-        else if (orderToCancel.Side == SideTrade.Sell)
-        {
-            cancelled = RemoveCancelledOrdersAsync(orderToCancel).Result;
-        }
+        cancelled = RemoveCancelledOrdersAsync(orderToCancel).Result;
         if (cancelled)
         {
             orderToCancel.OrderStatus = OrderStatus.Cancelled;
@@ -122,6 +115,20 @@ public class TradeOrderService : ITradeOrderService, IDisposable
             QueueOrderStatusChanged.Enqueue(orderToCancel);
 
         return cancelled;
+    }
+
+    public async Task<bool> ModifyOrder(OrderEngine orderEngine)
+    {
+        bool modified = false;
+        if (orderEngine.Side == SideTrade.Buy)
+        {
+            modified = await _matchingCache.UpsertBuyOrder(orderEngine);
+        }
+        else if (orderEngine.Side == SideTrade.Buy)
+        {
+            modified = await _matchingCache.UpsertSellOrder(orderEngine);
+        }
+        return modified;
     }
 
     public async Task<bool> RemoveCancelledOrdersAsync(OrderEngine orderToCancel)
@@ -135,14 +142,6 @@ public class TradeOrderService : ITradeOrderService, IDisposable
             cancelled = await _matchingCache.DeleteSellOrderAsync(orderToCancel.Symbol, orderToCancel.OrderID);
         }
         return cancelled;
-    }
-
-    public async Task<bool> RemoveTradedOrdersAsync(OrderEngine buyOrder, OrderEngine sellOrder)
-    {
-        var buyRemoved = await _matchingCache.DeleteBuyOrderAsync(buyOrder.Symbol, buyOrder.OrderID);
-        var sellRemoved = await _matchingCache.DeleteBuyOrderAsync(sellOrder.Symbol, sellOrder.OrderID);
-
-        return buyRemoved && sellRemoved;
     }
 
     public async Task<bool> RemoveTradedOrdersAsync(Dictionary<long, OrderEngine> dicOrders)
@@ -268,23 +267,6 @@ public class TradeOrderService : ITradeOrderService, IDisposable
         return result;
     }
 
-
-    
-    public bool ReplaceOrder(OrderEngine order)
-    {
-        bool replaced = false;
-
-        if (order.Side == SideTrade.Buy)
-            _matchingCache.UpsertBuyOrder(order);
-        else if (order.Side == SideTrade.Sell)
-            _matchingCache.UpsertSellOrder(order);
-
-        order.OrderStatus = OrderStatus.New;
-        QueueOrderStatusChanged.Enqueue(order);
-        replaced = true;
-        return replaced;
-    }
-
     public void SortBuyOrders(ref Dictionary<long, OrderEngine> buyOrders)
     {
         var ordersSorted = buyOrders.OrderBy(kvp => kvp.Value.Price);
@@ -321,5 +303,4 @@ public class TradeOrderService : ITradeOrderService, IDisposable
     {
         _running = false;
     }
-
 }

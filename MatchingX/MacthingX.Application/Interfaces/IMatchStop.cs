@@ -1,6 +1,6 @@
-﻿using SharedX.Core.Matching.OrderEngine;
+﻿using MatchingX.Core.Interfaces;
+using SharedX.Core.Matching.OrderEngine;
 namespace MacthingX.Application.Interfaces;
-public interface IMatchStop
+public interface IMatchStop : IMatch
 {
-    void ReceiveOrder(OrderEngine order);
 }
