@@ -1,7 +1,7 @@
-﻿using MacthingX.Application.Validations;
-using MatchingX.Core.Interfaces;
+﻿using OrderEngineX.Application.Validations;
+using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
-namespace MacthingX.Application.Commands.Order;
+namespace OrderEngineX.Application.Commands.Order;
 public class OrderCancelCommand : OrderEngineCommand
 {
     private readonly IMatchingCache _cache;
@@ -11,7 +11,6 @@ public class OrderCancelCommand : OrderEngineCommand
         Order = order;
         _cache = cache;
     }
-
     public override bool IsValid()
     {
         ValidationResult = new OrderCancelRequestValidation(_cache).Validate(this);

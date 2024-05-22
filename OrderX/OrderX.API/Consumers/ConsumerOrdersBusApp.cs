@@ -3,15 +3,21 @@ using SharedX.Core.Enums;
 using SharedX.Core.Bus;
 using SharedX.Core.Matching.OrderEngine;
 using OrderEngineX.Application.Commands;
-using MarketDataX.Application.Commands;
-
+using OrderEngineX.Application.Commands.Order;
+using SharedX.Core.Interfaces;
 namespace OrderX.API.Consumers;
 public class ConsumerOrdersBusApp : IConsumer<OrderEngine>
 {
     private readonly ILogger<ConsumerOrdersBusApp> _logger;
     private readonly IMediatorHandler _mediatorHandler;
-    public ConsumerOrdersBusApp(ILogger<ConsumerOrdersBusApp> logger, IMediatorHandler mediatorHandler)
+    private readonly IMatchingCache _cache;
+    public ConsumerOrdersBusApp(
+        ILogger<ConsumerOrdersBusApp> logger, 
+        IMediatorHandler mediatorHandler,
+        IMatchingCache cache
+        )
     {
+        _cache = cache;
         _logger = logger;
         _mediatorHandler = mediatorHandler;
     }
@@ -22,13 +28,13 @@ public class ConsumerOrdersBusApp : IConsumer<OrderEngine>
         switch (context.Message.Execution)
         {
             case Execution.ToCancel:
-                command = new OrderTradeCancelCommand(context.Message);
+                command = new OrderCancelCommand(context.Message,_cache);
                 break;
             case Execution.ToCancelReplace:
-                command = new OrderTradeCancelReplaceCommand(context.Message);
+                command = new OrderCancelReplaceCommand(context.Message, _cache);
                 break;
             case Execution.ToOpen:
-                command = new OrderTradeNewCommand(context.Message);
+                command = new OrderOpenedCommand(context.Message, _cache);
                 break;
         }
         _mediatorHandler.SendCommand(command);

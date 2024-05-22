@@ -1,6 +1,4 @@
 ﻿using FluentValidation.Results;
-using MacthingX.Application.Commands;
-using MacthingX.Application.Commands.Order;
 using MacthingX.Application.Events;
 using MatchingX.Core.Notifications;
 using MediatR;
@@ -29,64 +27,64 @@ public class CommandHandler
             _bus.RaiseEvent(new DomainNotification(message.MessageType, error.ErrorMessage));
         }
 
-        MakeReportWithErrors(message,message.ValidationResult.Errors);
+        //MakeReportWithErrors(message,message.ValidationResult.Errors);
 
         //_bus.RaiseEvent(new OrderTradeRejectEvent(report));
     }
     
-    private void MakeReportWithErrors(Command message, List<ValidationFailure> failures)
-    {
-        var report = new ReportFix();
-        switch (message)
-        {
-            case OrderCancelCommand:
-                {
-                    foreach (var failure in failures)
-                    {
-                        int CxlRejReason = int.Parse(failure.ErrorCode);
-                        report = ((OrderCancelCommand)message)
-                            .Order.ReportOrderCancelRejectFix(CxlRejReason, '1', failure.ErrorMessage);
-                        _bus.RaiseEvent(new OrderRejectEvent(report));
-                    }
+    //private void MakeReportWithErrors(Command message, List<ValidationFailure> failures)
+    //{
+    //    var report = new ReportFix();
+    //    switch (message)
+    //    {
+    //        case OrderCancelCommand:
+    //            {
+    //                foreach (var failure in failures)
+    //                {
+    //                    int CxlRejReason = int.Parse(failure.ErrorCode);
+    //                    report = ((OrderCancelCommand)message)
+    //                        .Order.ReportOrderCancelRejectFix(CxlRejReason, '1', failure.ErrorMessage);
+    //                    _bus.RaiseEvent(new OrderRejectEvent(report));
+    //                }
 
-                }
-                break;
-            case OrderCancelReplaceCommand:
-                {
-                    foreach (var failure in failures)
-                    {
-                        if (failure.PropertyName != "replace")
-                        {
-                            int CxlRejReason = int.Parse(failure.ErrorCode);
-                            report = ((OrderCancelCommand)message)
-                                .Order.ReportOrderCancelRejectFix(CxlRejReason, '1', failure.ErrorMessage);
-                            _bus.RaiseEvent(new OrderRejectEvent(report));
-                        }
-                        else
-                        {
-                            int BusinessRejectReason = int.Parse(failure.ErrorCode);
-                            report = ((OrderCancelCommand)message)
-                                .Order.ReportBusinessMessageRejectFix(BusinessRejectReason, "x", failure.ErrorMessage);
-                            _bus.RaiseEvent(new OrderRejectEvent(report));
-                        }
-                    }
+    //            }
+    //            break;
+    //        case OrderCancelReplaceCommand:
+    //            {
+    //                foreach (var failure in failures)
+    //                {
+    //                    if (failure.PropertyName != "replace")
+    //                    {
+    //                        int CxlRejReason = int.Parse(failure.ErrorCode);
+    //                        report = ((OrderCancelCommand)message)
+    //                            .Order.ReportOrderCancelRejectFix(CxlRejReason, '1', failure.ErrorMessage);
+    //                        _bus.RaiseEvent(new OrderRejectEvent(report));
+    //                    }
+    //                    else
+    //                    {
+    //                        int BusinessRejectReason = int.Parse(failure.ErrorCode);
+    //                        report = ((OrderCancelCommand)message)
+    //                            .Order.ReportBusinessMessageRejectFix(BusinessRejectReason, "x", failure.ErrorMessage);
+    //                        _bus.RaiseEvent(new OrderRejectEvent(report));
+    //                    }
+    //                }
                     
-                }
-                break;
-            case OrderOpenedCommand:
-                {
-                    foreach (var failure in failures)
-                    {
-                        int BusinessRejectReason = int.Parse(failure.ErrorCode);
-                        report = ((OrderOpenedCommand)message)
-                            .Order.ReportBusinessMessageRejectFix(BusinessRejectReason, "1", failure.ErrorMessage);
-                        _bus.RaiseEvent(new OrderRejectEvent(report));
-                    }
+    //            }
+    //            break;
+    //        case OrderOpenedCommand:
+    //            {
+    //                foreach (var failure in failures)
+    //                {
+    //                    int BusinessRejectReason = int.Parse(failure.ErrorCode);
+    //                    report = ((OrderOpenedCommand)message)
+    //                        .Order.ReportBusinessMessageRejectFix(BusinessRejectReason, "1", failure.ErrorMessage);
+    //                    _bus.RaiseEvent(new OrderRejectEvent(report));
+    //                }
                     
-                }
-                break;
-        }
-    }
+    //            }
+    //            break;
+    //    }
+    //}
 
     
 }

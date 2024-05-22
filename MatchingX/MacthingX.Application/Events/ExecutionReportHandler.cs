@@ -2,11 +2,9 @@
 using MatchingX.Core.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Logging;
-
 namespace MacthingX.Application.Events;
 public class ExecutionReportHandler : 
     INotificationHandler<OrderOpenedEvent>,
-    INotificationHandler<OrderRejectedEvent>,
     INotificationHandler<OrderCanceledEvent>
 {
     private readonly IDropCopyCache _dropCopyCache;
@@ -20,21 +18,12 @@ public class ExecutionReportHandler :
         _dropCopyCache = dropCopyCache;
         _marketDataCache = marketDataCache;
     }
-    
     public Task Handle(OrderOpenedEvent notification, CancellationToken cancellationToken)
     {
         _marketDataCache.AddIncremental(notification.Order.ToMarketData());
         _dropCopyCache.AddExecutionReport(notification.Order.ToExecutionReport());
         return Task.CompletedTask;
     }
-
-    public Task Handle(OrderRejectedEvent notification, CancellationToken cancellationToken)
-    {
-        _marketDataCache.AddIncremental(notification.Order.ToMarketData());
-        _dropCopyCache.AddExecutionReport(notification.Order.ToExecutionReport());
-        return Task.CompletedTask;
-    }
-
     public Task Handle(OrderCanceledEvent notification, CancellationToken cancellationToken)
     {
         _marketDataCache.AddIncremental(notification.Order.ToMarketData());

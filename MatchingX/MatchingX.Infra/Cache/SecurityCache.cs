@@ -1,7 +1,6 @@
 ﻿using MatchingX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using QuickFix.Config;
 using SharedX.Core.Enums;
 using SharedX.Core.Specs;
 using StackExchange.Redis;
@@ -11,11 +10,11 @@ public class SecurityCache : ISecurityCache
 {
     private readonly ConnectionRedis _config;
     private readonly IDatabase _dbSecurity;
-    private readonly ILogger<MatchingCache> _logger;
+    private readonly ILogger<SecurityCache> _logger;
     private readonly ConnectionMultiplexer _redis;
 
     private RedisKey keySecurity = new RedisKey("Security");
-    public SecurityCache(ILogger<MatchingCache> logger, IOptions<ConnectionRedis> config)
+    public SecurityCache(ILogger<SecurityCache> logger, IOptions<ConnectionRedis> config)
     {
         _config = config.Value;
 

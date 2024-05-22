@@ -5,11 +5,10 @@ using SharedX.Core.Enums;
 using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
-using Sharex.Infra.Order.Cache;
 using StackExchange.Redis;
 using System.Text.Json;
 
-namespace Sharex.Infra.Outbox.Cache;
+namespace Sharedx.Infra.Outbox.Cache;
 public class OrderOutboxCache : IOrderOutboxCache
 {
     private readonly ConnectionRedis _config;

@@ -3,16 +3,14 @@ using DropCopyX.Infra.Cache;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OrderEntryX.Core.Interfaces;
-using OrderEntryX.Core.Repositories;
 using OrderEntryX.Infra.Client;
 using OrderEntryX.Infra.Data;
 using OrderEntryX.ServerApp.Services;
+using Sharedx.Infra.LoginFix.Data;
 using SharedX.Core.Bus;
 using SharedX.Core.Repositories;
 using SharedX.Core.Specs;
-using Sharex.Infra.LoginFix.Data;
-using ShareX.Infra.Repositories;
-
+using SharedX.Infra.Repositories;
 namespace OrderEntryX.ServerApp;
 internal class NativeInjectorBoostrapper
 {

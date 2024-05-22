@@ -1,5 +1,4 @@
-﻿using MatchingX.Core.Interfaces;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SharedX.Core.Enums;
 using SharedX.Core.Matching.OrderEngine;
@@ -8,8 +7,9 @@ using StackExchange.Redis;
 using FluentResults;
 using System.Text.Json;
 using QuickFix.Fields;
+using SharedX.Core.Interfaces;
 
-namespace MatchingX.Infra.Cache;
+namespace SharedX.Infra.Cache;
 public class MatchingCache : IMatchingCache
 {
     private readonly ConnectionRedis _config;

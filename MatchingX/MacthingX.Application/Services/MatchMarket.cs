@@ -4,6 +4,8 @@ using SharedX.Core.Enums;
 using MacthingX.Application.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
 using MacthingX.Application.Commands.Match;
+using MacthingX.Application.Commands.Match.OrderType;
+
 namespace MacthingX.Application.Services;
 public class MatchMarket : IMatchMarket
 {

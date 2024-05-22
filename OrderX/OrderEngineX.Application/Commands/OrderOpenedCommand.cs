@@ -1,7 +1,7 @@
-﻿using MacthingX.Application.Validations;
-using MatchingX.Core.Interfaces;
+﻿using OrderEngineX.Application.Validations;
+using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
-namespace MacthingX.Application.Commands.Order;
+namespace OrderEngineX.Application.Commands.Order;
 public class OrderOpenedCommand : OrderEngineCommand
 {
     private readonly IMatchingCache _cache;

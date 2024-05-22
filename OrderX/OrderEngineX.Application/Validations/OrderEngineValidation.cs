@@ -1,12 +1,18 @@
 ﻿using FluentValidation;
 using OrderEngineX.Application.Commands;
 using SharedX.Core.Enums;
+using SharedX.Core.Interfaces;
 
 namespace OrderEngineX.Application.Validations;
 public abstract class OrderEngineValidation<T> :
     AbstractValidator<T> where T :
     OrderEngineCommand
 {
+    private readonly IMatchingCache _matchingCache;
+    public OrderEngineValidation(IMatchingCache matchingCache)
+    {
+        _matchingCache = matchingCache;
+    }
     protected void ValidateNewOrderSingle()
     {
         /*

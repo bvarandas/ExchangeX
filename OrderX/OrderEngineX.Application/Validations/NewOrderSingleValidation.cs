@@ -1,8 +1,9 @@
-﻿using MarketDataX.Application.Commands;
+﻿using OrderEngineX.Application.Commands.Order;
+using SharedX.Core.Interfaces;
 namespace OrderEngineX.Application.Validations;
-public class NewOrderSingleValidation : OrderEngineValidation<OrderTradeNewCommand>
+public class NewOrderSingleValidation : OrderEngineValidation<OrderOpenedCommand>
 {
-    public NewOrderSingleValidation()
+    public NewOrderSingleValidation(IMatchingCache matchingCache) : base(matchingCache)
     {
         ValidateNewOrderSingle();
     }

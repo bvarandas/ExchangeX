@@ -1,6 +1,6 @@
 ﻿using FluentResults;
 using SharedX.Core.Matching.OrderEngine;
-namespace MatchingX.Core.Interfaces;
+namespace SharedX.Core.Interfaces;
 public interface IMatchingCache 
 {
     Task<bool> UpsertBuyOrder(OrderEngine order);

@@ -2,7 +2,7 @@
 using MongoDB.Driver;
 using SharedX.Core.Entities;
 
-namespace Sharex.Infra.LoginFix.Data;
+namespace Sharedx.Infra.LoginFix.Data;
 public class LoginFixContext : ILoginFixContext
 {
     public IMongoCollection<Login> Login { get; }

@@ -1,5 +1,6 @@
 ﻿using MacthingX.Application.Commands;
-using MacthingX.Application.Commands.Order;
+using MacthingX.Application.Commands.Match;
+using MacthingX.Application.Commands.Match.Status;
 using MacthingX.Application.Events;
 using MacthingX.Application.Extensions;
 using MacthingX.Application.Interfaces;
@@ -60,16 +61,16 @@ public class TradeOrderService : ITradeOrderService, IDisposable
                 switch (order.OrderStatus)
                 {
                     case OrderStatus.New:
-                        Bus.SendCommand(new OrderOpenedCommand(order, _matchingCache));
+                        Bus.SendCommand(new MatchingOpenedCommand(order));
                         break;
                     case OrderStatus.Filled:
-                        Bus.SendCommand(new OrderFilledCommand(order, _matchingCache));
+                        Bus.SendCommand(new MatchingFilledCommand(order));
                         break;
                     case OrderStatus.PartiallyFilled:
-                        Bus.SendCommand(new OrderPartiallyFilledCommand(order, _matchingCache));
+                        Bus.SendCommand(new MatchingPartiallyFilledCommand(order));
                         break;
                     case OrderStatus.Cancelled:
-                        Bus.SendCommand(new OrderCancelCommand(order, _matchingCache));
+                        Bus.SendCommand(new MatchingCancelCommand(order));
                         break;
                 }
 

@@ -1,4 +1,4 @@
-﻿using MacthingX.Application.Commands.Match;
+﻿using MacthingX.Application.Commands.Match.OrderType;
 using MatchingX.Application.Commands;
 using MatchingX.Core.Interfaces;
 using MatchingX.Core.Notifications;

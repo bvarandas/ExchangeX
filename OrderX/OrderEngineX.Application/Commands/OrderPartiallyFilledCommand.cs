@@ -1,10 +1,10 @@
-﻿using MatchingX.Core.Interfaces;
+﻿using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
-namespace MacthingX.Application.Commands.Order;
-public class OrderTradeCommand : OrderEngineCommand
+namespace OrderEngineX.Application.Commands.Order;
+public class OrderPartiallyFilledCommand : OrderEngineCommand
 {
     private readonly IMatchingCache _cache;
-    public OrderTradeCommand(OrderEngine order, IMatchingCache cache)
+    public OrderPartiallyFilledCommand(OrderEngine order, IMatchingCache cache)
     {
         Timestamp = DateTime.Now;
         Order = order;

@@ -7,7 +7,7 @@ using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
 using StackExchange.Redis;
 using System.Text.Json;
-namespace Sharex.Infra.Order.Cache;
+namespace Sharedx.Infra.Order.Cache;
 public class OrderStopCache : IOrderStopCache
 {
     private readonly ConnectionRedis _config;

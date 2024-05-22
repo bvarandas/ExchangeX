@@ -1,8 +1,10 @@
 ﻿using OrderEngineX.Application.Commands;
+using SharedX.Core.Interfaces;
+
 namespace OrderEngineX.Application.Validations;
-public class OrderCancelReplaceRequestValidation : OrderEngineValidation<OrderTradeCancelReplaceCommand>
+public class OrderCancelReplaceRequestValidation : OrderEngineValidation<OrderCancelReplaceCommand>
 {
-    public OrderCancelReplaceRequestValidation()
+    public OrderCancelReplaceRequestValidation(IMatchingCache  matchingCache) : base(matchingCache)
     {
         ValidateOrderCancelReplaceRequest();
     }

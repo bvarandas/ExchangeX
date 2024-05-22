@@ -100,7 +100,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderEngineX.Core", "OrderX
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderEngineX.Application", "OrderX\OrderEngineX.Application\OrderEngineX.Application.csproj", "{D4EFFFA2-9953-4930-9186-C20568F59923}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sharex.Infra", "SharedX\Sharex.Infra\Sharex.Infra.csproj", "{5F5862A9-99CC-4D73-B686-9FA57B840E43}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sharedx.Infra", "SharedX\Sharex.Infra\Sharedx.Infra.csproj", "{5F5862A9-99CC-4D73-B686-9FA57B840E43}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarketDataAPI", "MarketDataX\MarketDataAPI\MarketDataAPI.csproj", "{D65FD111-EA29-4664-A943-1870302B748C}"
 EndProject
@@ -110,7 +110,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Security.API", "SecurityX\S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SecurityX.Infra", "SecurityX\Security.Infra\Security.Infra\SecurityX.Infra.csproj", "{9E82D12D-D8C8-4345-A86E-7B9801431752}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SecurityX.Core", "SecurityX\SecurityX.Core\SecurityX.Core.csproj", "{0A47342A-7CAA-40BD-924C-31BC6DA64771}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SecurityX.Core", "SecurityX\SecurityX.Core\SecurityX.Core.csproj", "{0A47342A-7CAA-40BD-924C-31BC6DA64771}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

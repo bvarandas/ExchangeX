@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using SharedX.Core.Bus;
 using SharedX.Core.Entities;
 using SharedX.Core.Enums;
+using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
 namespace MacthingX.Application.Services;
 public class MatchingReceiver : IMatchingReceiver

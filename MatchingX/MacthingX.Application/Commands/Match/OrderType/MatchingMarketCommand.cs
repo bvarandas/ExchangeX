@@ -1,6 +1,5 @@
-﻿using MacthingX.Application.Commands.Order;
-using SharedX.Core.Matching.OrderEngine;
-namespace MacthingX.Application.Commands.Match;
+﻿using SharedX.Core.Matching.OrderEngine;
+namespace MacthingX.Application.Commands.Match.OrderType;
 public class MatchingMarketCommand : MatchingEngineCommand
 {
     public MatchingMarketCommand(OrderEngine order)

@@ -1,9 +1,9 @@
-﻿using MarketDataX.Application.Commands;
-
+﻿using OrderEngineX.Application.Commands.Order;
+using SharedX.Core.Interfaces;
 namespace OrderEngineX.Application.Validations;
-public class OrderCancelRequestValidation: OrderEngineValidation<OrderTradeCancelCommand>
+public class OrderCancelRequestValidation: OrderEngineValidation<OrderCancelCommand>
 {
-    public OrderCancelRequestValidation()
+    public OrderCancelRequestValidation(IMatchingCache matchingCache) : base(matchingCache)
     {
         ValidateOrderCancelRequest();
     }

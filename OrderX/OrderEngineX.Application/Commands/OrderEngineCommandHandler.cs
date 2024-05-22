@@ -1,21 +1,18 @@
-﻿using MarketDataX.Application.Commands;
-using MediatR;
+﻿using MediatR;
 using SharedX.Core.Bus;
 using SharedX.Core.Interfaces;
 using OrderEngineX.Application.Events;
 using OrderEngineX.Core.Notifications;
-using OrderEngineX.Core.Interfaces;
-
+using OrderEngineX.Application.Commands.Order;
 namespace OrderEngineX.Application.Commands;
-public class OrderTradeCommandHandler : CommandHandler,
-    IRequestHandler<OrderTradeCancelCommand, bool>,
-    IRequestHandler<OrderTradeCancelReplaceCommand, bool>,
-    IRequestHandler<OrderTradeNewCommand, bool>
+public class OrderEngineCommandHandler : CommandHandler,
+    IRequestHandler<OrderCancelCommand, bool>,
+    IRequestHandler<OrderCancelReplaceCommand, bool>,
+    IRequestHandler<OrderOpenedCommand, bool>
 {
     private readonly IOrderRepository _repository;
     private readonly IMediatorHandler _bus;
-    
-    public OrderTradeCommandHandler(IOrderRepository repository, 
+    public OrderEngineCommandHandler(IOrderRepository repository, 
         IMediatorHandler bus, 
         INotificationHandler<DomainNotification> notifications) 
         : base(bus,notifications)  
@@ -23,7 +20,8 @@ public class OrderTradeCommandHandler : CommandHandler,
         _repository = repository;
         _bus = bus;
     }
-    public async Task<bool> Handle(OrderTradeCancelCommand command, CancellationToken cancellationToken)
+    
+    public async Task<bool> Handle(OrderCancelCommand command, CancellationToken cancellationToken)
     {
         if (!command.IsValid())
         {
@@ -34,7 +32,7 @@ public class OrderTradeCommandHandler : CommandHandler,
         return true;
     }
 
-    public async Task<bool> Handle(OrderTradeCancelReplaceCommand command, CancellationToken cancellationToken)
+    public async Task<bool> Handle(OrderCancelReplaceCommand command, CancellationToken cancellationToken)
     {
         if (!command.IsValid())
         {
@@ -49,7 +47,7 @@ public class OrderTradeCommandHandler : CommandHandler,
         return true;
     }
 
-    public async Task<bool> Handle(OrderTradeNewCommand command, CancellationToken cancellationToken)
+    public async Task<bool> Handle(OrderOpenedCommand command, CancellationToken cancellationToken)
     {
         if (!command.IsValid())
         {

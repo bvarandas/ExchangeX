@@ -1,11 +1,12 @@
-﻿using MarketDataX.Application.Commands;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using NetMQ;
 using NetMQ.Sockets;
 using OrderEngineX.Application.Commands;
+using OrderEngineX.Application.Commands.Order;
 using SharedX.Core.Bus;
 using SharedX.Core.Enums;
 using SharedX.Core.Extensions;
+using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
 namespace OrderEngineX.API.Consumers;
@@ -16,13 +17,16 @@ public class ConsumerOrdersApp : BackgroundService
     private readonly ConnectionZmq _config;
     private static Thread ThreadReceiverOrder = null!;
     private readonly IMediatorHandler _mediator;
+    private readonly  IMatchingCache _cache;
     public ConsumerOrdersApp(ILogger<ConsumerOrdersApp> logger,
         IOptions<ConnectionZmq> options,
-        IMediatorHandler mediator)
+        IMediatorHandler mediator,
+        IMatchingCache cache)
     {
         _logger = logger;
         _config = options.Value;
         _mediator = mediator;
+        _cache = cache;
     }
 
     public override Task StartAsync(CancellationToken cancellationToken)
@@ -54,13 +58,13 @@ public class ConsumerOrdersApp : BackgroundService
         switch (order.Execution)
         {
             case Execution.ToCancel:
-                command = new OrderTradeCancelCommand(order);
+                command = new OrderCancelCommand(order, _cache);
                 break;
             case Execution.ToCancelReplace:
-                command = new OrderTradeCancelReplaceCommand(order);
+                command = new OrderCancelReplaceCommand(order, _cache);
                 break;
             case Execution.ToOpen:
-                command = new OrderTradeNewCommand(order);
+                command = new OrderOpenedCommand(order, _cache);
                 break;
         }
         _mediator.SendCommand(command);

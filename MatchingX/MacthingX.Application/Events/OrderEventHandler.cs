@@ -1,18 +1,13 @@
-﻿using Amazon.Runtime.Internal.Util;
-using MacthingX.Application.Services;
-using MatchingX.Core.Interfaces;
-using MediatR;
+﻿using MediatR;
 using Microsoft.Extensions.Logging;
 using SharedX.Core.Enums;
 using SharedX.Core.Interfaces;
-using SharedX.Core.Matching.OrderEngine;
 
 namespace MacthingX.Application.Events;
 public class OrderEventHandler :    
     INotificationHandler<OrderCanceledEvent>,
     INotificationHandler<OrderTradedEvent>,
     INotificationHandler<OrderOpenedEvent>,
-    INotificationHandler<OrderRejectedEvent>,
     INotificationHandler<OrderModifiedEvent>
 {
     private readonly ILogger<OrderEventHandler> _logger;
@@ -58,17 +53,6 @@ public class OrderEventHandler :
 
 
         return Task.CompletedTask;
-    }
-
-    public async Task Handle(OrderRejectedEvent @event, CancellationToken cancellationToken)
-    {
-        await _matchCache.DeleteSellOrderAsync(@event.Order.Symbol, @event.Order.OrderID);
-
-        if (@event.Order.OrderType == OrderType.StopLimit ||
-            @event.Order.OrderType == OrderType.Stop)
-        {
-            await _orderStopCache.DeleteOrderAsync(@event.Order.Symbol, @event.Order.OrderID);
-        }
     }
 
     public async Task Handle(OrderModifiedEvent @event, CancellationToken cancellationToken)

@@ -1,15 +1,13 @@
 ﻿using FluentResults;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
 using MongoDB.Driver;
-using QuickFix.Fields;
 using SharedX.Core.Entities;
 using SharedX.Core.Repositories;
-using Sharex.Infra.LoginFix.Data;
+using Sharedx.Infra.LoginFix.Data;
 using System.Security.Cryptography;
 using System.Text;
 using Error = FluentResults.Error;
-namespace ShareX.Infra.Repositories;
+namespace SharedX.Infra.Repositories;
 public class LoginFixRepository : ILoginRepository
 {
     private readonly ILoginFixContext _context;

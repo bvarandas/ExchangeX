@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using MarketDataX.Application.Commands;
 using MassTransit;
 using MediatR;
 using OrderEngineX.API.Consumers;
@@ -13,7 +12,8 @@ using OrderX.API.Consumers;
 using SharedX.Core.Bus;
 using SharedX.Core.Interfaces;
 using SharedX.Core.Specs;
-using Sharex.Infra.Order.Cache;
+using Sharedx.Infra.Order.Cache;
+using OrderEngineX.Application.Commands.Order;
 
 namespace DropCopyX.ServerApp;
 internal class NativeInjectorBoostrapper
@@ -76,9 +76,9 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IRequestHandler<OrderTradeCancelEvent, bool>, OrderTradeEventHandler>();
 
         // Domain - Command
-        services.AddSingleton<IRequestHandler<OrderTradeCancelCommand, bool>, OrderTradeCommandHandler>();
-        services.AddSingleton<IRequestHandler<OrderTradeCancelReplaceCommand, bool>, OrderTradeCommandHandler>();
-        services.AddSingleton<IRequestHandler<OrderTradeNewCommand, bool>, OrderTradeCommandHandler>();
+        services.AddSingleton<IRequestHandler<OrderCancelCommand, bool>, OrderEngineCommandHandler>();
+        services.AddSingleton<IRequestHandler<OrderCancelReplaceCommand, bool>, OrderEngineCommandHandler>();
+        services.AddSingleton<IRequestHandler<OrderOpenedCommand, bool>, OrderEngineCommandHandler>();
 
         // Infra - Data
         services.AddSingleton<IExecutionReportCache, ExecutionReportCache>();

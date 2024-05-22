@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using MacthingX.Application.Commands;
-using MacthingX.Application.Commands.Match;
-using MacthingX.Application.Commands.Order;
+using MacthingX.Application.Commands.Match.OrderType;
 using MacthingX.Application.Events;
 using MacthingX.Application.Interfaces;
 using MacthingX.Application.Querys;
@@ -69,19 +68,12 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<INotificationHandler<OrderCanceledEvent>, OrderEventHandler>();
         services.AddSingleton<INotificationHandler<OrderTradedEvent>, OrderEventHandler>();
         services.AddSingleton<INotificationHandler<OrderOpenedEvent>, OrderEventHandler>();
-        services.AddSingleton<INotificationHandler<OrderRejectedEvent>, OrderEventHandler>();
-
+        
         // Domain - Querys
         services.AddSingleton<IRequestHandler<GetTradeIdQuery, Trade>, GetTradeQueryHandler>();
         services.AddSingleton<IRequestHandler<GetOrderQuery, IEnumerable<OrderEngine>>, GetOrderQueryHandler>();
 
         // Domain - Commands
-        services.AddSingleton<IRequestHandler<OrderOpenedCommand, bool>, OrderCommandHandler>();
-        services.AddSingleton<IRequestHandler<OrderCancelReplaceCommand, bool>, OrderCommandHandler>();
-        services.AddSingleton<IRequestHandler<OrderCancelCommand, bool>, OrderCommandHandler>();
-        services.AddSingleton<IRequestHandler<OrderPartiallyFilledCommand, bool>, OrderCommandHandler>();
-        services.AddSingleton<IRequestHandler<OrderFilledCommand, bool>, OrderCommandHandler>();
-
         services.AddSingleton<IRequestHandler<MatchingLimitCommand, (OrderStatus, Dictionary<long, OrderEngine>)>, MatchingCommandHandler>();
         services.AddSingleton<IRequestHandler<MatchingMarketCommand, (OrderStatus, Dictionary<long, OrderEngine>)>, MatchingCommandHandler>();
         services.AddSingleton<IRequestHandler<MatchingStopLimitCommand, (OrderStatus, Dictionary<long, OrderEngine>)>, MatchingCommandHandler>();

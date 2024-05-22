@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
-using MacthingX.Application.Commands.Order;
-using MatchingX.Core.Interfaces;
+using OrderEngineX.Application.Commands;
 using SharedX.Core.Enums;
+using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
 namespace MacthingX.Application.Validations;
 public abstract class OrderValidation<T> : 
