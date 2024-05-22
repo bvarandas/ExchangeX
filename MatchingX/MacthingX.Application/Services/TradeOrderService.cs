@@ -1,6 +1,5 @@
 ﻿using MacthingX.Application.Commands;
-using MacthingX.Application.Commands.Match;
-using MacthingX.Application.Commands.Match.Status;
+using MacthingX.Application.Commands.Match.OrderStatus;
 using MacthingX.Application.Events;
 using MacthingX.Application.Extensions;
 using MacthingX.Application.Interfaces;

@@ -8,7 +8,7 @@ public class OrderTradeEventHandler :
     IRequestHandler<OrderTradeNewEvent, bool>,
     IRequestHandler<OrderTradeModifyEvent, bool>,
     IRequestHandler<OrderTradeCancelEvent, bool>,
-    IRequestHandler<OrderTradeRejectEvent, bool>
+    IRequestHandler<OrderTradeRejectedEvent, bool>
 {
     private readonly IOrderReportCache _reportCache;
     private readonly IOrderEngineCache _orderCache;
@@ -39,7 +39,7 @@ public class OrderTradeEventHandler :
         return Task.FromResult(true);
     }
 
-    public Task<bool> Handle(OrderTradeRejectEvent request, CancellationToken cancellationToken)
+    public Task<bool> Handle(OrderTradeRejectedEvent request, CancellationToken cancellationToken)
     {
         _reportCache.AddReport(request.Report);
         throw new NotImplementedException();

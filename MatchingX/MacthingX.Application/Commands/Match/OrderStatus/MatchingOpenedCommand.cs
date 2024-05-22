@@ -1,8 +1,8 @@
 ﻿using SharedX.Core.Matching.OrderEngine;
-namespace MacthingX.Application.Commands.Match.Status;
-public class MatchingPartiallyFilledCommand : MatchingStatusEngineCommand
+namespace MacthingX.Application.Commands.Match.OrderStatus;
+public class MatchingOpenedCommand : MatchingStatusEngineCommand
 {
-    public MatchingPartiallyFilledCommand(OrderEngine order)
+    public MatchingOpenedCommand(OrderEngine order)
     {
         Timestamp = DateTime.Now;
         Order = order;

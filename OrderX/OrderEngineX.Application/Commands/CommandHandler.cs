@@ -41,7 +41,7 @@ public class CommandHandler
 
         MakeReportWithErrors(ref message, message.ValidationResult.Errors);
 
-        _bus.RaiseEvent(new OrderTradeRejectEvent(report));
+        _bus.RaiseEvent(new OrderTradeRejectedEvent(report));
     }
 
     private void MakeReportWithErrors(ref Command message, List<ValidationFailure> failures)
@@ -55,7 +55,7 @@ public class CommandHandler
                     {
                         int CxlRejReason = int.Parse(failure.ErrorCode);
                         report = ((OrderCancelCommand)message).Order.ReportOrderCancelRejectFix(CxlRejReason, '1', failure.ErrorMessage);
-                        _bus.RaiseEvent(new OrderRejectedEvent(report));
+                        _bus.RaiseEvent(new OrderTradeRejectedEvent(report));
                     }
                 }
                 break;
@@ -68,14 +68,14 @@ public class CommandHandler
                             int CxlRejReason = int.Parse(failure.ErrorCode);
                             report = ((OrderCancelCommand)message)
                                 .Order.ReportOrderCancelRejectFix(CxlRejReason, '1', failure.ErrorMessage);
-                            _bus.RaiseEvent(new OrderRejectedEvent(report));
+                            _bus.RaiseEvent(new OrderTradeRejectedEvent(report));
                         }
                         else
                         {
                             int BusinessRejectReason = int.Parse(failure.ErrorCode);
                             report = ((OrderCancelCommand)message)
                                 .Order.ReportBusinessMessageRejectFix(BusinessRejectReason, "x", failure.ErrorMessage);
-                            _bus.RaiseEvent(new OrderRejectedEvent(report));
+                            _bus.RaiseEvent(new OrderTradeRejectedEvent(report));
                         }
                     }
 
@@ -88,7 +88,7 @@ public class CommandHandler
                         int BusinessRejectReason = int.Parse(failure.ErrorCode);
                         report = ((OrderOpenedCommand)message)
                             .Order.ReportBusinessMessageRejectFix(BusinessRejectReason, "1", failure.ErrorMessage);
-                        _bus.RaiseEvent(new OrderRejectedEvent(report));
+                        _bus.RaiseEvent(new OrderTradeRejectedEvent(report));
                     }
 
                 }

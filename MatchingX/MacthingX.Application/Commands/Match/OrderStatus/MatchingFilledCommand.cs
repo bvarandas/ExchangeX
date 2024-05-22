@@ -1,12 +1,13 @@
 ﻿using SharedX.Core.Matching.OrderEngine;
-namespace MacthingX.Application.Commands.Match.Status;
-public class MatchingCancelCommand : MatchingStatusEngineCommand
+namespace MacthingX.Application.Commands.Match.OrderStatus;
+public class MatchingFilledCommand : MatchingStatusEngineCommand
 {
-    public MatchingCancelCommand(OrderEngine order)
+    public MatchingFilledCommand(OrderEngine order)
     {
         Timestamp = DateTime.Now;
         Order = order;
     }
+
     public override bool IsValid()
     {
         throw new NotImplementedException();
