@@ -2,6 +2,7 @@
 namespace MatchingX.Core.Interfaces;
 public  interface IMatch
 {
+    string Name { get; }
     void ReceiveOrder(OrderEngine order);
     bool ModifyOrder(OrderEngine order);
     bool CancelOrder(OrderEngine orderToCancel);

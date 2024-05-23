@@ -3,6 +3,6 @@
 namespace MatchingX.Core.Interfaces;
 public interface IMatchContextStrategy
 {
-    void SetStrategy(IMatch match);
+    void SetStrategy(string strategyName);
     void ReceivedOrder(OrderEngine order);
 }

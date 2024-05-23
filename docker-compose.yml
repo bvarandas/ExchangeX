@@ -29,7 +29,7 @@ services:
     image: adminer
 
   zookeeper:
-    image: zookeeperSA
+    image: zookeeper
   
   zoonavigator:
     image: elkozmon/zoonavigator:latest

@@ -5,25 +5,29 @@ using SharedX.Core.Interfaces;
 namespace MacthingX.Application.Services;
 public class MatchContextStrategy : IMatchContextStrategy
 {
-    private IMatch _match;
+    private readonly IEnumerable<IMatch> _matchList;
     private readonly IOrderRepository _orderRepository;
-    private readonly IMatchingCache _matchingCache;
-
+    private IMatchingCache _matchingCache;
+    private IMatch _actualMatch;
+         
     
-    public MatchContextStrategy(IMatch match, 
+    public MatchContextStrategy(IEnumerable<IMatch> matchList, 
         IOrderRepository orderRepository, 
         IMatchingCache matchingCache)
     {
-        this._match = match;
+        this._matchList = matchList;
         this._orderRepository = orderRepository;
         this._matchingCache = matchingCache;
 
         LoadOrdersOnRestart();
     }
 
-    public void SetStrategy(IMatch match)
+    public void SetStrategy(string strategyName)
     {
-        this._match = match;
+        var instance = _matchList.FirstOrDefault(x =>
+            x.Name.Equals(strategyName, StringComparison.InvariantCultureIgnoreCase));
+
+        _actualMatch = instance!;
     }
 
     private void LoadOrdersOnRestart()
@@ -41,19 +45,19 @@ public class MatchContextStrategy : IMatchContextStrategy
     }
     public void ReceivedOrder(OrderEngine order)
     {
-        this._match.ReceiveOrder(order);
+        this._actualMatch.ReceiveOrder(order);
     }
     public async Task<bool> MatchOrderAsync(OrderEngine order)
     {
         bool result = false;
-        result  = await this._match.MatchOrderAsync(order);
+        result  = await this._actualMatch.MatchOrderAsync(order);
         return result;
     }
 
     public async Task<bool> CancelOrderAsync(OrderEngine order)
     {
         bool result = false;
-        result = this._match.CancelOrder(order);
+        result = this._actualMatch.CancelOrder(order);
         return result;
     }
 }

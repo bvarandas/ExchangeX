@@ -3,20 +3,23 @@ using SharedX.Core.Bus;
 using SharedX.Core.Enums;
 using MacthingX.Application.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
-using MacthingX.Application.Commands.Match;
 using MacthingX.Application.Commands.Match.OrderType;
+using MatchingX.Core.Interfaces;
 
 namespace MacthingX.Application.Services;
-public class MatchMarket : IMatchMarket
+public class MatchMarket : IMatch
 {
     protected readonly ITradeOrderService _tradeOrder;
     protected readonly IMediatorHandler Bus;
+
+    public string Name => nameof(MatchMarket);
+
     public MatchMarket(ILogger<MatchMarket> logger, IMediatorHandler bus, ITradeOrderService tradeOrder) 
     {
         _tradeOrder = tradeOrder;
         Bus = bus;
     }
-    public void ReceiveOrder(OrderEngine order)
+    public  void ReceiveOrder(OrderEngine order)
     {
         switch (order.Execution)
         {
@@ -32,12 +35,12 @@ public class MatchMarket : IMatchMarket
         }
     }
 
-    public bool CancelOrder(OrderEngine orderToCancel)
+    public  bool CancelOrder(OrderEngine orderToCancel)
     {
         return _tradeOrder.CancelOrder(orderToCancel);
     }
 
-    public async Task<bool> MatchOrderAsync(OrderEngine order)
+    public  async Task<bool> MatchOrderAsync(OrderEngine order)
     {
         bool cancelled = false;
         var result = Bus.SendMatchCommand(new MatchingMarketCommand(order)).Result;
@@ -55,7 +58,7 @@ public class MatchMarket : IMatchMarket
         return true;
     }
 
-    public bool ModifyOrder(OrderEngine order)
+    public  bool ModifyOrder(OrderEngine order)
     {
         return _tradeOrder.ModifyOrder(order).Result;
     }

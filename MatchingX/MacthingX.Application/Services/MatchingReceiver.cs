@@ -14,14 +14,13 @@ public class MatchingReceiver : IMatchingReceiver
     private readonly IMediatorHandler _mediator;
     private readonly IMatchingCache _matchingCache;
     private readonly IMatchContextStrategy _contextStrategy;
-    private readonly IMatchMarket _match;
-    
+
     public MatchingReceiver(ILogger<MatchingReceiver> logger,
         IMatchingCache matchingCache,
-        IMatchContextStrategy contextoStrategy,
-        IMatchMarket match)
+        IMatchContextStrategy contextoStrategy
+        )
     {
-        _match = match;
+
         _logger = logger;
         _matchingCache = matchingCache;
         _contextStrategy = contextoStrategy;
@@ -54,16 +53,16 @@ public class MatchingReceiver : IMatchingReceiver
         switch (order.OrderType)
         {
             case OrderType.Limit:
-                _contextStrategy.SetStrategy((MatchLimit)_match);
+                _contextStrategy.SetStrategy(nameof(MatchLimit));
                 break;
             case OrderType.Market:
-                _contextStrategy.SetStrategy((MatchMarket)_match);
+                _contextStrategy.SetStrategy(nameof(MatchMarket));
                 break;
             case OrderType.StopLimit:
-                _contextStrategy.SetStrategy((MatchStopLimit)_match);
+                _contextStrategy.SetStrategy(nameof(MatchStopLimit));
                 break;
             case OrderType.Stop:
-                _contextStrategy.SetStrategy((MatchStop)_match);
+                _contextStrategy.SetStrategy(nameof(MatchStop));
                 break;
         }
     }

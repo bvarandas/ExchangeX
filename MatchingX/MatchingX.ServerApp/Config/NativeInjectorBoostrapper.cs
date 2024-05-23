@@ -16,12 +16,14 @@ using MatchingX.ServerApp.Publisher;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Sharedx.Infra.Order.Cache;
 using SharedX.Core.Bus;
 using SharedX.Core.Enums;
 using SharedX.Core.Interfaces;
 using SharedX.Core.Matching;
 using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
+using SharedX.Infra.Cache;
 using SharedX.Infra.Order.Data;
 using SharedX.Infra.Order.Repositories;
 
@@ -80,17 +82,31 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IRequestHandler<MatchingStopCommand, (OrderStatus, Dictionary<long, OrderEngine>)>, MatchingCommandHandler>();
 
         // Domain - Services
-        services.AddSingleton<IMatchingReceiver, MatchingReceiver>();
-        services.AddSingleton<IMatchLimit,       MatchLimit>();
-        services.AddSingleton<IMatchStop,        MatchStop>();
-        services.AddSingleton<IMatchStopLimit,   MatchStopLimit>();
-        services.AddSingleton<IMatchMarket,      MatchMarket>();
-        services.AddSingleton<ITradeOrderService, TradeOrderService>();
+        services.AddSingleton<IMatchingReceiver,    MatchingReceiver>();
+        services.AddSingleton<ITradeOrderService,   TradeOrderService>();
 
-
+        var strategies = AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(assembly => assembly.GetTypes())
+                .Where(type => typeof(IMatch).IsAssignableFrom(type) && !type.IsInterface && !type.IsAbstract);
+        
+        foreach (var strategy in strategies)
+            services.AddSingleton(typeof(IMatch), strategy);
+        
+        /*
+        services.AddSingleton<IMatch, MatchLimit>();
+        services.AddSingleton<IMatch, MatchStop>();
+        services.AddSingleton<IMatch, MatchStopLimit>();
+        services.AddSingleton<IMatch, MatchMarket>();
+        */
         // Infra - Data
         services.AddSingleton<IDropCopyCache, DropCopyCache>();
         services.AddSingleton<IMarketDataCache, MarketDataCache>();
+
+        services.AddSingleton<IOrderStopCache, OrderStopCache>();
+
+        services.AddSingleton<IMatchingCache, MatchingCache>();
+        services.AddSingleton<IMatchContextStrategy, MatchContextStrategy>();
+        
 
         services.AddSingleton<IOrderRepository, OrderRepository>();
         services.AddSingleton<IExecutedTradeRepository, ExecutedTradeRepository>();

@@ -2,6 +2,7 @@
 using MacthingX.Application.Commands.Match.OrderType;
 using MacthingX.Application.Events;
 using MacthingX.Application.Interfaces;
+using MatchingX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using SharedX.Core.Bus;
 using SharedX.Core.Enums;
@@ -9,12 +10,14 @@ using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
 using System.Collections.Concurrent;
 namespace MacthingX.Application.Services;
-public class MatchStop : IMatchStop
+public class MatchStop : IMatch
 {
     private readonly ConcurrentDictionary<long, OrderEngine> DicOrdersToCancel;
     protected readonly ITradeOrderService _tradeOrder;
     protected readonly IOrderStopCache _orderStopCache;
     protected readonly IMediatorHandler Bus;
+
+    public string Name => nameof(MatchStop);
 
     public MatchStop(ILogger<MatchStop> logger, IMediatorHandler bus, IOrderStopCache orderStopCache, ITradeOrderService tradeOrder) 
     {
@@ -59,7 +62,7 @@ public class MatchStop : IMatchStop
         }
     }
 
-    public void ReceiveOrder(OrderEngine order)
+    public  void ReceiveOrder(OrderEngine order)
     {
         switch (order.Execution)
         {
@@ -75,7 +78,7 @@ public class MatchStop : IMatchStop
         }
     }
     
-    public bool CancelOrder(OrderEngine orderToCancel)
+    public   bool CancelOrder(OrderEngine orderToCancel)
     {
         bool cancelled = false;
         DicOrdersToCancel.TryAdd(orderToCancel.OrderID, orderToCancel);
@@ -85,7 +88,7 @@ public class MatchStop : IMatchStop
         return cancelled;
     }
 
-    public async Task<bool> MatchOrderAsync(OrderEngine order)
+    public  async Task<bool> MatchOrderAsync(OrderEngine order)
     {
         bool cancelled = false;
         var result = Bus.SendMatchCommand(new MatchingStopCommand(order)).Result;
@@ -103,7 +106,7 @@ public class MatchStop : IMatchStop
         return true;
     }
 
-    public bool ModifyOrder(OrderEngine order)
+    public  bool ModifyOrder(OrderEngine order)
     {
         return _tradeOrder.ModifyOrder(order).Result;
     }

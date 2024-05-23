@@ -1,5 +1,4 @@
-﻿using MacthingX.Application.Commands.Match;
-using MacthingX.Application.Commands.Match.OrderType;
+﻿using MacthingX.Application.Commands.Match.OrderType;
 using MacthingX.Application.Interfaces;
 using MatchingX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -9,12 +8,15 @@ using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
 using System.Collections.Concurrent;
 namespace MacthingX.Application.Services;
-public class MatchStopLimit :  IMatchStopLimit
+public class MatchStopLimit :  IMatch
 {
     protected readonly IOrderStopCache _orderStopCache;
     private readonly ConcurrentDictionary<long, OrderEngine> DicOrdersToCancel;
     protected readonly ITradeOrderService _tradeOrder;
     protected readonly IMediatorHandler Bus;
+
+    public string Name => nameof(MatchStopLimit);
+
     public MatchStopLimit(ILogger<MatchStopLimit> logger, 
         IMediatorHandler bus,
         IOrderStopCache orderStopCache,
@@ -61,7 +63,7 @@ public class MatchStopLimit :  IMatchStopLimit
         }
     }
 
-    public void ReceiveOrder(OrderEngine order)
+    public  void ReceiveOrder(OrderEngine order)
     {
         switch (order.Execution)
         {
@@ -77,7 +79,7 @@ public class MatchStopLimit :  IMatchStopLimit
         }
     }
 
-    public bool CancelOrder(OrderEngine orderToCancel)
+    public   bool CancelOrder(OrderEngine orderToCancel)
     {
         bool cancelled = false;
         DicOrdersToCancel.TryAdd(orderToCancel.OrderID, orderToCancel);
@@ -86,12 +88,12 @@ public class MatchStopLimit :  IMatchStopLimit
         return cancelled;
     }
 
-    public bool ModifyOrder(OrderEngine order)
+    public  bool ModifyOrder(OrderEngine order)
     {
         return _tradeOrder.ModifyOrder(order).Result;
     }
 
-    public async Task<bool> MatchOrderAsync(OrderEngine order)
+    public  async Task<bool> MatchOrderAsync(OrderEngine order)
     {
         bool cancelled = false;
         var result = Bus.SendMatchCommand(new MatchingStopLimitCommand(order)).Result;

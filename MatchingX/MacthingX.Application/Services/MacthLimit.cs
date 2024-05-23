@@ -1,5 +1,4 @@
-﻿using MacthingX.Application.Commands.Match;
-using MacthingX.Application.Commands.Match.OrderType;
+﻿using MacthingX.Application.Commands.Match.OrderType;
 using MacthingX.Application.Interfaces;
 using MatchingX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -7,16 +6,19 @@ using SharedX.Core.Bus;
 using SharedX.Core.Enums;
 using SharedX.Core.Matching.OrderEngine;
 namespace MacthingX.Application.Services;
-public class MatchLimit :  IMatchLimit
+public class MatchLimit : IMatch
 {
     protected readonly ITradeOrderService _tradeOrder;
     protected readonly IMediatorHandler Bus;
+
+    public string Name => nameof(MatchLimit);
+
     public MatchLimit(ILogger<MatchLimit> logger, IMediatorHandler bus, ITradeOrderService tradeOrder) 
     {
         _tradeOrder = tradeOrder;
         Bus = bus;
     }
-    public void ReceiveOrder(OrderEngine order)
+    public  void ReceiveOrder(OrderEngine order)
     {
         switch (order.Execution)
         {
@@ -31,17 +33,17 @@ public class MatchLimit :  IMatchLimit
                 break;
         }
     }
-    public bool CancelOrder(OrderEngine orderToCancel)
+    public  bool CancelOrder(OrderEngine orderToCancel)
     {
         _tradeOrder.CancelOrder(orderToCancel);
         return true;
     }
-    public bool ModifyOrder(OrderEngine order)
+    public  bool ModifyOrder(OrderEngine order)
     {
         return _tradeOrder.ModifyOrder(order).Result;
     }
 
-    public async Task<bool> MatchOrderAsync(OrderEngine order)
+    public  async Task<bool> MatchOrderAsync(OrderEngine order)
     {
         bool cancelled = false;
 
