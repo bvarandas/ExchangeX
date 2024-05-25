@@ -7,7 +7,6 @@ using NetMQ.Sockets;
 using SharedX.Core.Bus;
 using SharedX.Core.Extensions;
 using SharedX.Core.Matching.MarketData;
-using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
 namespace MarketDataX.ServerApp.Consumer;
 public class ConsumerMarketDataApp : BackgroundService
@@ -59,7 +58,7 @@ public class ConsumerMarketDataApp : BackgroundService
             try
             {
                 _logger.LogInformation($"Receiver de marketdata tentando conectar..{_config.OrderEngineToMatching.Uri}");
-                using (_receiver = new PullSocket(_config.OrderEngineToMatching.Uri))
+                using (_receiver = new PullSocket(_config.MatchingToMarketData.Uri))
                 {
                     _logger.LogInformation("Receiver de marketdata Conectado!!!");
                     isConnected = true;

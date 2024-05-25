@@ -1,5 +1,4 @@
 ﻿using MatchingX.Core.Interfaces;
-using MatchingX.ServerApp.Publisher;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -58,7 +57,7 @@ public class ConsumerOrderApp : BackgroundService
             try
             {
                 _logger.LogInformation($"Receiver de ordens tentando conectar..{_config.OrderEngineToMatching.Uri}");
-                using (_receiver = new PullSocket(_config.OrderEngineToMatching.Uri))
+                using (_receiver = new PullSocket(_config.OrderEntryToOrderEngine.Uri))
                 {
                     _logger.LogInformation("Receiver de ordens Conectado!!!");
                     isConnected = true;

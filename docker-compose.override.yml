@@ -63,28 +63,60 @@ services:
       - exchange
   
   mongodb:
+    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
     container_name: mongo
     restart: always
     ports:
       - "27017:27017"
-    environment:
-       MONGO_INITDB_ROOT_USERNAME: root
-       MONGO_INITDB_ROOT_PASSWORD: example
+    healthcheck:
+      test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'host.docker.internal:27017'}]}) }" | mongosh --port 27017 --quiet
+      interval: 5s
+      timeout: 30s
+      start_period: 0s
+      start_interval: 1s
+      retries: 30
+    # environment:
+    #    MONGO_INITDB_ROOT_USERNAME: root
+    #    MONGO_INITDB_ROOT_PASSWORD: example
     volumes:
-      - mongo_data:/data/db
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+      #- $PWD/.docker/mongo/replica.key:/data/replica.key.devel
+      # - example/.docker/mongo/replica.key:/data/replica.key.devel
+      # - example/.docker/mongo/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh
+    
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - exchange
+  
+
+  # orderentryx:
+  #   container_name: orderentryx
+  #   ports:
+  #     - "5022:5022"
+  #   networks:
+  #     - exchange
+  
+  testenginex:
+    container_name: testenginex
+    ports:
+      - "5023:5023"
     networks:
       - exchange
 
-  orderentryx:
-    container_name: orderentryx
+  orderenginex:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
     ports:
-      - "5022:5022"
+      - "5024:5024"
     networks:
       - exchange
 
 volumes:
-  mongo_data:
-    driver: local
+  mongodb_data:
+  mongodb_config:
+    # driver: local
 
 networks:
     exchange:

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using QuickFix.Fields;
+using SharedX.Core.Entities;
 using SharedX.Core.Enums;
 using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
@@ -37,7 +38,7 @@ public class OrderRepository : IOrderRepository
         long result = 0;
         try
         {
-            var builder = Builders<long>.Filter;
+            var builder = Builders<OrderIDEngine>.Filter;
             var filter = builder.Empty;
 
             using (var session = await _context.MongoClient.StartSessionAsync())
@@ -45,12 +46,16 @@ public class OrderRepository : IOrderRepository
                 session.StartTransaction();
                 try
                 {
-                    var single = await _context.OrderId.Find(session, filter).SingleAsync(cancellation);
-                    single++;
+                    var single = await _context.OrderId.Find(session, filter)
+                        .FirstOrDefaultAsync(cancellation);
+
+                    single = single ?? new OrderIDEngine();
+                    single.OrderId++;
+                    result = single.OrderId;
 
                     var resultReplace = await _context.OrderId.ReplaceOneAsync(session,
-                        null,
-                    replacement: single,
+                        filter,
+                    replacement: new OrderIDEngine() { OrderId = result },
                     options: new ReplaceOptions { IsUpsert = true },
                     cancellation);
 
@@ -69,6 +74,7 @@ public class OrderRepository : IOrderRepository
         }
         return result;
     }
+
     public async Task<IEnumerable<OrderEngine>> GetOrdersByAccountIdAsync(int accountId, CancellationToken cancellation)
     {
         IEnumerable<OrderEngine> result = null!;

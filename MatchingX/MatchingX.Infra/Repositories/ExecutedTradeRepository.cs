@@ -4,7 +4,6 @@ using MatchingX.Infra.Data;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using QuickFix.Fields;
 using SharedX.Core.Matching.DropCopy;
 
 namespace MatchingX.Infra.Repositories;

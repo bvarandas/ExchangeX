@@ -36,7 +36,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarketTradeX.Consumer", "Ma
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarketTradeX.Infra", "MarketTradeX\MarketTradeX.Infra\MarketTradeX.Infra.csproj", "{F96E81BD-95BC-427D-8E80-5C29DE402844}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderEngineX.Infra", "OrderX\OrderX.Infra\OrderEngineX.Infra.csproj", "{8303DE7A-9C91-4CD6-8C31-A537FDF89D2D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderEngineX.Infra", "OrderEngineX\OrderX.Infra\OrderEngineX.Infra.csproj", "{8303DE7A-9C91-4CD6-8C31-A537FDF89D2D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProviderBookX.Infra", "ProviderBookX\ProviderBookX.Infra\ProviderBookX.Infra.csproj", "{4222320A-8F12-4E4E-8F4C-308D7132F864}"
 EndProject
@@ -94,11 +94,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderEntryX.Infra", "OrderE
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderEntryX.ServerApp", "OrderEntryX\OrderEntryX.ServerApp\OrderEntryX.ServerApp.csproj", "{098DCC6E-6896-46C5-ACC7-8220B34B4E54}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderEngineX.API", "OrderX\OrderX.API\OrderEngineX.API.csproj", "{F2084172-8818-4AE9-923B-1C4B24A7BD9B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderEngineX.API", "OrderEngineX\OrderX.API\OrderEngineX.API.csproj", "{F2084172-8818-4AE9-923B-1C4B24A7BD9B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderEngineX.Core", "OrderX\OrderEngineX.Core\OrderEngineX.Core.csproj", "{E93CDCF1-D2FA-4C11-93AC-DD91E8E21125}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderEngineX.Core", "OrderEngineX\OrderEngineX.Core\OrderEngineX.Core.csproj", "{E93CDCF1-D2FA-4C11-93AC-DD91E8E21125}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderEngineX.Application", "OrderX\OrderEngineX.Application\OrderEngineX.Application.csproj", "{D4EFFFA2-9953-4930-9186-C20568F59923}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderEngineX.Application", "OrderEngineX\OrderEngineX.Application\OrderEngineX.Application.csproj", "{D4EFFFA2-9953-4930-9186-C20568F59923}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sharedx.Infra", "SharedX\Sharex.Infra\Sharedx.Infra.csproj", "{5F5862A9-99CC-4D73-B686-9FA57B840E43}"
 EndProject
@@ -114,7 +114,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SecurityX.Core", "SecurityX
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{2EF48AD2-3FC0-4538-99BD-8887D1E89161}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MatchingX.Tests", "Tests\MatchingX.Tests\MatchingX.Tests.csproj", "{AD0316E3-3223-44A8-B462-057C89F3DC96}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MatchingEngine.Tests", "Tests\MatchingEngine.Tests\MatchingEngine.Tests.csproj", "{AD0316E3-3223-44A8-B462-057C89F3DC96}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderEngine.Tests", "Tests\OrderEngine.Tests\OrderEngine.Tests.csproj", "{A20E96A2-CBE6-4E0D-9E29-26A89ACA3CAE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestEngine", "TestEngine", "{29661D31-B283-4BE2-89A6-ACEA7E622A15}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestEngineX", "TestEngineX\TestEngineX\TestEngineX.csproj", "{47F9546C-6F00-4FBC-8D43-1C5698DF7DC7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -278,6 +284,14 @@ Global
 		{AD0316E3-3223-44A8-B462-057C89F3DC96}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD0316E3-3223-44A8-B462-057C89F3DC96}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD0316E3-3223-44A8-B462-057C89F3DC96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A20E96A2-CBE6-4E0D-9E29-26A89ACA3CAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A20E96A2-CBE6-4E0D-9E29-26A89ACA3CAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A20E96A2-CBE6-4E0D-9E29-26A89ACA3CAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A20E96A2-CBE6-4E0D-9E29-26A89ACA3CAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47F9546C-6F00-4FBC-8D43-1C5698DF7DC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47F9546C-6F00-4FBC-8D43-1C5698DF7DC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47F9546C-6F00-4FBC-8D43-1C5698DF7DC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47F9546C-6F00-4FBC-8D43-1C5698DF7DC7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -332,6 +346,9 @@ Global
 		{9E82D12D-D8C8-4345-A86E-7B9801431752} = {69748346-DFDD-4593-B621-9069EC1B385C}
 		{0A47342A-7CAA-40BD-924C-31BC6DA64771} = {69748346-DFDD-4593-B621-9069EC1B385C}
 		{AD0316E3-3223-44A8-B462-057C89F3DC96} = {2EF48AD2-3FC0-4538-99BD-8887D1E89161}
+		{A20E96A2-CBE6-4E0D-9E29-26A89ACA3CAE} = {2EF48AD2-3FC0-4538-99BD-8887D1E89161}
+		{29661D31-B283-4BE2-89A6-ACEA7E622A15} = {4AFD1806-530A-46E6-AF65-92A8A4A6E581}
+		{47F9546C-6F00-4FBC-8D43-1C5698DF7DC7} = {29661D31-B283-4BE2-89A6-ACEA7E622A15}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8A7B5B6E-83FE-4591-A58F-528F40DBD09C}

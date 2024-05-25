@@ -12,8 +12,8 @@ using System.Text.Json;
 namespace MatchingX.Infra.Cache;
 public class MarketDataCache : IMarketDataCache
 {
-    private static ConcurrentQueue<Security> SecurityQueue;
-    private static ConcurrentQueue<MarketData> IncrementalQueue;
+    
+    private static ConcurrentQueue<MarketData> IncrementalQueue=null!;
     private static ConcurrentDictionary<string, decimal> _LastPrice;
     private readonly ConnectionRedis _config;
     private readonly ConnectionMultiplexer _redis;
@@ -21,13 +21,12 @@ public class MarketDataCache : IMarketDataCache
     private readonly ILogger<MarketDataCache> _logger;
     private static long MarketID = 0;
     private RedisKey keyMarketData = new RedisKey("Marketdata");
-    private RedisKey keySecurity = new RedisKey("Security");
+    
     public MarketDataCache(ILogger<MarketDataCache> logger , IOptions<ConnectionRedis> config)
     {
         _config = config.Value;
 
         IncrementalQueue = new ConcurrentQueue<MarketData>();
-        SecurityQueue = new ConcurrentQueue<Security>();
         _LastPrice = new ConcurrentDictionary<string, decimal>();
 
         _redis = ConnectionMultiplexer.Connect(_config.ConnectionString, options => {
@@ -38,20 +37,7 @@ public class MarketDataCache : IMarketDataCache
         _logger = logger;
     }
 
-    public async void AddSecurity(Security security)
-    {
-        SecurityQueue.Enqueue(security);
-        await SetValueRedis(security);
-    }
-
-    private async Task SetValueRedis(Security security)
-    {
-        RedisValue value = new RedisValue(JsonSerializer.Serialize<Security>(security));
-        await _dbMatching.HashSetAsync(keySecurity, new HashEntry[]
-        {
-            new HashEntry(security.SecurityID, value)
-        });
-    }
+    
     public async Task<decimal> GetPrice(string symbol)
     {
         RedisValue value = new RedisValue(symbol);

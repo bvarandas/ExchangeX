@@ -1,14 +1,4 @@
-﻿using Microsoft.VisualBasic;
-using Microsoft.VisualBasic.FileIO;
-using ProtoBuf;
-using SharedX.Core.Commands;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Collections.Specialized.BitVector32;
-
+﻿using ProtoBuf;
 namespace SharedX.Core.Matching.MarketData;
 [ProtoContract]
 public class Security

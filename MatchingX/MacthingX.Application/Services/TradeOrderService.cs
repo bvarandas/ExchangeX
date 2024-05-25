@@ -79,9 +79,8 @@ public class TradeOrderService : ITradeOrderService, IDisposable
 
                 if (_running)
                     break;
-
+            }else
                 Thread.Sleep(10);
-            }
         }
     }
     private void TriggerPriceChanged(OrderEngine order)

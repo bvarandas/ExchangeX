@@ -4,7 +4,9 @@
       "commandName": "DockerCompose",
       "commandVersion": "1.0",
       "serviceActions": {
-        "matchinx.api": "StartDebugging"
+        "matchinx.api": "StartDebugging",
+        "testenginex": "StartDebugging",
+        "orderenginex.api": "StartDebugging"
       }
     }
   }

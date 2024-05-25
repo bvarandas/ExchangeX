@@ -2,15 +2,9 @@
 using MatchingX.Infra.Data;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
-using SharedX.Core.Matching;
 using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Enums;
-using StackExchange.Redis;
-using FluentResults;
-using System.Transactions;
-
 namespace MatchingX.Infra.Repositories;
-
 public class MatchingRepository : IMatchingRepository
 {
     private readonly IMatchingContext _context;
@@ -84,8 +78,6 @@ public class MatchingRepository : IMatchingRepository
         }
         return result;
     }
-
-
 
     public async Task<(OrderStatus, Dictionary<long, OrderEngine>)> MatchingLimitAsync(OrderEngine orderEngine,  CancellationToken cancellation)
     {

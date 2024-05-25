@@ -7,17 +7,17 @@ services:
       context: .
       dockerfile: MatchingX/MatchingX.ServerApp/Dockerfile
  
-  orderentryx:
-    image: ${DOCKER_REGISTRY-}orderentry
-    build:
-      context: .
-      dockerfile: OrderEntryX/OrderEntryX.ServerApp/Dockerfile
-  
+  # orderentryx:
+  #   image: ${DOCKER_REGISTRY-}orderentry
+  #   build:
+  #     context: .
+  #     dockerfile: OrderEntryX/OrderEntryX.ServerApp/Dockerfile
+
   rabbitmq:
     image: rabbitmq:3-management-alpine
   
   mongodb:
-    image: mongo
+    image: mongo:7.0
   
   postgres:
     image: postgres
@@ -33,3 +33,17 @@ services:
   
   zoonavigator:
     image: elkozmon/zoonavigator:latest
+  
+  testenginex:
+    image: ${DOCKER_REGISTRY-}testenginex
+    build:
+      context: .
+      dockerfile: TestEngineX/TestEngineX/Dockerfile
+
+
+  orderenginex:
+    image: ${DOCKER_REGISTRY-}orderenginexapi
+    build:
+      context: .
+      dockerfile: OrderEngineX/OrderX.API/Dockerfile
+

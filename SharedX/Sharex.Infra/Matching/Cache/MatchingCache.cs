@@ -6,7 +6,6 @@ using SharedX.Core.Specs;
 using StackExchange.Redis;
 using FluentResults;
 using System.Text.Json;
-using QuickFix.Fields;
 using SharedX.Core.Interfaces;
 
 namespace SharedX.Infra.Cache;

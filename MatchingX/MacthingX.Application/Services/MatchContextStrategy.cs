@@ -30,19 +30,26 @@ public class MatchContextStrategy : IMatchContextStrategy
         _actualMatch = instance!;
     }
 
-    private void LoadOrdersOnRestart()
+    private async void LoadOrdersOnRestart()
     {
-        var ordersDb = _orderRepository.GetOrdersOnRestartAsync(default(CancellationToken));
+        var ordersDb = await _orderRepository.GetOrdersOnRestartAsync(default(CancellationToken));
+        
+        if (ordersDb is not null)
+        foreach (var order in ordersDb)
+        {
 
-        var buyOrders = ordersDb.Result.Where(o => o.Side == SideTrade.Buy);
-        var sellOrders = ordersDb.Result.Where(o => o.Side == SideTrade.Sell);
+        }
 
-        foreach (var order in buyOrders)
-            _matchingCache.UpsertBuyOrder(order);
+        //var buyOrders = ordersDb.Where(o => o.Side == SideTrade.Buy);
+        //var sellOrders = ordersDb.Where(o => o.Side == SideTrade.Sell);
 
-        foreach (var order in sellOrders)
-            _matchingCache.UpsertSellOrder(order);
+        //foreach (var order in sellOrders.ToList())
+        //    await _matchingCache.UpsertSellOrder(order);
+
+        //foreach (var order in buyOrders.ToList())
+        //    await _matchingCache.UpsertBuyOrder(order);
     }
+
     public void ReceivedOrder(OrderEngine order)
     {
         this._actualMatch.ReceiveOrder(order);
