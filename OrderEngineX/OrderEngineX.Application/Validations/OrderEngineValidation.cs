@@ -34,7 +34,7 @@ public abstract class OrderEngineValidation<T> :
         ValidatePriceLimit();
         ValidatePriceMarket();
         ValidateTimeInForceFOK();
-        //ValidateTimeInForceIOC();
+        ValidateTimeInForceIOC();
     }
 
     protected void ValidateOrderCancelRequest()
@@ -140,10 +140,11 @@ public abstract class OrderEngineValidation<T> :
 
     private void ValidateTimeInForceIOC()
     {
-        RuleFor(o => o.Order.TimeInForce)
-            .Must(p => p == TimeInForce.IOC)
-            .When(p => p.Order.MinQty == 0)
-            .WithMessage("5-Invalid TimeInForce IOC to MInQty equals zero");
+        RuleFor(o => o.Order.MinQty)
+            .Must(p => p > 0)
+            .When(p => p.Order.TimeInForce == TimeInForce.IOC)
+            .WithMessage("5-Invalid MinQty to order with timeinforce IOC")
+            .WithErrorCode("5");
     }
 
     private void ValidateNewOrderSingleOrderId()
