@@ -4,6 +4,9 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Enums;
+using SharedX.Core.Matching;
+using MongoDB.Bson;
+
 namespace MatchingX.Infra.Repositories;
 public class MatchingRepository : IMatchingRepository
 {
@@ -24,8 +27,14 @@ public class MatchingRepository : IMatchingRepository
             session.StartTransaction();
             try
             {
+                if ( string.IsNullOrEmpty( orderEngine.Id) )
+                    orderEngine.Id =  ObjectId.GenerateNewId().ToString();
+
+                var builder = Builders<OrderEngine>.Filter;
+                var filter = builder.Eq(o=>o.OrderID, orderEngine.OrderID);
+
                 var resultReplace = await _context.Matching.ReplaceOneAsync(session,
-                null,
+                filter,
                 replacement: orderEngine,
                 options: new ReplaceOptions { IsUpsert = true },
                 cancellation);

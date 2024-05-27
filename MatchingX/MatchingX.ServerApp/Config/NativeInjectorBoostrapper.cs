@@ -1,11 +1,13 @@
 ﻿using System.Reflection;
 using MacthingX.Application.Commands;
+using MacthingX.Application.Commands.Match.OrderStatus;
 using MacthingX.Application.Commands.Match.OrderType;
 using MacthingX.Application.Events;
 using MacthingX.Application.Interfaces;
 using MacthingX.Application.Querys;
 using MacthingX.Application.Services;
 using MatchingX.Core.Interfaces;
+using MatchingX.Core.Notifications;
 using MatchingX.Core.Repositories;
 using MatchingX.Infra.Cache;
 using MatchingX.Infra.Data;
@@ -65,6 +67,8 @@ internal class NativeInjectorBoostrapper
         }));
 
         // Domain - Events
+        services.AddSingleton<INotificationHandler<DomainNotification>, DomainNotificationHandler>();
+
         services.AddSingleton<INotificationHandler<ExecutedTradeEvent>, ExecutedTradeEventHandler>();
 
         services.AddSingleton<INotificationHandler<OrderCanceledEvent>, OrderEventHandler>();
@@ -80,6 +84,11 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IRequestHandler<MatchingMarketCommand, (OrderStatus, Dictionary<long, OrderEngine>)>, MatchingCommandHandler>();
         services.AddSingleton<IRequestHandler<MatchingStopLimitCommand, (OrderStatus, Dictionary<long, OrderEngine>)>, MatchingCommandHandler>();
         services.AddSingleton<IRequestHandler<MatchingStopCommand, (OrderStatus, Dictionary<long, OrderEngine>)>, MatchingCommandHandler>();
+
+        services.AddSingleton<IRequestHandler<MatchingOpenedCommand,bool>, MatchingStatusCommandHandler>();
+        services.AddSingleton<IRequestHandler<MatchingFilledCommand, bool>, MatchingStatusCommandHandler>();
+        services.AddSingleton<IRequestHandler<MatchingPartiallyFilledCommand, bool>, MatchingStatusCommandHandler>();
+        services.AddSingleton<IRequestHandler<MatchingCancelCommand, bool>, MatchingStatusCommandHandler>();
 
         // Domain - Services
         services.AddSingleton<IMatchingReceiver,    MatchingReceiver>();
@@ -104,6 +113,7 @@ internal class NativeInjectorBoostrapper
 
         services.AddSingleton<IOrderStopCache, OrderStopCache>();
 
+        services.AddSingleton<IBookOfferCache, BookOfferCache>();
         services.AddSingleton<IMatchingCache, MatchingCache>();
         services.AddSingleton<IMatchContextStrategy, MatchContextStrategy>();
         
@@ -117,7 +127,8 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IOrderContext, OrderContext>();
         services.AddSingleton<IExecutedTradeContext ,ExecutedTradeContext >();
         services.AddSingleton<IMatchingRepository, MatchingRepository>();
-
+        services.AddSingleton<IMatchingContext, MatchingContext>();
+        
         // Apps - Services
         services.AddHostedService<ConsumerOrderApp>();
         services.AddHostedService<PublisherMarketDataApp>();

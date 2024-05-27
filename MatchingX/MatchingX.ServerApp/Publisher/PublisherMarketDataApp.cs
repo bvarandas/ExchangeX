@@ -27,7 +27,7 @@ public class PublisherMarketDataApp : BackgroundService
 
     private void SenderMarketData(CancellationToken stoppingToken)
     {
-        using (_sender = new PushSocket(_config.MatchingToMarketData.Uri))
+        using (_sender = new PushSocket("@"+_config.MatchingToMarketData.Uri))
         {
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -36,6 +36,7 @@ public class PublisherMarketDataApp : BackgroundService
                     var message = marketData.SerializeToByteArrayProtobuf<MarketData>();
                     _sender.SendMultipartBytes(message);
                 }
+
                 Thread.Sleep(10);
             }
         }

@@ -1,12 +1,10 @@
 ﻿using MatchingX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using SharedX.Core.Entities;
 using SharedX.Core.Enums;
 using SharedX.Core.Matching.DropCopy;
 using SharedX.Core.Specs;
 using StackExchange.Redis;
-using System;
 using System.Collections.Concurrent;
 using System.Text.Json;
 

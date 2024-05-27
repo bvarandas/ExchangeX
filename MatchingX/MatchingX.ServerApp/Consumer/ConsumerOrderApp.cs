@@ -44,7 +44,7 @@ public class ConsumerOrderApp : BackgroundService
     public async override Task StopAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Finalizando o COnsumer Order ZeroMQ...");
-        _receiver.Disconnect(_config.MatchingToMarketData.Uri);
+        _receiver.Disconnect(_config.OrderEngineToMatching.Uri);
         await base.StopAsync(cancellationToken);
     }
 
@@ -57,7 +57,7 @@ public class ConsumerOrderApp : BackgroundService
             try
             {
                 _logger.LogInformation($"Receiver de ordens tentando conectar..{_config.OrderEngineToMatching.Uri}");
-                using (_receiver = new PullSocket(_config.OrderEntryToOrderEngine.Uri))
+                using (_receiver = new PullSocket(">"+_config.OrderEngineToMatching.Uri))
                 {
                     _logger.LogInformation("Receiver de ordens Conectado!!!");
                     isConnected = true;

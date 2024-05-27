@@ -39,22 +39,39 @@ public class ConsumerDropCopyApp : BackgroundService
     }
     private void ReceiverDropCopy(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Iniciando o DropCopy receiver do ZeroMQ...");
+        bool isConnected = false;
         var listExecutions = new List<ExecutionReport>();
 
-        using (_receiver = new PullSocket(_config.MatchingToDropCopy.Uri))
+        do
         {
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
-                var msg = _receiver.ReceiveMultipartBytes();
-                var execution = msg[1].DeserializeFromByteArrayProtobuf<ExecutionReport>();
+                _logger.LogInformation("Iniciando o DropCopy receiver do ZeroMQ...");
 
-                _cache.AddExecutionReport(execution);
-                _mediator.SendCommand(new ExecutionReportCommand(listExecutions));
+                using (_receiver = new PullSocket(_config.MatchingToDropCopy.Uri))
+                {
+                    _logger.LogInformation("Receiver de Dropcopy Conectado!!!");
+                    isConnected = true;
 
-                Thread.Sleep(10);
+                    while (!stoppingToken.IsCancellationRequested)
+                    {
+                        var msg = _receiver.ReceiveMultipartBytes();
+                        var execution = msg[1].DeserializeFromByteArrayProtobuf<ExecutionReport>();
+
+                        _cache.AddExecutionReport(execution);
+                        _mediator.SendCommand(new ExecutionReportCommand(listExecutions));
+
+                        Thread.Sleep(10);
+                    }
+                }
             }
-        }
+            catch (Exception ex)
+            {
+                isConnected = false;
+                _logger.LogError(ex.Message, ex);
+            }
+            Thread.Sleep(100);
+        } while (!isConnected);
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)

@@ -5,15 +5,13 @@ using FluentResults;
 using StackExchange.Redis;
 using SharedX.Core.Enums;
 using Microsoft.Extensions.Options;
-using SharedX.Core.Matching.OrderEngine;
 using System.Text.Json;
 using SharedX.Core.Entities;
 using System.Collections.Concurrent;
-
 namespace SecurityX.Infra.Cache;
-
 public class SecurityCache: ISecurityCache
 {
+    private static ConcurrentQueue<SecurityEngine> SecurityEngineQueue = null!;
     private readonly ConnectionRedis _config;
     private readonly IDatabase _dbSecurity;
     private readonly ILogger<SecurityCache> _logger;
@@ -23,6 +21,8 @@ public class SecurityCache: ISecurityCache
     public SecurityCache(ILogger<SecurityCache> logger, IOptions<ConnectionRedis> config)
     {
         _config = config.Value;
+        
+        SecurityEngineQueue = new ConcurrentQueue<SecurityEngine>();
 
         _redis = ConnectionMultiplexer.Connect(_config.ConnectionString, options => {
             options.ReconnectRetryPolicy = new ExponentialRetry(5000, 1000 * 60);
@@ -64,6 +64,7 @@ public class SecurityCache: ISecurityCache
 
     public async Task UpsertSecurityAsync(SecurityEngine security)
     {
+        SecurityEngineQueue.Enqueue(security);
         RedisValue value = new RedisValue(JsonSerializer.Serialize<SecurityEngine>(security));
         var key = string.Concat(_key, ":", security.Symbol);
         await _dbSecurity.HashSetAsync(key,
@@ -71,5 +72,16 @@ public class SecurityCache: ISecurityCache
             {
                 new HashEntry(security.Symbol, value)
             });
+    }
+
+    public bool TryDequeueSecurity(out SecurityEngine security)
+    {
+        security = default(SecurityEngine);
+        if (SecurityEngineQueue.TryDequeue(out SecurityEngine securityFound))
+        {
+            security = securityFound;
+            return true;
+        }
+        return false;
     }
 }

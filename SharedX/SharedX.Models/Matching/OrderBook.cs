@@ -2,6 +2,8 @@
 using ShareX.Core.Interfaces;
 using SharedX.Core.Enums;
 using ProtoBuf;
+using QuickFix.Fields;
+
 namespace SharedX.Core.Matching;
 
 [ProtoContract]
@@ -10,25 +12,27 @@ public class Book
     [ProtoMember(1)]
     public SideTrade Side { get; set; }
     [ProtoMember(2)]
-    public double Price { get; set; }
+    public decimal Price { get; set; }
     [ProtoMember(3)]
-    public double Amount { get; set; }
+    public decimal Amount { get; set; }
     [ProtoMember(4)]
     public long OrderId { get; set; }
     [ProtoMember(5)]
     public DateTime Timestamp { get; set; }
+    [ProtoMember(6)]
+    public string Symbol { get; set; }
     public Book()
     {
 
     }
 }
-
+[ProtoContract]
 public class OrderBook : IOrderBook
 {
     protected readonly ILogger<OrderBook> _logger;
     
     [ProtoMember(1)]
-    public string Ticker { get; set; } = string.Empty;
+    public string Symbol { get; set; } = string.Empty;
     [ProtoMember(2)]
     public DateTime Timestamp { get; set; }
     [ProtoMember(3)]
@@ -38,6 +42,10 @@ public class OrderBook : IOrderBook
     public OrderBook(ILogger<OrderBook> logger)
     {
         _logger = logger;
+    }
+    public OrderBook()
+    {
+
     }
 
     public void AddOrder(Book book)
@@ -70,8 +78,14 @@ public class OrderBook : IOrderBook
 
     public void CancelOrder(Book book)
     {
-
+        if (book.Side == SideTrade.Buy)
+        {
+            _bookBid = Array.FindAll(_bookBid, (bookBid) => { return bookBid.OrderId != book.OrderId; }).ToArray();
+        }
+        else if (book.Side == SideTrade.Sell)
+        {
+            _bookAsk = Array.FindAll(_bookAsk, (bookAsk) => { return bookAsk.OrderId != book.OrderId; }).ToArray();
+        }
     }
-
 
 }

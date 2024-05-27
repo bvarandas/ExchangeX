@@ -2,9 +2,6 @@
 using MarketDataX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using MongoDB.Bson;
-using NRedisStack.Graph;
-using QuickFix.Fields;
 using SharedX.Core.Enums;
 using SharedX.Core.Matching.MarketData;
 using SharedX.Core.Specs;
@@ -21,9 +18,8 @@ public class MarketDataChache : IMarketDataChache
     private readonly ILogger<MarketDataChache> _logger;
     private static ConcurrentQueue<MarketData> IncrementalQueue;
     
-
     private RedisKey _keyIncremental = new RedisKey("Incremental");
-    private RedisKey _keyBook = new RedisKey("Book");
+    
     public MarketDataChache(ILogger<MarketDataChache> logger, IOptions<ConnectionRedis> config)
     {
         _config = config.Value;

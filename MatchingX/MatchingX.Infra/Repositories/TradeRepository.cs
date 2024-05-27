@@ -37,7 +37,7 @@ public class TradeRepository : ITradeRepository
                     single.TradeId++;
 
                     var resultReplace = await _context.Trade.ReplaceOneAsync(session,
-                        null,
+                        filter,
                     replacement: single,
                     options: new ReplaceOptions { IsUpsert = true },
                     cancellation);

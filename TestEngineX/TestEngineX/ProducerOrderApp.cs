@@ -69,7 +69,7 @@ public class ProducerOrderApp : BackgroundService
                             var message = order.SerializeToByteArrayProtobuf<OrderEngine>();
                             _sender.SendMultipartBytes(message);
                         }
-                        Thread.Sleep(10);
+                        Thread.Sleep(1000);
                     }
                 }
             }

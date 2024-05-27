@@ -17,10 +17,11 @@ public class MatchingReceiver : IMatchingReceiver
 
     public MatchingReceiver(ILogger<MatchingReceiver> logger,
         IMatchingCache matchingCache,
-        IMatchContextStrategy contextoStrategy
+        IMatchContextStrategy contextoStrategy,
+        IMediatorHandler mediator
         )
     {
-
+        _mediator = mediator;
         _logger = logger;
         _matchingCache = matchingCache;
         _contextStrategy = contextoStrategy;

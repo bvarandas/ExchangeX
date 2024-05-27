@@ -37,7 +37,7 @@ public class PublisherOrderReportApp : BackgroundService
     {
         _logger.LogInformation("Initializing the Publisher Orders ZeroMQ...");
 
-        using (_sender = new PushSocket(_config.OrderEngineToMatching.Uri))
+        using (_sender = new PushSocket("@"+_config.OrderEngineToMatching.Uri))
         {
             while (!stoppingToken.IsCancellationRequested)
             {

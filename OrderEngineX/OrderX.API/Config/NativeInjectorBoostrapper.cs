@@ -95,7 +95,7 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IOrderContext, OrderContext>();
 
         services.AddHostedService<ConsumerExecutionReportApp>();
-        services.AddHostedService<PublisherOrderReportApp>();
+        //services.AddHostedService<PublisherOrderReportApp>();
         services.AddHostedService<PublisherOrderApp>();
         services.AddHostedService<ConsumerOrdersApp>();
     }

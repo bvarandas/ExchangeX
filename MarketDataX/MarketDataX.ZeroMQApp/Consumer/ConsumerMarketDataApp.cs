@@ -57,8 +57,8 @@ public class ConsumerMarketDataApp : BackgroundService
         {
             try
             {
-                _logger.LogInformation($"Receiver de marketdata tentando conectar..{_config.OrderEngineToMatching.Uri}");
-                using (_receiver = new PullSocket(_config.MatchingToMarketData.Uri))
+                _logger.LogInformation($"Receiver de marketdata tentando conectar..{_config.MatchingToMarketData.Uri}");
+                using (_receiver = new PullSocket(">"+ _config.MatchingToMarketData.Uri))
                 {
                     _logger.LogInformation("Receiver de marketdata Conectado!!!");
                     isConnected = true;

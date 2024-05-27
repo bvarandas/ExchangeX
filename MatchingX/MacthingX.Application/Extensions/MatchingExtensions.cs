@@ -47,4 +47,16 @@ public static class MatchingExtensions
 
         return ep;
     }
+
+    public static Book ToBookItem(this OrderEngine order)
+    {
+        var book = new Book();
+        book.Side = order.Side;
+        book.Price = order.Price;
+        book.Symbol = order.Symbol;
+        book.OrderId = order.OrderID;
+        book.Amount = order.Quantity;
+        book.Timestamp = order.TransactTime;
+        return book;
+    }
 }

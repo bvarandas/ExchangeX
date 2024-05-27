@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using QuickFix.Fields;
 using SharedX.Core.Entities;
@@ -46,16 +47,22 @@ public class OrderRepository : IOrderRepository
                 session.StartTransaction();
                 try
                 {
+
                     var single = await _context.OrderId.Find(session, filter)
                         .FirstOrDefaultAsync(cancellation);
 
                     single = single ?? new OrderIDEngine();
+                    
+                    if ( string.IsNullOrEmpty( single.Id))
+                        single.Id = ObjectId.GenerateNewId().ToString();
+
                     single.OrderId++;
                     result = single.OrderId;
 
+
                     var resultReplace = await _context.OrderId.ReplaceOneAsync(session,
                         filter,
-                    replacement: new OrderIDEngine() { OrderId = result },
+                    replacement: new OrderIDEngine() { OrderId = result , Id = single.Id},
                     options: new ReplaceOptions { IsUpsert = true },
                     cancellation);
 

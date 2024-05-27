@@ -35,14 +35,20 @@ public class PublisherOrderApp : BackgroundService
     {
         _logger.LogInformation("Initializing the Publisher Orders ZeroMQ...");
 
-        using (_sender = new PushSocket(_config.OrderEngineToMatching.Uri))
+        using (_sender = new PushSocket("@"+_config.OrderEngineToMatching.Uri))
         {
             while (!stoppingToken.IsCancellationRequested)
             {
                 while (_cache.TryDequeueOrder(out OrderEngine order))
                 {
-                    var message = order.SerializeToByteArrayProtobuf<OrderEngine>();
-                    _sender.SendMultipartBytes(message);
+                    try
+                    {
+                        var message = order.SerializeToByteArrayProtobuf<OrderEngine>();
+                        _sender.SendMultipartBytes(message);
+                    }catch(Exception ex)
+                    {
+
+                    }
                 }
                 Thread.Sleep(10);
             }

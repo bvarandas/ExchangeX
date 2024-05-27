@@ -37,8 +37,11 @@ public class ConsumerExecutionReportApp : BackgroundService
         {
             try
             {
-                using (_receiver = new PullSocket(_config.MatchingToOrderEngine.Uri))
+                _logger.LogInformation($"Receiver de DropCopy tentando conectar..{_config.MatchingToOrderEngine.Uri}");
+                
+                using (_receiver = new PullSocket(">"+_config.MatchingToOrderEngine.Uri))
                 {
+                    isConnected = true;
                     while (!stoppingToken.IsCancellationRequested)
                     {
                         var message = _receiver.ReceiveFrameBytes();

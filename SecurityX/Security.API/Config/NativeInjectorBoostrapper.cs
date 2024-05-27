@@ -1,14 +1,11 @@
 ﻿using System.Reflection;
 using MassTransit;
-using MediatR;
 using Security.API.Consumer;
+using Security.API.Publisher;
 using SecurityX.Core.Interfaces;
 using SecurityX.Infra.Cache;
 using SharedX.Core.Bus;
-using SharedX.Core.Interfaces;
 using SharedX.Core.Specs;
-
-
 namespace DropCopyX.ServerApp;
 internal class NativeInjectorBoostrapper
 {
@@ -62,28 +59,10 @@ internal class NativeInjectorBoostrapper
             .AllowCredentials();
         }));
 
-        // Domain - Events
-        //services.AddSingleton<INotificationHandler<DomainNotification>, DomainNotificationHandler>();
-
-        //services.AddSingleton<IRequestHandler<OrderTradeNewEvent, bool>, OrderTradeEventHandler>();
-        //services.AddSingleton<IRequestHandler<OrderTradeModifyEvent, bool>, OrderTradeEventHandler>();
-        //services.AddSingleton<IRequestHandler<OrderTradeCancelEvent, bool>, OrderTradeEventHandler>();
-
-        // Domain - Command
-        //services.AddSingleton<IRequestHandler<OrderTradeCancelCommand, bool>, OrderTradeCommandHandler>();
-        //services.AddSingleton<IRequestHandler<OrderTradeCancelReplaceCommand, bool>, OrderTradeCommandHandler>();
-        //services.AddSingleton<IRequestHandler<OrderTradeNewCommand, bool>, OrderTradeCommandHandler>();
-
         // Infra - Data
         services.AddSingleton<ISecurityCache, SecurityCache>();
     
-        //services.AddSingleton<IOrderEngineCache, OrderEngineCache>();
-        //services.AddSingleton<IOrderReportCache, OrderReportCache>();
-        //services.AddSingleton<IOrderStopCache, OrderStopCache>();
-
-        //services.AddHostedService<ConsumerExecutionReportApp>();
-        //services.AddHostedService<PublisherOrderReportApp>();
-        //services.AddHostedService<PublisherOrderApp>();
+        services.AddHostedService<PublisherSecurityApp>();
         services.AddHostedService<ConsumerSecurityApp>();
     }
 }

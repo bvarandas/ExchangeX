@@ -1,14 +1,12 @@
 ﻿using MatchingX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using QuickFix.Fields;
 using SharedX.Core.Enums;
 using SharedX.Core.Matching.MarketData;
 using SharedX.Core.Specs;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
 using System.Text.Json;
-
 namespace MatchingX.Infra.Cache;
 public class MarketDataCache : IMarketDataCache
 {
