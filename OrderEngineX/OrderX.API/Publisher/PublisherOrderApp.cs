@@ -41,14 +41,8 @@ public class PublisherOrderApp : BackgroundService
             {
                 while (_cache.TryDequeueOrder(out OrderEngine order))
                 {
-                    try
-                    {
-                        var message = order.SerializeToByteArrayProtobuf<OrderEngine>();
-                        _sender.SendMultipartBytes(message);
-                    }catch(Exception ex)
-                    {
-
-                    }
+                    var message = order.SerializeToByteArrayProtobuf<OrderEngine>();
+                    _sender.SendMultipartBytes(message);
                 }
                 Thread.Sleep(10);
             }

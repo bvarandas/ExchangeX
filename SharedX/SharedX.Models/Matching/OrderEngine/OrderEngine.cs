@@ -17,18 +17,12 @@ public class OrderEngine : BaseEntity
     public decimal Quantity { get; set; } // Original Order Qty- Removed (modification) Qty
     [ProtoMember(3)]
     public decimal LeavesQuantity { get; set; } //Remaining open quantity F OrdStatus(39) =    [4(Canceled) or C(Expired) or 8(Rejected)] Then LeavesQty(151) = 0 Else  LeavesQty(151) = OrderQty(38) - CumQty(14)
-    
-    [BsonRepresentation(BsonType.String)]
     [ProtoMember(4)]
     public SideTrade Side { get; set; }
-
-    [BsonRepresentation(BsonType.String)]
     [ProtoMember(5)]
     public OrderType OrderType { get; set; }
-    [BsonRepresentation(BsonType.String)]
     [ProtoMember(6)]
     public TimeInForce TimeInForce { get; set; }
-    [BsonRepresentation(BsonType.String)]
     [ProtoMember(7)]
     public virtual OrderStatus OrderStatus { get; set; }
     [ProtoMember(8)]
