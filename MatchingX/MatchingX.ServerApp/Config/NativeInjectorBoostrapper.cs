@@ -6,6 +6,7 @@ using MacthingX.Application.Events;
 using MacthingX.Application.Interfaces;
 using MacthingX.Application.Querys;
 using MacthingX.Application.Services;
+using MassTransit;
 using MatchingX.Core.Interfaces;
 using MatchingX.Core.Notifications;
 using MatchingX.Core.Repositories;
@@ -19,6 +20,7 @@ using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Sharedx.Infra.Order.Cache;
+using Sharedx.Infra.Outbox.Services;
 using SharedX.Core.Bus;
 using SharedX.Core.Enums;
 using SharedX.Core.Interfaces;
@@ -39,8 +41,29 @@ internal class NativeInjectorBoostrapper
         services.Configure<QueueSettings>(config.GetSection(nameof(QueueSettings)));
         services.Configure<ConnectionRedis>(config.GetSection(nameof(ConnectionRedis)));
         services.Configure<ConnectionZmq>(config.GetSection(nameof(ConnectionZmq)));
-        // FIX - Application
 
+        services.AddMassTransit(x =>
+        {
+            x.AddConsumer<SecurityEngineOutboxApp>();
+            x.AddConsumer<OrderEngineOutboxApp>();
+            x.AddConsumer<DropCopyOutboxApp>();
+
+            x.UsingRabbitMq((context, cfg) =>
+            {
+                string hostname = config["QueueSettings:Hostname"]!;
+                string port = config["QueueSettings:port"]!;
+
+                cfg.Host(hostname, port, "/", h =>
+                {
+                    h.Username("guest");
+                    h.Password("guest");
+                });
+
+                cfg.ConfigureEndpoints(context);
+            });
+        });
+
+        // FIX - Application
         services.AddSingleton<ITradeClientApp, TradeClientApp>();
         //services.AddSingleton<IApplication, FixServerApp>();
         

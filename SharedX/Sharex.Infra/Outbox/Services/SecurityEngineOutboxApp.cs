@@ -1,27 +1,31 @@
 ﻿using MassTransit;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NetMQ;
 using NetMQ.Sockets;
 using SharedX.Core;
 using SharedX.Core.Entities;
+using SharedX.Core.Extensions;
+using SharedX.Core.Specs;
 using SharedX.Core.ValueObjects;
 using System.Collections.Concurrent;
-using System.Threading;
-
 namespace Sharedx.Infra.Outbox.Services;
 public class SecurityEngineOutboxApp : 
     IConsumer<EnvelopeOutbox<SecurityEngine>>
 
 {
     private readonly ILogger<SecurityEngineOutboxApp> _logger;
-    private readonly PushSocket _sender = null!;
+    private PushSocket _sender = null!;
     private readonly ConcurrentQueue<EnvelopeOutbox<SecurityEngine>> _queueEnvelopeOutbox = null!;
     private readonly Thread ThreadSenderActivity = null!;
     private readonly CancellationTokenSource _cancellationTokenSource = null!;
-    public SecurityEngineOutboxApp(ILogger<SecurityEngineOutboxApp> logger)
+    private readonly ConnectionZmq _config;
+    public SecurityEngineOutboxApp(ILogger<SecurityEngineOutboxApp> logger, IOptions<ConnectionZmq> options)
     {
         _logger = logger;
         _queueEnvelopeOutbox = new ConcurrentQueue<EnvelopeOutbox<SecurityEngine>>();
+
+        _config = options.Value;
 
         _cancellationTokenSource = new CancellationTokenSource();
 
@@ -45,32 +49,24 @@ public class SecurityEngineOutboxApp :
             {
                 switch (envelope.ActivityOutbox.NextActivity)
                 {
-                    case OutboxActivities.OrderEntryToOrderEngineSent:
+                    case OutboxActivities.SecurityEngineToMarketDataSent:
                         {
-
+                            using (_sender = new PushSocket("@" + _config.SecurityToMarketData))
+                            {
+                                var message = envelope.Body.SerializeToByteArrayProtobuf<SecurityEngine>();
+                                _sender.SendMultipartBytes(message);
+                            }
                         }
                         break;
-                    case OutboxActivities.OrderEngineToMatchingSent:
+                    case OutboxActivities.SecurityEngineToMatchingSent:
                         {
-
+                            using (_sender = new PushSocket("@" + _config.SecurityToMatching))
+                            {
+                                var message = envelope.Body.SerializeToByteArrayProtobuf<SecurityEngine>();
+                                _sender.SendMultipartBytes(message);
+                            }
                         }
                         break;
-                    case OutboxActivities.MatchingToMarketDataSent:
-                        {
-
-                        }
-                        break;
-                    case OutboxActivities.MatchingToOrderEngineSent:
-                        {
-
-                        }
-                        break;
-                    case OutboxActivities.MatchingToDropCopySent:
-                        {
-
-                        }
-                        break;
-
                 }
             }
 

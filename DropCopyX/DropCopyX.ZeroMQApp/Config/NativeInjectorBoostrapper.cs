@@ -7,9 +7,11 @@ using DropCopyX.Infra.Client;
 using DropCopyX.Infra.Data;
 using DropCopyX.Infra.Repositories;
 using DropCopyX.ServerApp.Services;
+using MassTransit;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Sharedx.Infra.Outbox.Services;
 using SharedX.Core.Bus;
 using SharedX.Core.Specs;
 namespace DropCopyX.ServerApp;
@@ -21,6 +23,24 @@ internal class NativeInjectorBoostrapper
 
         services.Configure<QueueSettings>(config.GetSection(nameof(QueueSettings)));
         services.Configure<ConnectionZmq>(config.GetSection(nameof(ConnectionZmq)));
+
+        services.AddMassTransit(x =>
+        {
+            x.AddConsumer<DropCopyOutboxApp>();
+            x.UsingRabbitMq((context, cfg) =>
+            {
+                string hostname = config["QueueSettings:Hostname"]!;
+                string port = config["QueueSettings:port"]!;
+
+                cfg.Host(hostname, port, "/", h =>
+                {
+                    h.Username("guest");
+                    h.Password("guest");
+                });
+
+                cfg.ConfigureEndpoints(context);
+            });
+        });
 
         // FIX - Application
 
@@ -51,8 +71,6 @@ internal class NativeInjectorBoostrapper
 
         // Domain - Commands
         services.AddSingleton<IRequestHandler<ExecutionReportCommand, bool>, ExecutionReportCommandHandler>();
-
-
 
         // Infra - Data
         

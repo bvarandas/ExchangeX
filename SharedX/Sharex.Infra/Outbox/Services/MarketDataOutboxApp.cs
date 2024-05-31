@@ -1,9 +1,13 @@
 ﻿using MassTransit;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NetMQ;
 using NetMQ.Sockets;
 using SharedX.Core;
+using SharedX.Core.Entities;
+using SharedX.Core.Extensions;
 using SharedX.Core.Matching.MarketData;
+using SharedX.Core.Specs;
 using SharedX.Core.ValueObjects;
 using System.Collections.Concurrent;
 using System.Threading;
@@ -12,14 +16,17 @@ namespace Sharedx.Infra.Outbox.Services;
 public class MarketDataOutboxApp :  IConsumer<EnvelopeOutbox<MarketData>>
 {
     private readonly ILogger<MarketDataOutboxApp> _logger;
-    private readonly PushSocket _sender = null!;
+    private PushSocket _sender = null!;
     private readonly ConcurrentQueue<EnvelopeOutbox<MarketData>> _queueEnvelopeOutbox = null!;
     private readonly Thread ThreadSenderActivity = null!;
     private readonly CancellationTokenSource _cancellationTokenSource = null!;
-    public MarketDataOutboxApp(ILogger<MarketDataOutboxApp> logger)
+    private readonly ConnectionZmq _config;
+    public MarketDataOutboxApp(ILogger<MarketDataOutboxApp> logger, IOptions<ConnectionZmq> options)
     {
         _logger = logger;
         _queueEnvelopeOutbox = new ConcurrentQueue<EnvelopeOutbox<MarketData>>();
+
+        _config = options.Value;
 
         _cancellationTokenSource = new CancellationTokenSource();
 
@@ -43,32 +50,15 @@ public class MarketDataOutboxApp :  IConsumer<EnvelopeOutbox<MarketData>>
             {
                 switch (envelope.ActivityOutbox.NextActivity)
                 {
-                    case OutboxActivities.OrderEntryToOrderEngineSent:
-                        {
-
-                        }
-                        break;
-                    case OutboxActivities.OrderEngineToMatchingSent:
-                        {
-
-                        }
-                        break;
                     case OutboxActivities.MatchingToMarketDataSent:
                         {
-
+                            using (_sender = new PushSocket("@" + _config.MatchingToMarketData))
+                            {
+                                var message = envelope.Body.SerializeToByteArrayProtobuf<MarketData>();
+                                _sender.SendMultipartBytes(message);
+                            }
                         }
                         break;
-                    case OutboxActivities.MatchingToOrderEngineSent:
-                        {
-
-                        }
-                        break;
-                    case OutboxActivities.MatchingToDropCopySent:
-                        {
-
-                        }
-                        break;
-
                 }
             }
 

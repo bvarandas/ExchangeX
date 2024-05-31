@@ -23,4 +23,7 @@ public static class OutboxActivities
     public const string MatchingToOrderEngineSent= nameof(MatchingToOrderEngineSent);
     public const string MatchingToDropCopySent = nameof(MatchingToDropCopySent);
     public const string MatchingToMarketDataSent = nameof(MatchingToMarketDataSent);
+
+    public const string SecurityEngineToMatchingSent = nameof(SecurityEngineToMatchingSent);
+    public const string SecurityEngineToMarketDataSent = nameof(SecurityEngineToMarketDataSent);
 }

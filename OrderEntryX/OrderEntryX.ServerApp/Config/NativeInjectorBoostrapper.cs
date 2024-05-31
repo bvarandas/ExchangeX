@@ -27,6 +27,9 @@ internal class NativeInjectorBoostrapper
 
         services.AddMassTransit(x =>
         {
+            x.AddConsumer<OrderEngineOutboxApp>();
+            x.AddConsumer<DropCopyOutboxApp>();
+
             x.UsingRabbitMq((context, cfg) =>
             {
                 string hostname = config["QueueSettings:Hostname"]!;

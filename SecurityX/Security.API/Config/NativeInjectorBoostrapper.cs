@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using MassTransit;
 using Security.API.Consumer;
 using Security.API.Publisher;
 using SecurityX.Core.Interfaces;
@@ -15,24 +14,7 @@ internal class NativeInjectorBoostrapper
 
         services.Configure<QueueSettings>(config.GetSection(nameof(QueueSettings)));
         services.Configure<ConnectionZmq>(config.GetSection(nameof(ConnectionZmq)));
-
-        services.AddMassTransit(x =>
-        {
-            //x.AddConsumer<ConsumerOrdersBusApp>();
-            x.UsingRabbitMq((context, cfg) =>
-            {
-                string hostname = config["QueueCommandSettings:Hostname"]!;
-                string port = config["QueueCommandSettings:port"]!;
-
-                cfg.Host(hostname,port , "/", h =>
-                {
-                    h.Username("guest");
-                    h.Password("guest");
-                });
-                cfg.ConfigureEndpoints(context);
-            });
-        });
-        
+                
         // FIX - Application
 
         //services.AddSingleton<IFixServerApp, FixServerApp>();

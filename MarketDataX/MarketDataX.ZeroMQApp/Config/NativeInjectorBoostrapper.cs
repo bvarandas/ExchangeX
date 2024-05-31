@@ -1,16 +1,14 @@
 ﻿using System.Reflection;
 using MarketDataX.Core.Interfaces;
 using MarketDataX.ServerApp.Services;
-using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MarketDataX.Core.Repositories;
-using MarketDataX.Infra.Data;
 using SharedX.Core.Bus;
 using SharedX.Core.Specs;
 using MarketDataX.ServerApp.Consumer;
 using MarketDataX.Infra.Cache;
-
+using MassTransit;
+using Sharedx.Infra.Outbox.Services;
 namespace DropCopyX.ServerApp;
 internal class NativeInjectorBoostrapper
 {
@@ -21,10 +19,28 @@ internal class NativeInjectorBoostrapper
         services.Configure<QueueSettings>(config.GetSection(nameof(QueueSettings)));
         services.Configure<ConnectionZmq>(config.GetSection(nameof(ConnectionZmq)));
 
-        // FIX - Application
+        services.AddMassTransit(x =>
+        {
+            x.AddConsumer<SecurityEngineOutboxApp>();
+            x.AddConsumer<MarketDataOutboxApp>();
 
+            x.UsingRabbitMq((context, cfg) =>
+            {
+                string hostname = config["QueueSettings:Hostname"]!;
+                string port = config["QueueSettings:port"]!;
+
+                cfg.Host(hostname, port, "/", h =>
+                {
+                    h.Username("guest");
+                    h.Password("guest");
+                });
+
+                cfg.ConfigureEndpoints(context);
+            });
+        });
+
+        // FIX - Application
         services.AddSingleton<IFixServerApp, FixServerApp>();
-        
 
         // Domain Bus (Mediator)
         services.AddScoped<IMediatorHandler, InMemmoryBus>();

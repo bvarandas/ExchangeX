@@ -1,25 +1,30 @@
 ﻿using MassTransit;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NetMQ;
 using NetMQ.Sockets;
 using SharedX.Core;
+using SharedX.Core.Extensions;
 using SharedX.Core.Matching.OrderEngine;
+using SharedX.Core.Specs;
 using SharedX.Core.ValueObjects;
 using System.Collections.Concurrent;
-using System.Threading;
 
 namespace Sharedx.Infra.Outbox.Services;
 public class OrderEngineOutboxApp : IConsumer<EnvelopeOutbox<OrderEngine>>
 {
     private readonly ILogger<OrderEngineOutboxApp> _logger;
-    private readonly PushSocket _sender = null!;
+    private PushSocket _sender = null!;
     private readonly ConcurrentQueue<EnvelopeOutbox<OrderEngine>> _queueEnvelopeOutbox = null!;
     private readonly Thread ThreadSenderActivity = null!;
     private readonly CancellationTokenSource _cancellationTokenSource = null!;
-    public OrderEngineOutboxApp(ILogger<OrderEngineOutboxApp> logger)
+    private readonly ConnectionZmq _config;
+    public OrderEngineOutboxApp(ILogger<OrderEngineOutboxApp> logger, IOptions<ConnectionZmq> options)
     {
         _logger = logger;
         _queueEnvelopeOutbox = new ConcurrentQueue<EnvelopeOutbox<OrderEngine>>();
+
+        _config = options.Value;
 
         _cancellationTokenSource = new CancellationTokenSource();
 
@@ -45,30 +50,22 @@ public class OrderEngineOutboxApp : IConsumer<EnvelopeOutbox<OrderEngine>>
                 {
                     case OutboxActivities.OrderEntryToOrderEngineSent:
                         {
-
+                            using (_sender = new PushSocket("@" + _config.OrderEntryToOrderEngine))
+                            {
+                                var message = envelope.Body.SerializeToByteArrayProtobuf<OrderEngine>();
+                                _sender.SendMultipartBytes(message);
+                            }
                         }
                         break;
                     case OutboxActivities.OrderEngineToMatchingSent:
                         {
-
+                            using (_sender = new PushSocket("@" + _config.OrderEngineToMatching))
+                            {
+                                var message = envelope.Body.SerializeToByteArrayProtobuf<OrderEngine>();
+                                _sender.SendMultipartBytes(message);
+                            }
                         }
                         break;
-                    case OutboxActivities.MatchingToMarketDataSent:
-                        {
-
-                        }
-                        break;
-                    case OutboxActivities.MatchingToOrderEngineSent:
-                        {
-
-                        }
-                        break;
-                    case OutboxActivities.MatchingToDropCopySent:
-                        {
-
-                        }
-                        break;
-
                 }
             }
 

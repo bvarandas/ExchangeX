@@ -17,8 +17,6 @@ using SharedX.Infra.Cache;
 using SharedX.Infra.Order.Repositories;
 using SharedX.Infra.Order.Data;
 using Sharedx.Infra.Outbox.Services;
-using SharedX.Core.Matching.OrderEngine;
-
 namespace OrderEngineX.API.Config;
 internal class NativeInjectorBoostrapper
 {
@@ -32,7 +30,9 @@ internal class NativeInjectorBoostrapper
 
         services.AddMassTransit(x =>
         {
-            //x.AddConsumer<ConsumerOrdersBusApp>();
+            x.AddConsumer<OrderEngineOutboxApp>();
+            x.AddConsumer<DropCopyOutboxApp>();
+
             x.UsingRabbitMq((context, cfg) =>
             {
                 

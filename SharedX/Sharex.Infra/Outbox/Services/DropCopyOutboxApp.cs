@@ -1,25 +1,29 @@
 ﻿using MassTransit;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NetMQ;
 using NetMQ.Sockets;
 using SharedX.Core;
+using SharedX.Core.Extensions;
 using SharedX.Core.Matching.DropCopy;
+using SharedX.Core.Specs;
 using SharedX.Core.ValueObjects;
 using System.Collections.Concurrent;
-using System.Threading;
-
 namespace Sharedx.Infra.Outbox.Services;
 public class DropCopyOutboxApp : IConsumer<EnvelopeOutbox<ExecutionReport>>
 {
     private readonly ILogger<DropCopyOutboxApp> _logger;
-    private readonly PushSocket _sender = null!;
+    private PushSocket _sender = null!;
     private readonly ConcurrentQueue<EnvelopeOutbox<ExecutionReport>> _queueEnvelopeOutbox = null!;
     private readonly Thread ThreadSenderActivity = null!;
     private readonly CancellationTokenSource _cancellationTokenSource = null!;
-    public DropCopyOutboxApp(ILogger<DropCopyOutboxApp> logger)
+    private readonly ConnectionZmq _config;
+    public DropCopyOutboxApp(ILogger<DropCopyOutboxApp> logger, IOptions<ConnectionZmq> options)
     {
         _logger = logger;
         _queueEnvelopeOutbox = new ConcurrentQueue<EnvelopeOutbox<ExecutionReport>>();
+
+        _config = options.Value;
 
         _cancellationTokenSource = new CancellationTokenSource();
 
@@ -43,29 +47,13 @@ public class DropCopyOutboxApp : IConsumer<EnvelopeOutbox<ExecutionReport>>
             {
                 switch (envelope.ActivityOutbox.NextActivity)
                 {
-                    case OutboxActivities.OrderEntryToOrderEngineSent:
-                        {
-
-                        }
-                        break;
-                    case OutboxActivities.OrderEngineToMatchingSent:
-                        {
-
-                        }
-                        break;
-                    case OutboxActivities.MatchingToMarketDataSent:
-                        {
-
-                        }
-                        break;
-                    case OutboxActivities.MatchingToOrderEngineSent:
-                        {
-
-                        }
-                        break;
                     case OutboxActivities.MatchingToDropCopySent:
                         {
-
+                            using (_sender = new PushSocket("@" + _config.MatchingToDropCopy))
+                            {
+                                var message = envelope.Body.SerializeToByteArrayProtobuf<ExecutionReport>();
+                                _sender.SendMultipartBytes(message);
+                            }
                         }
                         break;
 
