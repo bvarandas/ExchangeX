@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using DropCopyX.Infra.Cache;
+using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OrderEntryX.Core.Interfaces;
@@ -7,7 +8,9 @@ using OrderEntryX.Infra.Client;
 using OrderEntryX.Infra.Data;
 using OrderEntryX.ServerApp.Services;
 using Sharedx.Infra.LoginFix.Data;
+using Sharedx.Infra.Outbox.Services;
 using SharedX.Core.Bus;
+using SharedX.Core.Interfaces;
 using SharedX.Core.Repositories;
 using SharedX.Core.Specs;
 using SharedX.Infra.Repositories;
@@ -20,7 +23,25 @@ internal class NativeInjectorBoostrapper
 
         services.Configure<ConnectionZmq>(config.GetSection(nameof(ConnectionZmq)));
         services.Configure<ConnectionRedis>(config.GetSection(nameof(ConnectionRedis)));
-        
+        services.Configure<QueueSettings>(config.GetSection(nameof(QueueSettings)));
+
+        services.AddMassTransit(x =>
+        {
+            x.UsingRabbitMq((context, cfg) =>
+            {
+                string hostname = config["QueueSettings:Hostname"]!;
+                string port = config["QueueSettings:port"]!;
+
+                cfg.Host(hostname, port, "/", h =>
+                {
+                    h.Username("guest");
+                    h.Password("guest");
+                });
+
+                cfg.ConfigureEndpoints(context);
+            });
+        });
+
         // FIX - Application
         services.AddSingleton<IFixServerApp, FixServerApp>();
         
@@ -47,13 +68,8 @@ internal class NativeInjectorBoostrapper
             .AllowCredentials();
         }));
 
-        // Domain - Events
-        //services.AddSingleton<INotificationHandler<ExecutedTradeEvent>, ExecutedTradeEventHandler>();
-
-        //services.AddSingleton<IRequestHandler<ExecutionReportCommand, bool>, ExecutionReportCommandHandler>();
-        //services.AddSingleton<INotificationHandler<OrderFilledEvent>, OrderEventHandler>();
-        //services.AddSingleton<INotificationHandler<OrderOpenedEvent>, OrderEventHandler>();
-        //services.AddSingleton<INotificationHandler<OrderRejectedEvent>, OrderEventHandler>();
+        // Outbox
+        services.AddSingleton(typeof(IManagerOutboxApp<>), typeof(ManagerOutboxApp<>));
 
         // Infra - Data
         

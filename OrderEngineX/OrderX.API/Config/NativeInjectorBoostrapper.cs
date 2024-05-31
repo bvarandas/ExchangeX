@@ -8,7 +8,6 @@ using OrderEngineX.Application.Events;
 using OrderEngineX.Core.Interfaces;
 using OrderEngineX.Core.Notifications;
 using OrderEngineX.Infra.Cache;
-using OrderX.API.Consumers;
 using SharedX.Core.Bus;
 using SharedX.Core.Interfaces;
 using SharedX.Core.Specs;
@@ -17,6 +16,8 @@ using OrderEngineX.Application.Commands.Order;
 using SharedX.Infra.Cache;
 using SharedX.Infra.Order.Repositories;
 using SharedX.Infra.Order.Data;
+using Sharedx.Infra.Outbox.Services;
+using SharedX.Core.Matching.OrderEngine;
 
 namespace OrderEngineX.API.Config;
 internal class NativeInjectorBoostrapper
@@ -25,17 +26,18 @@ internal class NativeInjectorBoostrapper
     {
         services.AddSwaggerGen();
 
-        services.Configure<QueueCommandSettings>(config.GetSection(nameof(QueueCommandSettings)));
+        services.Configure<QueueSettings>(config.GetSection(nameof(QueueSettings)));
         services.Configure<ConnectionZmq>(config.GetSection(nameof(ConnectionZmq)));
         services.Configure<ConnectionRedis>(config.GetSection(nameof(ConnectionRedis)));
 
         services.AddMassTransit(x =>
         {
-            x.AddConsumer<ConsumerOrdersBusApp>();
+            //x.AddConsumer<ConsumerOrdersBusApp>();
             x.UsingRabbitMq((context, cfg) =>
             {
-                string hostname = config["QueueCommandSettings:Hostname"]!;
-                string port = config["QueueCommandSettings:port"]!;
+                
+                string hostname = config["QueueSettings:Hostname"]!;
+                string port = config["QueueSettings:port"]!;
 
                 cfg.Host(hostname,port , "/", h =>
                 {
@@ -71,6 +73,9 @@ internal class NativeInjectorBoostrapper
             .SetIsOriginAllowed((host) => true)
             .AllowCredentials();
         }));
+
+        // Outbox
+        services.AddSingleton(typeof(IManagerOutboxApp<>), typeof( ManagerOutboxApp<>));
 
         // Domain - Events
         services.AddSingleton<INotificationHandler<DomainNotification>, DomainNotificationHandler>();

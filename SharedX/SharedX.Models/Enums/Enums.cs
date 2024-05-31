@@ -33,15 +33,12 @@ public enum TimeInForce
 
 public enum RedisDataBases
 {
-    //OrderId = 0,
     Matching = 0,
-    //MatchingTradeId= 1,             // é o execId do executionReport
-    //MatchingSecurity= 4,            // marketdata
-    //MatchingSnapshotIncrement = 5,  // marketdata
-    OrderEngine=1,                  // OrderEngine
+    OrderEngine=1,
     OrderReport=2,
     Security=3,
     Fix = 4,    // DropCopy e MarketData
+    Outbox = 5,
     
 }
 //public enum Redis

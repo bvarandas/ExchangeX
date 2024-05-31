@@ -15,12 +15,10 @@ public static class RequestTypeSecurity
     public const string Status = nameof(Status);
 }
 
-
-
-    public static class OutboxActivities
+public static class OutboxActivities
 {
-    public const string OrderEngineToMatchingSent= nameof(OrderEngineToMatchingSent);
     public const string OrderEntryToOrderEngineSent = nameof(OrderEntryToOrderEngineSent);
+    public const string OrderEngineToMatchingSent= nameof(OrderEngineToMatchingSent);
 
     public const string MatchingToOrderEngineSent= nameof(MatchingToOrderEngineSent);
     public const string MatchingToDropCopySent = nameof(MatchingToDropCopySent);

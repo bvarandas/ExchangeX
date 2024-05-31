@@ -34,11 +34,11 @@ services:
   zoonavigator:
     image: elkozmon/zoonavigator:latest
   
-  testenginex:
-    image: ${DOCKER_REGISTRY-}testenginex
-    build:
-      context: .
-      dockerfile: TestEngineX/TestEngineX/Dockerfile
+  # testenginex:
+  #   image: ${DOCKER_REGISTRY-}testenginex
+  #   build:
+  #     context: .
+  #     dockerfile: TestEngineX/TestEngineX/Dockerfile
 
 
   orderenginex:

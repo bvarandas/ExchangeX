@@ -13,7 +13,7 @@ internal class NativeInjectorBoostrapper
     {
         services.AddSwaggerGen();
 
-        services.Configure<QueueCommandSettings>(config.GetSection(nameof(QueueCommandSettings)));
+        services.Configure<QueueSettings>(config.GetSection(nameof(QueueSettings)));
         services.Configure<ConnectionZmq>(config.GetSection(nameof(ConnectionZmq)));
 
         services.AddMassTransit(x =>

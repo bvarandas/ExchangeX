@@ -98,12 +98,12 @@ services:
   #   networks:
   #     - exchange
   
-  testenginex:
-    container_name: testenginex
-    ports:
-      - "5023:5023"
-    networks:
-      - exchange
+  # testenginex:
+  #   container_name: testenginex
+  #   ports:
+  #     - "5023:5023"
+  #   networks:
+  #     - exchange
 
   orderenginex:
     environment:

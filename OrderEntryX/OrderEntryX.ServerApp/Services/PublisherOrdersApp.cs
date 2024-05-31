@@ -4,10 +4,13 @@ using Microsoft.Extensions.Options;
 using NetMQ;
 using NetMQ.Sockets;
 using OrderEntryX.Core.Interfaces;
+using SharedX.Core;
 using SharedX.Core.Extensions;
-using SharedX.Core.Matching;
+using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
+using SharedX.Core.ValueObjects;
+
 namespace OrderEntryX.Infra.Client;
 public class PublisherOrdersApp : BackgroundService
 {
@@ -16,13 +19,16 @@ public class PublisherOrdersApp : BackgroundService
     private PushSocket _sender;
     private readonly IOrderEntryChache _orderEntryChache;
     private static Thread ThreadSenderOrder=null!;
+    private readonly IManagerOutboxApp<OrderEngine> _managerOutbox;
     public PublisherOrdersApp(ILogger<PublisherOrdersApp> logger, 
         IOptions<ConnectionZmq> options,
-        IOrderEntryChache orderEntryChache)
+        IOrderEntryChache orderEntryChache,
+        IManagerOutboxApp<OrderEngine> managerOutbox)
     {
         _logger = logger;
         _config = options.Value;
         _orderEntryChache = orderEntryChache;
+        _managerOutbox = managerOutbox;
     }
     public override Task StartAsync(CancellationToken stoppingToken)
     {
@@ -37,7 +43,7 @@ public class PublisherOrdersApp : BackgroundService
 
     private void SenderOrder(CancellationToken stoppingToken)
     {
-        using (_sender = new PushSocket(_config.OrderEntryToOrderEngine.Uri))
+        using (_sender = new PushSocket("@"+_config.OrderEntryToOrderEngine.Uri))
         {
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -45,6 +51,20 @@ public class PublisherOrdersApp : BackgroundService
                 {
                     var message = order.SerializeToByteArrayProtobuf<OrderEngine>();
                     _sender.SendMultipartBytes(message);
+
+                    var envelope = new EnvelopeOutbox<OrderEngine>()
+                    {
+                        Id = order.OrderID,
+                        Body = order,
+                        LastTransaction = DateTime.Now,
+                        ActivityOutbox = new ActivityOutbox()
+                        {
+                            Activity = OutboxActivities.OrderEntryToOrderEngineSent,
+                            NextActivity = OutboxActivities.OrderEntryToOrderEngineSent
+                        }
+                    };
+
+                    _managerOutbox.AddActivityAsync(envelope);
                 }
 
                 Thread.Sleep(10);
