@@ -1,15 +1,19 @@
 ﻿using MarketDataX.Core.Interfaces;
+using MassTransit;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetMQ;
 using NetMQ.Sockets;
+using Sharedx.Infra.Outbox.Services;
 using SharedX.Core.Bus;
+using SharedX.Core.Entities;
 using SharedX.Core.Extensions;
+using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.MarketData;
 using SharedX.Core.Specs;
 namespace MarketDataX.ServerApp.Consumer;
-public class ConsumerSecurityApp : BackgroundService
+public class ConsumerSecurityApp : OutboxBackgroundService<SecurityEngine>, IHostedService
 {
     private readonly ConnectionZmq _config;
     private readonly ILogger<ConsumerSecurityApp> _logger;
@@ -21,7 +25,9 @@ public class ConsumerSecurityApp : BackgroundService
     public ConsumerSecurityApp(ILogger<ConsumerSecurityApp> logger,
         IOptions<ConnectionZmq> options,
         ISecurityCache cache,
-        IMediatorHandler mediator)
+        IMediatorHandler mediator,
+        IOutboxCache<SecurityEngine> outboxCache,
+        IBus bus) : base(logger, outboxCache, bus)
     {
         _logger = logger;
         _config = options.Value;
@@ -29,17 +35,18 @@ public class ConsumerSecurityApp : BackgroundService
         _mediator = mediator;
     }
 
-    public override Task StartAsync(CancellationToken cancellationToken)
+    public Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Iniciando o Receiver Securities ZeroMQ...");
 
         ThreadReceiverSecurity = new Thread(() => ReceiverSecurity(cancellationToken));
         ThreadReceiverSecurity.Name = nameof(ThreadReceiverSecurity);
         ThreadReceiverSecurity.Start();
-        return base.StartAsync(cancellationToken);
+        
+        return Task.CompletedTask;
     }
 
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected Task ExecuteAsync(CancellationToken stoppingToken)
     {
         return Task.CompletedTask;
     }
@@ -79,7 +86,7 @@ public class ConsumerSecurityApp : BackgroundService
         } while (!isConnected);
     }
 
-    public override Task StopAsync(CancellationToken stoppingToken)
+    public Task StopAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation("Finalizando o consumer de marketdata ZeroMQ...");
         _receiver.Disconnect(_config.SecurityToMarketData.Uri);

@@ -1,22 +1,23 @@
 ﻿using Microsoft.Extensions.Logging;
 using SharedX.Core.Interfaces;
-using SharedX.Core.Matching.OrderEngine;
 using MassTransit;
 using SharedX.Core.Extensions;
 using SharedX.Core.ValueObjects;
+using SharedX.Core.Matching.OrderEngine;
+using SharedX.Core;
 namespace Sharedx.Infra.Outbox.Services;
-public class ManagerOutboxApp<T> where T :class ,  IManagerOutboxApp<T>
+public class OutboxBackgroundService<T> :  IOutboxBackgroundService<T> where T : class
 {
-    private readonly ILogger<ManagerOutboxApp<T>> _logger;
+    private readonly ILogger<OutboxBackgroundService<T>> _logger;
     private static Thread ThreadReceiverActivity = null!;
-    private readonly IOrderOutboxCache<T> _cacheOutbox;
+    private readonly IOutboxCache<T> _cacheOutbox;
     private readonly ManualResetEvent _manualResetOutbox = null!;
     private static ActivityOutbox _activityOutbox = null!;
     private readonly CancellationTokenSource _source = new CancellationTokenSource();
     private readonly IBus _bus;
     
-    public ManagerOutboxApp(ILogger<ManagerOutboxApp<T>> logger,
-        IOrderOutboxCache<T> cache, 
+    public OutboxBackgroundService(ILogger<OutboxBackgroundService<T>> logger,
+        IOutboxCache<T> cache, 
         IBus bus)
     {
         _logger = logger;
@@ -28,7 +29,7 @@ public class ManagerOutboxApp<T> where T :class ,  IManagerOutboxApp<T>
         StartAsync(_source.Token);
     }
 
-    public Task StartAsync(CancellationToken cancellationToken)
+    private Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Initializing o receiver Activities ZeroMQ...");
         ThreadReceiverActivity = new Thread(() => ReceiverActivity(cancellationToken));
@@ -92,7 +93,22 @@ public class ManagerOutboxApp<T> where T :class ,  IManagerOutboxApp<T>
         //await _cacheOutbox.DeleteOutboxAsync(_activityOutbox.activity, order.OrderID);
     }
 
-    ~ManagerOutboxApp()
+    protected async void DeleteOutboxCacheAsync(T body, long id)
+    {
+        var envelope = new EnvelopeOutbox<T>()
+        {
+            Id = id,
+            Body = body,
+            ActivityOutbox = new ActivityOutbox()
+            {
+                Activity = _activityOutbox.Activity
+            }
+
+        };
+        await _cacheOutbox.DeleteOutboxAsync(envelope);
+    }
+
+    ~OutboxBackgroundService()
     {
         _logger.LogInformation("Finalizando o objeto de ConsumerOutboxCacheApp");
         _source.Cancel();

@@ -19,11 +19,11 @@ public class PublisherOrdersApp : BackgroundService
     private PushSocket _sender;
     private readonly IOrderEntryChache _orderEntryChache;
     private static Thread ThreadSenderOrder=null!;
-    private readonly IManagerOutboxApp<OrderEngine> _managerOutbox;
+    private readonly IOutboxBackgroundService<OrderEngine> _managerOutbox;
     public PublisherOrdersApp(ILogger<PublisherOrdersApp> logger, 
         IOptions<ConnectionZmq> options,
         IOrderEntryChache orderEntryChache,
-        IManagerOutboxApp<OrderEngine> managerOutbox)
+        IOutboxBackgroundService<OrderEngine> managerOutbox)
     {
         _logger = logger;
         _config = options.Value;

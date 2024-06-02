@@ -1,18 +1,13 @@
 ﻿using DropCopyX.Core.Interfaces;
-using FluentResults;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuickFix;
 using QuickFix.Fields;
-using QuickFix.FIX44;
 using SharedX.Core;
 using SharedX.Core.Enums;
-using SharedX.Core.Matching;
 using SharedX.Core.Specs;
 using StackExchange.Redis;
-using System.ServiceModel.Channels;
 using System.Text.Json;
-
 namespace DropCopyX.Infra.Cache;
 public class FixSessionDropCopyCache : IFixSessionDropCopyCache
 {

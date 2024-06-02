@@ -17,6 +17,8 @@ using SharedX.Infra.Cache;
 using SharedX.Infra.Order.Repositories;
 using SharedX.Infra.Order.Data;
 using Sharedx.Infra.Outbox.Services;
+using Sharedx.Infra.Outbox.Cache;
+
 namespace OrderEngineX.API.Config;
 internal class NativeInjectorBoostrapper
 {
@@ -75,7 +77,8 @@ internal class NativeInjectorBoostrapper
         }));
 
         // Outbox
-        services.AddSingleton(typeof(IManagerOutboxApp<>), typeof( ManagerOutboxApp<>));
+        services.AddSingleton(typeof(IOutboxBackgroundService<>), typeof(OutboxBackgroundService<>));
+        services.AddSingleton(typeof(IOutboxCache<>), typeof(OutboxCache<>));
 
         // Domain - Events
         services.AddSingleton<INotificationHandler<DomainNotification>, DomainNotificationHandler>();

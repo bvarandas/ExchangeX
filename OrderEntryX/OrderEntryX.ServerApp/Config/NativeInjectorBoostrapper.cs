@@ -72,7 +72,7 @@ internal class NativeInjectorBoostrapper
         }));
 
         // Outbox
-        services.AddSingleton(typeof(IManagerOutboxApp<>), typeof(ManagerOutboxApp<>));
+        services.AddSingleton(typeof(IOutboxBackgroundService<>), typeof(OutboxBackgroundService<>));
 
         // Infra - Data
         

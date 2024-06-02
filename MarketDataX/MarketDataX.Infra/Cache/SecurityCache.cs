@@ -17,6 +17,7 @@ public class SecurityCache : ISecurityCache
     private readonly ConnectionMultiplexer _redis;
     private readonly IDatabase _dbSecurity;
     private readonly ILogger<SecurityCache> _logger;
+    private static ConcurrentQueue<Security> SecurityStatusQueue =null!;
     private RedisKey _key = new RedisKey("Security");
     public SecurityCache(ILogger<SecurityCache> logger, IOptions<ConnectionRedis> config)
     {
@@ -25,8 +26,20 @@ public class SecurityCache : ISecurityCache
             options.ReconnectRetryPolicy = new ExponentialRetry(5000, 1000 * 60);
         });
 
+        SecurityStatusQueue = new ConcurrentQueue<Security>();
+
         _dbSecurity = _redis.GetDatabase((int)RedisDataBases.Fix);
         _logger = logger;
+    }
+    public bool TryDequeueSecurityStatus(out Security security)
+    {
+        security = default(Security)!;
+        if (SecurityStatusQueue.TryDequeue(out Security report))
+        {
+            security = report;
+            return true;
+        }
+        return false;
     }
 
     private async Task SetValueRedis(Security security)
@@ -54,6 +67,20 @@ public class SecurityCache : ISecurityCache
 
         return Result.Fail(new Error($"Symbol {symbol} not found "));
     }
+
+    public async Task<Result<Dictionary<long, Security>>> GetSnapShotSecuritiesAsync()
+    {
+        var result = new Dictionary<long, Security>();
+
+        var key = string.Concat(_key, ":");
+        var securityHash = await _dbSecurity.HashGetAllAsync(key);
+        
+        foreach (var data in securityHash)
+            result.TryAdd(long.Parse(data.Name!), JsonSerializer.Deserialize<Security>(data.Value!)!);
+
+        return Result.Ok(result);
+    }
+
     public async Task<Result<bool>> UpsertSecurity(Security security)
     {
         SecurityQueue.Enqueue(security);

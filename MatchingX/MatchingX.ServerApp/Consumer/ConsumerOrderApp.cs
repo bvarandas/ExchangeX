@@ -1,37 +1,43 @@
-﻿using MatchingX.Core.Interfaces;
+﻿using MassTransit;
+using MatchingX.Core.Interfaces;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetMQ;
 using NetMQ.Sockets;
+using Sharedx.Infra.Outbox.Services;
+using SharedX.Core;
 using SharedX.Core.Extensions;
+using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
+using SharedX.Core.ValueObjects;
 namespace MatchingX.ServerApp.Consumer;
-public class ConsumerOrderApp : BackgroundService
+public class ConsumerOrderApp : OutboxBackgroundService<OrderEngine>, IHostedService
 {
     private readonly ILogger<ConsumerOrderApp> _logger;
     private PullSocket _receiver;
     private readonly ConnectionZmq _config;
     private readonly IMatchingReceiver _matchReceiver;
     private static Thread ThreadReceiverOrder= null!;
-
     public ConsumerOrderApp(ILogger<ConsumerOrderApp> logger,
         IOptions<ConnectionZmq> options
         ,IMatchingReceiver matchReceiver
-        )
+        , IOutboxCache<OrderEngine> outboxCache
+        , IBus bus
+        ) : base(logger, outboxCache, bus)
     {
         _logger = logger;
         _config = options.Value;
         _matchReceiver = matchReceiver;
     }
 
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected Task ExecuteAsync(CancellationToken stoppingToken)
     {
         return Task.CompletedTask;
     }
 
-    public override Task StartAsync(CancellationToken cancellationToken)
+    public Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Iniciando o Receiver Order ZeroMQ...");
 
@@ -41,11 +47,10 @@ public class ConsumerOrderApp : BackgroundService
 
         return Task.CompletedTask;
     }
-    public async override Task StopAsync(CancellationToken cancellationToken)
+    public async Task StopAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Finalizando o COnsumer Order ZeroMQ...");
         _receiver.Disconnect(_config.OrderEngineToMatching.Uri);
-        await base.StopAsync(cancellationToken);
     }
 
     private void ReceiverOrder(CancellationToken stoppingToken)
@@ -67,6 +72,7 @@ public class ConsumerOrderApp : BackgroundService
                         var message = _receiver.ReceiveMultipartBytes()[0];
                         var order = message.DeserializeFromByteArrayProtobuf<OrderEngine>();
                         _matchReceiver.ReceiveOrder(order);
+                        DeleteOutboxCacheAsync(order, order.OrderID);
                         Thread.Sleep(10);
                     }
                 }

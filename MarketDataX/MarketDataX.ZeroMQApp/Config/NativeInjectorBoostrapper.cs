@@ -9,6 +9,9 @@ using MarketDataX.ServerApp.Consumer;
 using MarketDataX.Infra.Cache;
 using MassTransit;
 using Sharedx.Infra.Outbox.Services;
+using SharedX.Core.Interfaces;
+using Sharedx.Infra.Outbox.Cache;
+
 namespace DropCopyX.ServerApp;
 internal class NativeInjectorBoostrapper
 {
@@ -63,6 +66,9 @@ internal class NativeInjectorBoostrapper
             .SetIsOriginAllowed((host) => true)
             .AllowCredentials();
         }));
+        // Outbox 
+        services.AddSingleton(typeof(IOutboxBackgroundService<>), typeof(OutboxBackgroundService<>));
+        services.AddSingleton(typeof(IOutboxCache<>), typeof(OutboxCache<>));
 
         // Domain - Events
         //services.AddSingleton<INotificationHandler<ExecutedTradeEvent>, ExecutedTradeEventHandler>();

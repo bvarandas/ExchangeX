@@ -3,8 +3,12 @@ public static class KeyNameRedis
 {
     public const string TradeId = nameof(TradeId);
     public const string ExecutedTrade = nameof(ExecutedTrade);
-    public const string ExecutionReport = nameof(ExecutionReport);
     public const string OrderEngine = nameof(OrderEngine);
+
+    public const string DropCopyExecutionReport = nameof(DropCopyExecutionReport);
+    public const string MarketDataIncremental = nameof(MarketDataIncremental);  
+    public const string MarketDataSnapshot = nameof(MarketDataSnapshot);
+
     public const string DropCopyFixSession = nameof(DropCopyFixSession);
     public const string MarketDataFixSession = nameof(MarketDataFixSession);
 }

@@ -20,6 +20,7 @@ using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Sharedx.Infra.Order.Cache;
+using Sharedx.Infra.Outbox.Cache;
 using Sharedx.Infra.Outbox.Services;
 using SharedX.Core.Bus;
 using SharedX.Core.Enums;
@@ -88,6 +89,9 @@ internal class NativeInjectorBoostrapper
             .SetIsOriginAllowed((host) => true)
             .AllowCredentials();
         }));
+        // Outbox 
+        services.AddSingleton(typeof(IOutboxBackgroundService<>), typeof(OutboxBackgroundService<>));
+        services.AddSingleton(typeof(IOutboxCache<>), typeof(OutboxCache<>));
 
         // Domain - Events
         services.AddSingleton<INotificationHandler<DomainNotification>, DomainNotificationHandler>();

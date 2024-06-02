@@ -9,8 +9,10 @@ using SharedX.Core.Extensions;
 using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
+using Sharedx.Infra.Outbox.Services;
+using MassTransit;
 namespace OrderEngineX.API.Consumers;
-public class ConsumerOrdersApp : BackgroundService
+public class ConsumerOrdersApp : OutboxBackgroundService<OrderEngine>, IHostedService
 {
     private readonly ILogger<ConsumerOrdersApp> _logger;
     private PullSocket _receiver;
@@ -18,20 +20,24 @@ public class ConsumerOrdersApp : BackgroundService
     private static Thread ThreadReceiverOrder = null!;
     private readonly IMediatorHandler _mediator;
     private readonly  IMatchingCache _cache;
+    private readonly IOutboxCache<OrderEngine> _outboxCache;
     public ConsumerOrdersApp(ILogger<ConsumerOrdersApp> logger,
         IOptions<ConnectionZmq> options,
         IMediatorHandler mediator,
-        IMatchingCache cache)
+        IMatchingCache cache,
+        IOutboxCache<OrderEngine> outboxCache,
+        IBus bus) : base(logger,outboxCache, bus)
     {
         _logger = logger;
         _config = options.Value;
         _mediator = mediator;
         _cache = cache;
+        _outboxCache = outboxCache;
     }
 
-    public override Task StartAsync(CancellationToken cancellationToken)
+    public Task StartAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Initializing o receiver Orders ZeroMQ...");
+        _logger.LogInformation("Inicializando o receiver de Orders do ZeroMQ...");
         ThreadReceiverOrder = new Thread(() => ReceiverOrders(cancellationToken));
         ThreadReceiverOrder.Name = nameof(ThreadReceiverOrder);
         ThreadReceiverOrder.Start();
@@ -56,6 +62,7 @@ public class ConsumerOrdersApp : BackgroundService
                         var order = message.DeserializeFromByteArrayProtobuf<OrderEngine>();
                         
                         SendOrderCommand(order);
+                        DeleteOutboxCacheAsync(order, order.OrderID);
                     }
 
                     Thread.Sleep(10);
@@ -90,15 +97,15 @@ public class ConsumerOrdersApp : BackgroundService
         _mediator.SendCommand(command);
     }
 
-    public override Task StopAsync(CancellationToken cancellationToken)
+    public Task StopAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Finishing the publisher ZeroMQ...");
+        _logger.LogInformation("Finalizando o consumer de ordens do zeroMQ...");
         _receiver.Disconnect(_config.OrderEntryToOrderEngine.Uri);
-        _logger.LogInformation("Publisher ZeroMq...Finishing!");
-        return base.StopAsync(cancellationToken);
+        _logger.LogInformation("Consumer ZeroMq...Finalizado!");
+        return Task.CompletedTask;
     }
 
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected Task ExecuteAsync(CancellationToken stoppingToken)
     {
         return Task.CompletedTask;
     }

@@ -9,15 +9,15 @@ using StackExchange.Redis;
 using System.Text.Json;
 
 namespace Sharedx.Infra.Outbox.Cache;
-public class OrderOutboxCache<T>  where T : class,  IOrderOutboxCache<T>
+public class OutboxCache<T>  where T : class,  IOutboxCache<T>
 {
     private readonly ConnectionRedis _config;
     private readonly IDatabase _dbOutboxCache;
-    private readonly ILogger<OrderOutboxCache<T>> _logger;
+    private readonly ILogger<OutboxCache<T>> _logger;
     private readonly ConnectionMultiplexer _redis;
     private readonly RedisKey _key = new RedisKey("Outbox");
 
-    public OrderOutboxCache(ILogger<OrderOutboxCache<T>> logger, IOptions<ConnectionRedis> config)
+    public OutboxCache(ILogger<OutboxCache<T>> logger, IOptions<ConnectionRedis> config)
     {
         _config = config.Value;
 

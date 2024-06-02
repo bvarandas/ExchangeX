@@ -1,27 +1,32 @@
-﻿using Microsoft.Extensions.Options;
+﻿using MassTransit;
+using Microsoft.Extensions.Options;
 using NetMQ;
 using NetMQ.Sockets;
 using OrderEngineX.Core.Interfaces;
+using Sharedx.Infra.Outbox.Services;
 using SharedX.Core.Extensions;
+using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.DropCopy;
 using SharedX.Core.Specs;
 namespace OrderEngineX.API.Consumers;
-public class ConsumerExecutionReportApp : BackgroundService
+public class ConsumerExecutionReportApp : OutboxBackgroundService<ExecutionReport>, IHostedService
 {
     private readonly ILogger<ConsumerExecutionReportApp> _logger;
     private PullSocket _receiver;
     private readonly ConnectionZmq _config;
     private readonly IExecutionReportCache _cache;
     private static Thread ThreadReceiverExecutionReport = null!;
-    public ConsumerExecutionReportApp(ILogger<ConsumerExecutionReportApp> logger,
-        IOptions<ConnectionZmq> options,
-        IExecutionReportCache cache)
+    public ConsumerExecutionReportApp(ILogger<ConsumerExecutionReportApp> logger
+        ,IOptions<ConnectionZmq> options
+        ,IExecutionReportCache cache
+        ,IOutboxCache<ExecutionReport> outboxCache
+        , IBus bus) : base(logger, outboxCache, bus)
     {
         _logger = logger;
         _config = options.Value;
         _cache = cache;
     }
-    public override Task StartAsync(CancellationToken cancellationToken)
+    public Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Initializing receiver Execution Report ZeroMQ...");
         ThreadReceiverExecutionReport = new Thread(() => ReceiverExecutionReport(cancellationToken));
@@ -47,7 +52,7 @@ public class ConsumerExecutionReportApp : BackgroundService
                         var message = _receiver.ReceiveFrameBytes();
                         var execution = message.DeserializeFromByteArrayProtobuf<ExecutionReport>();
                         _cache.AddQueueExecutionReport(execution);
-                        
+                        DeleteOutboxCacheAsync(execution, execution.ExecID);
                     }
                     Thread.Sleep(10);
                 }
@@ -62,15 +67,18 @@ public class ConsumerExecutionReportApp : BackgroundService
         } while (!isConnected);
     }
 
-    public override Task StopAsync(CancellationToken cancellationToken)
+    
+
+    public Task StopAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Finishing the publisher ZeroMQ...");
         _receiver.Disconnect(_config.MatchingToOrderEngine.Uri);
         _logger.LogInformation("Publisher ZeroMq...Finishing!");
-        return base.StopAsync(cancellationToken);
+
+        return Task.CompletedTask;
     }
 
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected Task ExecuteAsync(CancellationToken stoppingToken)
     {
         return Task.CompletedTask;
     }

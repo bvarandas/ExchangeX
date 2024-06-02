@@ -16,7 +16,7 @@ public class MarketData
     [ProtoMember(5)]
     public ushort EntryID { get; set; }  //0 (bid) or 1 (ask)
     [ProtoMember(6)]
-    public ushort EntryType { get; set; } ////0 (bid) or 1 (ask) 2 trade 
+    public char EntryType { get; set; } ////0 (bid) or 1 (ask) 2 trade 
     [ProtoMember(7)]
     public decimal EntryPx { get; set; } = decimal.Zero;  /// Preço
     [ProtoMember(8)]

@@ -16,7 +16,7 @@ public class ExecutionReportChache : IExecutionReportChache
     private readonly IDatabase _dbExecutionReport;
     private readonly ILogger<ExecutionReportChache> _logger;
     private static ConcurrentQueue<ExecutionReport> ExecutionReportQueue;
-    private RedisKey keyExecutionReport = new RedisKey(KeyNameRedis.ExecutionReport);
+    private RedisKey keyExecutionReport = new RedisKey(KeyNameRedis.DropCopyExecutionReport);
     public ExecutionReportChache(ILogger<ExecutionReportChache> logger, IOptions<ConnectionRedis> config)
     {
         _config = config.Value;
@@ -24,7 +24,7 @@ public class ExecutionReportChache : IExecutionReportChache
         _redis = ConnectionMultiplexer.Connect(_config.ConnectionString, options => {
             options.ReconnectRetryPolicy = new ExponentialRetry(5000, 1000 * 60);
         });
-        _dbExecutionReport = _redis.GetDatabase((int)RedisDataBases.Matching);
+        _dbExecutionReport = _redis.GetDatabase((int)RedisDataBases.Fix);
         _logger = logger;
     }
     public async void AddExecutionReport(ExecutionReport report)

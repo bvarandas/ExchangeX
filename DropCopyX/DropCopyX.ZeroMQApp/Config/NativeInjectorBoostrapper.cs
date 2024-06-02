@@ -11,8 +11,10 @@ using MassTransit;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Sharedx.Infra.Outbox.Cache;
 using Sharedx.Infra.Outbox.Services;
 using SharedX.Core.Bus;
+using SharedX.Core.Interfaces;
 using SharedX.Core.Specs;
 namespace DropCopyX.ServerApp;
 internal class NativeInjectorBoostrapper
@@ -69,11 +71,14 @@ internal class NativeInjectorBoostrapper
             .AllowCredentials();
         }));
 
+        // Outbox 
+        services.AddSingleton(typeof(IOutboxBackgroundService<>), typeof(OutboxBackgroundService<>));
+        services.AddSingleton(typeof(IOutboxCache<>), typeof(OutboxCache<>));
+
         // Domain - Commands
         services.AddSingleton<IRequestHandler<ExecutionReportCommand, bool>, ExecutionReportCommandHandler>();
 
         // Infra - Data
-        
         services.AddSingleton<IFixSessionDropCopyCache, FixSessionDropCopyCache>();
         services.AddSingleton<IExecutedTradeCache, TradeCaptureReportCache>();
         services.AddSingleton<IExecutionReportChache, ExecutionReportChache>();

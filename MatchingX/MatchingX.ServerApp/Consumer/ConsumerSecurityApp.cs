@@ -1,38 +1,41 @@
-﻿using MatchingX.Core.Interfaces;
-using MatchingX.ServerApp.Publisher;
+﻿using MassTransit;
+using MatchingX.Core.Interfaces;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetMQ;
 using NetMQ.Sockets;
+using Sharedx.Infra.Outbox.Services;
 using SharedX.Core.Entities;
 using SharedX.Core.Extensions;
+using SharedX.Core.Interfaces;
 using SharedX.Core.Specs;
-
 namespace MatchingX.ServerApp.Consumer;
-public class ConsumerSecurityApp : BackgroundService
+public class ConsumerSecurityApp : OutboxBackgroundService<SecurityEngine>, IHostedService
 {
-    private readonly ILogger<PublisherMarketDataApp> _logger;
+    private readonly ILogger<OutboxBackgroundService<SecurityEngine>> _logger;
     private PullSocket _receiver;
     private readonly ConnectionZmq _config;
     private readonly IMatchingReceiver _matchReceiver;
     private static Thread ThreadReceiverSecurity = null!;
-    public ConsumerSecurityApp(ILogger<PublisherMarketDataApp> logger,
-        IOptions<ConnectionZmq> options
-        , IMatchingReceiver matchReceiver
-        )
+    public ConsumerSecurityApp(ILogger<OutboxBackgroundService<SecurityEngine>> logger,
+        IOptions<ConnectionZmq> options, 
+        IMatchingReceiver matchReceiver,
+        IOutboxCache<SecurityEngine> outboxCache,
+        IBus bus
+        ):base(logger, outboxCache, bus)
     {
         _logger = logger;
         _config = options.Value;
         _matchReceiver = matchReceiver;
     }
 
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        throw new NotImplementedException();
+        return Task.CompletedTask;
     }
 
-    public override Task StartAsync(CancellationToken cancellationToken)
+    public Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Iniciando o Receiver Order ZeroMQ...");
 
@@ -42,11 +45,12 @@ public class ConsumerSecurityApp : BackgroundService
 
         return Task.CompletedTask;
     }
-    public async override Task StopAsync(CancellationToken cancellationToken)
+    public Task StopAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Finalizando o COnsumer Order ZeroMQ...");
         _receiver.Disconnect(_config.MatchingToMarketData.Uri);
-        await base.StopAsync(cancellationToken);
+        
+        return Task.CompletedTask;
     }
 
     private void ReceiverSecurity(CancellationToken stoppingToken)
@@ -68,6 +72,7 @@ public class ConsumerSecurityApp : BackgroundService
                         var message = _receiver.ReceiveMultipartBytes()[0];
                         var security = message.DeserializeFromByteArrayProtobuf<SecurityEngine>();
                         _matchReceiver.ReceiveSecurity(security);
+                        DeleteOutboxCacheAsync(security, long.Parse(security.SecurityID));
 
                         Thread.Sleep(10);
                     }

@@ -1,16 +1,19 @@
 ﻿using DropCopyX.Application.Commands;
 using DropCopyX.Core.Interfaces;
+using MassTransit;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetMQ;
 using NetMQ.Sockets;
+using Sharedx.Infra.Outbox.Services;
 using SharedX.Core.Bus;
 using SharedX.Core.Extensions;
+using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.DropCopy;
 using SharedX.Core.Specs;
 namespace DropCopyX.Infra.Client;
-public class ConsumerDropCopyApp : BackgroundService
+public class ConsumerDropCopyApp : OutboxBackgroundService<ExecutionReport>, IHostedService
 {
     private readonly ConnectionZmq _config;
     private readonly ILogger<ConsumerDropCopyApp> _logger;
@@ -21,21 +24,24 @@ public class ConsumerDropCopyApp : BackgroundService
     public ConsumerDropCopyApp(ILogger<ConsumerDropCopyApp> logger, 
         IOptions<ConnectionZmq>  options, 
         IExecutionReportChache cache, 
-        IMediatorHandler mediator)
+        IMediatorHandler mediator,
+        IOutboxCache<ExecutionReport> outboxCache,
+        IBus bus) : base(logger, outboxCache, bus)
     {
         _logger = logger;
         _config = options.Value;
         _cache = cache;
         _mediator = mediator;
     }
-    public override Task StartAsync(CancellationToken cancellationToken)
+    public Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Iniciando o Receiver Marketdata ZeroMQ...");
 
         ThreadReceiverDropCopy = new Thread(() => ReceiverDropCopy(cancellationToken));
         ThreadReceiverDropCopy.Name = nameof(ThreadReceiverDropCopy);
         ThreadReceiverDropCopy.Start();
-        return base.StartAsync(cancellationToken);
+        
+        return Task.CompletedTask;
     }
     private void ReceiverDropCopy(CancellationToken stoppingToken)
     {
@@ -74,12 +80,12 @@ public class ConsumerDropCopyApp : BackgroundService
         } while (!isConnected);
     }
 
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected Task ExecuteAsync(CancellationToken stoppingToken)
     {
         return Task.CompletedTask;
     }
 
-    public async override Task StopAsync(CancellationToken stoppingToken)
+    public async Task StopAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation("Finalizando o receiver de dropcopy ZeroMQ...");
         _receiver.Disconnect(_config.MatchingToDropCopy.Uri);
