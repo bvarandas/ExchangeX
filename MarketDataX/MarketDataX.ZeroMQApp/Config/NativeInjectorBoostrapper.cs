@@ -11,6 +11,10 @@ using MassTransit;
 using Sharedx.Infra.Outbox.Services;
 using SharedX.Core.Interfaces;
 using Sharedx.Infra.Outbox.Cache;
+using MarketDataX.Application.Commands;
+using MediatR;
+using MarketDataX.Infra.Data;
+using MarketDataX.Infra.Repositories;
 
 namespace DropCopyX.ServerApp;
 internal class NativeInjectorBoostrapper
@@ -73,14 +77,13 @@ internal class NativeInjectorBoostrapper
         // Domain - Events
         //services.AddSingleton<INotificationHandler<ExecutedTradeEvent>, ExecutedTradeEventHandler>();
 
-        //services.AddSingleton<IRequestHandler<ExecutionReportCommand, bool>, ExecutionReportCommandHandler>();
-        //services.AddSingleton<INotificationHandler<OrderFilledEvent>, OrderEventHandler>();
-        //services.AddSingleton<INotificationHandler<OrderOpenedEvent>, OrderEventHandler>();
-        //services.AddSingleton<INotificationHandler<OrderRejectedEvent>, OrderEventHandler>();
+        // Domain - Commands
+        services.AddSingleton<IRequestHandler<SnapshotCommand, bool>, SnapshotCommandHandler>();
 
         // Infra - Data
         services.AddSingleton<IFixSessionMarketDataCache, FixSessionMarketDataCache>();
-        //services.AddSingleton<IOrderEntryRepository, OrderEntryRepository>();
+        services.AddSingleton<IMarketDataContext, MarketDataContext>();
+        services.AddSingleton<IMarketDataRepository, MarketDataRepository>();
 
         services.AddHostedService<ConsumerMarketDataApp>();
         services.AddHostedService<PublisherFixApp>();

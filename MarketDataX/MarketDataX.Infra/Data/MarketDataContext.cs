@@ -1,13 +1,13 @@
 ﻿using MarketDataX.Core.Entities;
-using MarketDataX.Infra.Data;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using SharedX.Core.Matching.MarketData;
-namespace DropCopyX.Infra.Data;
+namespace MarketDataX.Infra.Data;
 public class MarketDataContext : IMarketDataContext
 {
     public IMongoCollection<MarketData> MarketData { get; }
     public IMongoCollection<Login> Login { get; }
+    public IMongoCollection<MarketDataSnapshot> MarketDataSnapshot { get; }
 
     public MarketDataContext(IConfiguration configuration)
     {
@@ -18,6 +18,9 @@ public class MarketDataContext : IMarketDataContext
             configuration.GetValue<string>("DatabaseSettings:CollectionNameLogin"));
 
         MarketData = database.GetCollection<MarketData>(
-            configuration.GetValue<string>("DatabaseSettings:CollectionIncremental"));
+            configuration.GetValue<string>("DatabaseSettings:CollectionMarketData"));
+
+        MarketDataSnapshot = database.GetCollection<MarketDataSnapshot>(
+            configuration.GetValue<string>("DatabaseSettings:CollectionMarketDataSnapshot"));
     }
 }

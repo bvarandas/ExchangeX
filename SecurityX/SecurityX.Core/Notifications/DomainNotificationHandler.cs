@@ -1,5 +1,6 @@
 ﻿using MediatR;
-namespace OrderEngineX.Core.Notifications;
+
+namespace SecurityX.Core.Notifications;
 
 public class DomainNotificationHandler : INotificationHandler<DomainNotification>
 {

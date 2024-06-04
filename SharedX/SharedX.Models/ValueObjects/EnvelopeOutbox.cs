@@ -1,5 +1,4 @@
 ﻿using ProtoBuf;
-using SharedX.Core.Matching.OrderEngine;
 namespace SharedX.Core.ValueObjects;
 [ProtoContract()]
 public class EnvelopeOutbox<T> where T: class
