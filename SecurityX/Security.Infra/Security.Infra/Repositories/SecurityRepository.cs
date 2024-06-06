@@ -17,7 +17,7 @@ public class SecurityRepository : ISecurityRepository
         _logger = logger;
     }
 
-    public async Task<Dictionary<string, SecurityEngine>> GetAllSecurityiesAsync(CancellationToken cancellation)
+    public async Task<Result<Dictionary<string, SecurityEngine>>> GetAllSecurityiesAsync(CancellationToken cancellation)
     {
         Dictionary<string, SecurityEngine> result = null!;
         try
@@ -31,8 +31,9 @@ public class SecurityRepository : ISecurityRepository
         catch (Exception ex)
         {
             _logger.LogError(ex.Message, ex);
+            return Result.Fail(new Error(ex.Message));
         }
-        return result;
+        return Result.Ok(result);
     }
 
     public async Task<Result<bool>> UpsertSecurityAsync(SecurityEngine security, CancellationToken cancellationToken)
@@ -55,4 +56,27 @@ public class SecurityRepository : ISecurityRepository
         }
         return Result.Ok(result);
     }
+
+    public async Task<Result<bool>> RemoveSecurityAsync(SecurityEngine security, CancellationToken cancellationToken)
+    {
+        bool result = false;
+        try
+        {
+            var builder = Builders<SecurityEngine>.Filter;
+            var filter = builder.Eq(o => o.SecurityID, security.SecurityID);
+
+            var resultReplace = await _context.SecurityEngine.ReplaceOneAsync(filter,
+                replacement: security,
+                options: new ReplaceOptions { IsUpsert = true },
+                cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+            return Result.Fail(new Error(ex.Message));
+        }
+        return Result.Ok(result);
+    }
+
+
 }

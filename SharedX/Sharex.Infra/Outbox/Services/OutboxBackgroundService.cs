@@ -3,8 +3,6 @@ using SharedX.Core.Interfaces;
 using MassTransit;
 using SharedX.Core.Extensions;
 using SharedX.Core.ValueObjects;
-using SharedX.Core.Matching.OrderEngine;
-using SharedX.Core;
 namespace Sharedx.Infra.Outbox.Services;
 public class OutboxBackgroundService<T> :  IOutboxBackgroundService<T> where T : class
 {

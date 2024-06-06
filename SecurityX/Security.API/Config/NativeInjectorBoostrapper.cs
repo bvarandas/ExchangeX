@@ -1,7 +1,13 @@
 ﻿using System.Reflection;
+using MediatR;
 using Security.API.Consumer;
 using Security.API.Publisher;
+using Security.Application.Commands;
+using Security.Application.Events;
+using Security.Application.Services;
+using Security.Infra.Repositories;
 using SecurityX.Core.Interfaces;
+using SecurityX.Core.Notifications;
 using SecurityX.Infra.Cache;
 using SharedX.Core.Bus;
 using SharedX.Core.Specs;
@@ -41,9 +47,21 @@ internal class NativeInjectorBoostrapper
             .AllowCredentials();
         }));
 
+        // Domain - Commands
+        services.AddSingleton<IRequestHandler<SecurityNewCommand, bool>, SecurityEngineCommandHandler>();
+        services.AddSingleton<IRequestHandler<SecurityRemoveCommand, bool>, SecurityEngineCommandHandler>();
+        services.AddSingleton<IRequestHandler<SecurityUpdateCommand, bool>, SecurityEngineCommandHandler>();
+
+        //Domain - Events 
+        services.AddSingleton<INotificationHandler<SecurityChangedEvent>, SecurityEngineEventHandler>();
+
+        // Service
+        services.AddSingleton<ISecurityService, SecurityService>();
+
         // Infra - Data
         services.AddSingleton<ISecurityCache, SecurityCache>();
-    
+        services.AddSingleton<ISecurityRepository, SecurityRepository>();
+
         services.AddHostedService<PublisherSecurityApp>();
         services.AddHostedService<ConsumerSecurityApp>();
     }

@@ -6,9 +6,10 @@ namespace SecurityX.Core.Notifications;
 public class SecurityNewCommand : SecurityEngineCommand
 {
 
-    public SecurityNewCommand(SecurityEngine securityEngine)
+    public SecurityNewCommand(SecurityEngine securityEngine, CancellationToken cancellationToken)
     {
         SecurityEngine = securityEngine;
+        CancellationToken = cancellationToken;
     }
 
     public override bool IsValid()

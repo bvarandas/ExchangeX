@@ -38,9 +38,9 @@ public class PublisherSecurityApp : BackgroundService
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                while (_cache.TryDequeueSecurity(out var marketData))
+                while (_cache.TryDequeueSecurity(out var security))
                 {
-                    var message = marketData.SerializeToByteArrayProtobuf<SecurityEngine>();
+                    var message = security.SerializeToByteArrayProtobuf<SecurityEngine>();
                     _sender.SendMultipartBytes(message);
                 }
                 Thread.Sleep(10);

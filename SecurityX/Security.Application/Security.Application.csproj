@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\OrderEngineX\OrderEngineX.Application\OrderEngineX.Application.csproj" />
     <ProjectReference Include="..\..\SharedX\SharedX.Models\SharedX.Core.csproj" />
+    <ProjectReference Include="..\Security.Infra\Security.Infra\SecurityX.Infra.csproj" />
     <ProjectReference Include="..\SecurityX.Core\SecurityX.Core.csproj" />
   </ItemGroup>
 

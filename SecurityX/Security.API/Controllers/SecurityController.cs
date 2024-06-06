@@ -1,13 +1,25 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Security.Application.Commands;
+using Security.Application.Services;
+using SecurityX.Core.Interfaces;
+using SecurityX.Core.Notifications;
 using SharedX.Core.Bus;
+using SharedX.Core.Entities;
+using SharedX.Core.Matching.MarketData;
+
 namespace Security.API.Controllers;
 [Route("security")]
-public class SecurityController : Controller
+public class SecurityController : BaseController
 {
-    private readonly IMediatorHandler _mediator;
-    public SecurityController( IMediatorHandler mediator)
+    private readonly ISecurityService _securityService = null!;
+
+    public SecurityController(
+        ISecurityService securityService,
+        INotificationHandler<DomainNotification> notifications)
+        :base(notifications)
     {
-        _mediator = mediator;
+        _securityService = securityService;
     }
 
     public IActionResult Index()
@@ -15,35 +27,66 @@ public class SecurityController : Controller
         return View();
     }
 
+    [HttpGet]
+    [Route("all")]
+    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+    {
+        var securities = await _securityService.Get(null!, cancellationToken);
+        return Ok(securities);
+    }
+
+    [HttpGet]
+    [Route("detail/{id:string}")]
+    public async Task<IActionResult> Detail(string id, CancellationToken cancellationToken)
+    {
+        var securities = await _securityService.Get(new[] { id }, cancellationToken);
+        if (securities == null)
+            return NotFound();
+
+        return Ok(securities);
+    }
+
     [HttpPost]
-    [Route("new")]
-    public IActionResult Create(SharedX.Core.Matching.MarketData.Security security)
+    [Route("")]
+    public async Task<IActionResult> Add(SecurityEngine security, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid) return View(security);
 
-        _mediator.SendCommand(new );
-        ; ; _advAppService.Register(advViewModel);
+        var result =  await _securityService.Add(security, cancellationToken);
+        if (IsValidOperation())
+            ViewBag.Sucesso = "Ativo Registrado com sucesso!";
 
-        //if (IsValidOperation())
-        //    ViewBag.Sucesso = "Anúncio Registrado com sucesso!";
-
-        return View(security);
+        return Ok(security);
     }
 
     [HttpPut]
     [Route("")]
-    public IActionResult Update(SharedX.Core.Matching.MarketData.Security security)
+    public async Task<IActionResult> Update(SecurityEngine security, CancellationToken cancellationToken)
     {
-        if (!ModelState.IsValid) return View(advViewModel);
-        _advAppService.Register(advViewModel);
+        if (!ModelState.IsValid) return View(security);
+        
+        var result = await _securityService.Update(security, cancellationToken);
 
         if (IsValidOperation())
-            ViewBag.Sucesso = "Anúncio Registrado com sucesso!";
+            ViewBag.Sucesso = "Ativo Registrado com sucesso!";
 
-        return View(advViewModel);
+        return Ok(security);
     }
 
-    pu
+    [HttpDelete]
+    [Route("")]
+    public IActionResult Remove(SecurityEngine security, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid) return View(security);
+
+        _securityService.Delete(security, cancellationToken);
+        
+        if (IsValidOperation())
+            ViewBag.Sucesso = "Ativo Registrado com sucesso!";
+
+        return Ok(security);
+    }
+
 
 
 

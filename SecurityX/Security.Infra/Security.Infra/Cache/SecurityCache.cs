@@ -17,7 +17,6 @@ public class SecurityCache: ISecurityCache
     private readonly ILogger<SecurityCache> _logger;
     private readonly ConnectionMultiplexer _redis;
     private readonly RedisKey _key;
-    private readonly ConcurrentDictionary<string, SecurityEngine> _securities = null!;
     public SecurityCache(ILogger<SecurityCache> logger, IOptions<ConnectionRedis> config)
     {
         _config = config.Value;
@@ -30,10 +29,8 @@ public class SecurityCache: ISecurityCache
         _dbSecurity = _redis.GetDatabase((int)RedisDataBases.Security);
         _logger = logger;
         _key = new RedisKey("Security");
-
-        _securities = new ConcurrentDictionary<string, SecurityEngine>();
+        
     }
-
     public async Task<Result<SecurityEngine>> GetSecurityBySymbolAsync( string symbol)
     {
         var result = new SecurityEngine();
@@ -47,7 +44,6 @@ public class SecurityCache: ISecurityCache
         result = JsonSerializer.Deserialize<SecurityEngine>(hashEntry!);
         return Result.Ok(result!);
     }
-
     public async Task<Result<Dictionary<string, SecurityEngine>>> GetAllSecurityAsync()
     {
         var result = new Dictionary<string, SecurityEngine>();
@@ -61,7 +57,6 @@ public class SecurityCache: ISecurityCache
         }
         return Result.Ok(result);
     }
-
     public async Task UpsertSecurityAsync(SecurityEngine security)
     {
         SecurityEngineQueue.Enqueue(security);
@@ -73,7 +68,7 @@ public class SecurityCache: ISecurityCache
                 new HashEntry(security.Symbol, value)
             });
     }
-
+    
     public bool TryDequeueSecurity(out SecurityEngine security)
     {
         security = default(SecurityEngine);
