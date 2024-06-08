@@ -6,12 +6,10 @@ using Microsoft.Extensions.Options;
 using NetMQ;
 using NetMQ.Sockets;
 using Sharedx.Infra.Outbox.Services;
-using SharedX.Core;
 using SharedX.Core.Extensions;
 using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
-using SharedX.Core.ValueObjects;
 namespace MatchingX.ServerApp.Consumer;
 public class ConsumerOrderApp : OutboxBackgroundService<OrderEngine>, IHostedService
 {

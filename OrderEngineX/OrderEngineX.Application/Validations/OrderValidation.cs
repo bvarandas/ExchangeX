@@ -8,8 +8,8 @@ public abstract class OrderValidation<T> :
     AbstractValidator<T> where T: 
     OrderEngineCommand
 {
-    private readonly IMatchingCache _matchingCache;
-    public OrderValidation(IMatchingCache matchingCache)
+    private readonly IBookOfferCache _matchingCache;
+    public OrderValidation(IBookOfferCache matchingCache)
     {
         _matchingCache = matchingCache;
     }

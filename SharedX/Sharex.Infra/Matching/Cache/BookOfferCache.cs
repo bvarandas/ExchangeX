@@ -9,17 +9,17 @@ using System.Text.Json;
 using SharedX.Core.Interfaces;
 
 namespace SharedX.Infra.Cache;
-public class MatchingCache : IMatchingCache
+public class BookOfferCache : IBookOfferCache
 {
     private readonly ConnectionRedis _config;
     private readonly IDatabase _dbMatching;
-    private readonly ILogger<MatchingCache> _logger;
+    private readonly ILogger<BookOfferCache> _logger;
     private readonly ConnectionMultiplexer _redis;
 
     private RedisKey keyBuyOrders = new RedisKey("BuyOrders");
     private RedisKey keySellOrders = new RedisKey("SellOrders");
 
-    public MatchingCache(ILogger<MatchingCache> logger, IOptions<ConnectionRedis> config)
+    public BookOfferCache(ILogger<BookOfferCache> logger, IOptions<ConnectionRedis> config)
     {
         _config = config.Value;
 

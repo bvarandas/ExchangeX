@@ -4,5 +4,5 @@ namespace MatchingX.Core.Interfaces;
 public interface IMatchingReceiver
 {
     void ReceiveOrder(OrderEngine order);
-    void ReceiveSecurity(SecurityEngine security);
+    //void ReceiveSecurity(SecurityEngine security);
 }

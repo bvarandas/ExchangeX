@@ -7,6 +7,8 @@ using SecurityX.Core.Notifications;
 using SharedX.Core.Bus;
 using SharedX.Core.Entities;
 using SharedX.Core.Matching.MarketData;
+using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace Security.API.Controllers;
 [Route("security")]
@@ -22,9 +24,11 @@ public class SecurityController : BaseController
         _securityService = securityService;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
-        return View();
+        var result = await _securityService.Get(null!, cancellationToken);
+        var listSecurities = result.Value.Values.ToList();
+        return View(listSecurities);
     }
 
     [HttpGet]

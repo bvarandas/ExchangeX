@@ -5,8 +5,8 @@ namespace OrderEngineX.Application.Commands.Order;
 
 public class OrderFilledCommand : OrderEngineCommand
 {
-    private readonly IMatchingCache _cache;
-    public OrderFilledCommand(OrderEngine order, IMatchingCache cache)
+    private readonly IBookOfferCache _cache;
+    public OrderFilledCommand(OrderEngine order, IBookOfferCache cache)
     {
         Timestamp = DateTime.Now;
         Order = order;

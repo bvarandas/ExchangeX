@@ -128,23 +128,14 @@ internal class NativeInjectorBoostrapper
         foreach (var strategy in strategies)
             services.AddSingleton(typeof(IMatch), strategy);
         
-        /*
-        services.AddSingleton<IMatch, MatchLimit>();
-        services.AddSingleton<IMatch, MatchStop>();
-        services.AddSingleton<IMatch, MatchStopLimit>();
-        services.AddSingleton<IMatch, MatchMarket>();
-        */
+        
         // Infra - Data
-        services.AddSingleton<IDropCopyCache, DropCopyCache>();
-        services.AddSingleton<IMarketDataCache, MarketDataCache>();
-
         services.AddSingleton<IOrderStopCache, OrderStopCache>();
 
         services.AddSingleton<IBookOfferCache, BookOfferCache>();
         services.AddSingleton<IMatchingCache, MatchingCache>();
         services.AddSingleton<IMatchContextStrategy, MatchContextStrategy>();
         
-
         services.AddSingleton<IOrderRepository, OrderRepository>();
         services.AddSingleton<IExecutedTradeRepository, ExecutedTradeRepository>();
 

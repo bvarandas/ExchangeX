@@ -3,8 +3,8 @@ using SharedX.Core.Matching.OrderEngine;
 namespace OrderEngineX.Application.Commands.Order;
 public class OrderPartiallyFilledCommand : OrderEngineCommand
 {
-    private readonly IMatchingCache _cache;
-    public OrderPartiallyFilledCommand(OrderEngine order, IMatchingCache cache)
+    private readonly IBookOfferCache _cache;
+    public OrderPartiallyFilledCommand(OrderEngine order, IBookOfferCache cache)
     {
         Timestamp = DateTime.Now;
         Order = order;

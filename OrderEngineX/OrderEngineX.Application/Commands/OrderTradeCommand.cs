@@ -4,8 +4,8 @@ using SharedX.Core.Matching.OrderEngine;
 namespace MacthingX.Application.Commands.Order;
 public class OrderTradeCommand : OrderEngineCommand
 {
-    private readonly IMatchingCache _cache;
-    public OrderTradeCommand(OrderEngine order, IMatchingCache cache)
+    private readonly IBookOfferCache _cache;
+    public OrderTradeCommand(OrderEngine order, IBookOfferCache cache)
     {
         Timestamp = DateTime.Now;
         Order = order;

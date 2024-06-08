@@ -1,23 +1,28 @@
 ﻿using MatchingX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
-using SharedX.Core.Enums;
 using SharedX.Core.Interfaces;
+using SecurityX.Core.Interfaces;
+using SharedX.Core.Entities;
+
 namespace MacthingX.Application.Services;
 public class MatchContextStrategy : IMatchContextStrategy
 {
     private readonly IEnumerable<IMatch> _matchList;
     private readonly IOrderRepository _orderRepository;
+    private readonly ISecurityCache _securityCache;
     private IMatchingCache _matchingCache;
     private IMatch _actualMatch;
          
     
     public MatchContextStrategy(IEnumerable<IMatch> matchList, 
         IOrderRepository orderRepository, 
-        IMatchingCache matchingCache)
+        IMatchingCache matchingCache,
+        ISecurityCache securityCache)
     {
         this._matchList = matchList;
         this._orderRepository = orderRepository;
         this._matchingCache = matchingCache;
+        this._securityCache = securityCache;
 
         LoadOrdersOnRestart();
     }

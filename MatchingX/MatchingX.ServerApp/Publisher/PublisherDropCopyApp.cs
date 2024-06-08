@@ -13,11 +13,11 @@ public class PublisherDropCopyApp : BackgroundService
     private readonly ILogger<PublisherDropCopyApp> _logger;
     private PushSocket _sender;
     private readonly ConnectionZmq _config;
-    private readonly IDropCopyCache _cache;
+    private readonly IMatchingCache _cache;
     private static Thread ThreadSenderReport = null!;
     public PublisherDropCopyApp(ILogger<PublisherDropCopyApp> logger, 
-        IOptions<ConnectionZmq> options, 
-        IDropCopyCache cache )
+        IOptions<ConnectionZmq> options,
+        IMatchingCache cache )
     {
         _logger = logger;
         _config = options.Value;

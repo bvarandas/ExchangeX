@@ -13,11 +13,11 @@ namespace MatchingX.ServerApp.Publisher;
     private readonly ILogger<PublisherOrderEngineApp> _logger;
     private PushSocket _sender;
     private readonly ConnectionZmq _config;
-    private readonly IDropCopyCache _cache;
-    private static Thread TreadSenderDropCopy=null!;
+    private readonly IMatchingCache _cache;
+    private static Thread ThreadSenderExecutionReport=null!;
     public PublisherOrderEngineApp(ILogger<PublisherOrderEngineApp> logger,
         IOptions<ConnectionZmq> options,
-        IDropCopyCache cache)
+        IMatchingCache cache)
     {
         _logger = logger;
         _config = options.Value;
@@ -25,22 +25,22 @@ namespace MatchingX.ServerApp.Publisher;
     }
     public override Task StartAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Iniciando o Sender DropCopy ZeroMQ...");
+        _logger.LogInformation("Iniciando o Sender Execution Report para Order Engine ZeroMQ...");
 
-        TreadSenderDropCopy = new Thread(() => SenderDropCopy(cancellationToken));
-        TreadSenderDropCopy.Name = nameof(TreadSenderDropCopy);
-        TreadSenderDropCopy.Start();
+        ThreadSenderExecutionReport = new Thread(() => SenderExecutionReport(cancellationToken));
+        ThreadSenderExecutionReport.Name = nameof(ThreadSenderExecutionReport);
+        ThreadSenderExecutionReport.Start();
 
         return base.StartAsync(cancellationToken);
     }
     public override Task StopAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Finalizando o Sender DropCopy ZeroMQ...");
+        _logger.LogInformation("Finalizando o Sender Execution Report para Order Engines  ZeroMQ...");
         _sender.Disconnect(_config.MatchingToOrderEngine.Uri);
         return base.StopAsync(cancellationToken);
     }
 
-    private void SenderDropCopy(CancellationToken stoppingToken)
+    private void SenderExecutionReport(CancellationToken stoppingToken)
     {
         using (_sender = new PushSocket(_config.MatchingToOrderEngine.Uri))
         {

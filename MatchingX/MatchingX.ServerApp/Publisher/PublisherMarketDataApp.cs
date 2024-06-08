@@ -13,11 +13,11 @@ public class PublisherMarketDataApp : BackgroundService
     private readonly ILogger<PublisherMarketDataApp> _logger;
     private PushSocket _sender;
     private readonly ConnectionZmq _config;
-    private readonly IMarketDataCache _cache;
+    private readonly IMatchingCache _cache;
     private readonly Semaphore _semaphore;
     private static Thread TreadSenderMarketData = null!;
     public PublisherMarketDataApp(ILogger<PublisherMarketDataApp> logger,
-        IOptions<ConnectionZmq> options, IMarketDataCache cache)
+        IOptions<ConnectionZmq> options, IMatchingCache cache)
     {
         //_semaphore = new Semaphore(1, 2, "prioridadeIncremental");
         _logger = logger;

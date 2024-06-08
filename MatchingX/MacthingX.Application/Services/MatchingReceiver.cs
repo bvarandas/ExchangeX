@@ -1,11 +1,9 @@
 ﻿using MacthingX.Application.Events;
-using MacthingX.Application.Interfaces;
 using MatchingX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using SharedX.Core.Bus;
 using SharedX.Core.Entities;
 using SharedX.Core.Enums;
-using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
 namespace MacthingX.Application.Services;
 public class MatchingReceiver : IMatchingReceiver
@@ -67,8 +65,8 @@ public class MatchingReceiver : IMatchingReceiver
                 break;
         }
     }
-    public void ReceiveSecurity(SecurityEngine security)
-    {
-
-    }
+    //public void ReceiveSecurity(SecurityEngine security)
+    //{
+    //    _contextStrategy.ReceivedSecurity(security);
+    //}
 }

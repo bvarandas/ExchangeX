@@ -11,10 +11,10 @@ public class OrderEventHandler :
     INotificationHandler<OrderModifiedEvent>
 {
     private readonly ILogger<OrderEventHandler> _logger;
-    private readonly IMatchingCache _matchCache;
+    private readonly IBookOfferCache _matchCache;
     private readonly IOrderStopCache _orderStopCache;
     
-    public OrderEventHandler(IMatchingCache orderCache, IOrderStopCache orderStopCache, ILogger<OrderEventHandler> logger) 
+    public OrderEventHandler(IBookOfferCache orderCache, IOrderStopCache orderStopCache, ILogger<OrderEventHandler> logger) 
     {
         _logger = logger;
         _matchCache = orderCache;

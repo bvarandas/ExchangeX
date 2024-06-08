@@ -6,13 +6,13 @@ using MacthingX.Application.Interfaces;
 using MatchingX.Core.Interfaces;
 using MatchingX.Core.Repositories;
 using Microsoft.Extensions.Logging;
+using SecurityX.Core.Interfaces;
 using SharedX.Core.Bus;
 using SharedX.Core.Enums;
 using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.DropCopy;
 using SharedX.Core.Matching.OrderEngine;
 using System.Collections.Concurrent;
-
 namespace MacthingX.Application.Services;
 public delegate void PriceChangedEventHandler(object sender, OrderPriceEventArgs args);
 public class TradeOrderService : ITradeOrderService, IDisposable
@@ -21,23 +21,28 @@ public class TradeOrderService : ITradeOrderService, IDisposable
     protected readonly ILogger<TradeOrderService> _logger;
     private readonly IOrderRepository _orderRepository;
     private readonly ITradeRepository _tradeRepository;
+    protected readonly IBookOfferCache _bookCache;
     protected readonly IMatchingCache _matchingCache;
-    protected readonly IMarketDataCache _marketDataCache;
+    protected readonly ISecurityCache _securityCache;
     protected readonly IMediatorHandler Bus;
     protected readonly ConcurrentQueue<OrderEngine> QueueOrderStatusChanged;
     protected readonly ConcurrentQueue<Dictionary<long, DropCopyReport>> QueueExecutedTraded;
     
-
     private readonly Thread ThreadExecutedTrade;
     private readonly Thread ThreadOrdersStatus;
     public event PriceChangedEventHandler PriceChanged;
 
-    public TradeOrderService(ILogger<TradeOrderService> logger, IMediatorHandler bus, IMatchingCache matchingCache, IMarketDataCache marketDataCache)
+    public TradeOrderService(ILogger<TradeOrderService> logger, 
+        IMediatorHandler bus, 
+        IBookOfferCache bookCache, 
+        IMatchingCache matchingCache,
+        ISecurityCache securityCache)
     {
         _logger = logger;
         Bus = bus;
+        _bookCache = bookCache;
         _matchingCache = matchingCache;
-        _marketDataCache = marketDataCache;
+        _securityCache = securityCache;
 
         QueueExecutedTraded = new ConcurrentQueue<Dictionary<long, DropCopyReport>>();
         QueueOrderStatusChanged = new ConcurrentQueue<OrderEngine>();
@@ -73,7 +78,7 @@ public class TradeOrderService : ITradeOrderService, IDisposable
                         break;
                 }
 
-                _marketDataCache.AddIncremental(order.ToMarketData());
+                _matchingCache.AddIncremental(order.ToMarketData());
 
                 TriggerPriceChanged(order);
 
@@ -109,10 +114,9 @@ public class TradeOrderService : ITradeOrderService, IDisposable
         if (cancelled)
         {
             orderToCancel.OrderStatus = OrderStatus.Cancelled;
-        }
-        if (cancelled)
             QueueOrderStatusChanged.Enqueue(orderToCancel);
-
+        }
+        
         return cancelled;
     }
 
@@ -120,13 +124,10 @@ public class TradeOrderService : ITradeOrderService, IDisposable
     {
         bool modified = false;
         if (orderEngine.Side == SideTrade.Buy)
-        {
-            modified = await _matchingCache.UpsertBuyOrder(orderEngine);
-        }
+            modified = await _bookCache.UpsertBuyOrder(orderEngine);
         else if (orderEngine.Side == SideTrade.Buy)
-        {
-            modified = await _matchingCache.UpsertSellOrder(orderEngine);
-        }
+            modified = await _bookCache.UpsertSellOrder(orderEngine);
+        
         return modified;
     }
 
@@ -135,17 +136,17 @@ public class TradeOrderService : ITradeOrderService, IDisposable
         bool cancelled = false;
         if (orderToCancel.Side == SideTrade.Buy)
         {
-            cancelled = await _matchingCache.DeleteBuyOrderAsync(orderToCancel.Symbol, orderToCancel.OrderID);
+            cancelled = await _bookCache.DeleteBuyOrderAsync(orderToCancel.Symbol, orderToCancel.OrderID);
         }else if (orderToCancel.Side == SideTrade.Buy)
         {
-            cancelled = await _matchingCache.DeleteSellOrderAsync(orderToCancel.Symbol, orderToCancel.OrderID);
+            cancelled = await _bookCache.DeleteSellOrderAsync(orderToCancel.Symbol, orderToCancel.OrderID);
         }
         return cancelled;
     }
 
     public async Task<bool> RemoveTradedOrdersAsync(Dictionary<long, OrderEngine> dicOrders)
     {
-        var removed = await _matchingCache.DeleteAllOrderAsync(dicOrders);
+        var removed = await _bookCache.DeleteAllOrderAsync(dicOrders);
         return removed;
     }
 
@@ -286,11 +287,11 @@ public class TradeOrderService : ITradeOrderService, IDisposable
         bool added = false;
         if (order.Side == SideTrade.Buy)
         {
-            _matchingCache.UpsertBuyOrder(order);
+            _bookCache.UpsertBuyOrder(order);
         }
         else if (order.Side == SideTrade.Sell)
         {
-            _matchingCache.UpsertSellOrder(order);
+            _bookCache.UpsertSellOrder(order);
         }
         order.OrderStatus = OrderStatus.New;
         QueueOrderStatusChanged.Enqueue(order);

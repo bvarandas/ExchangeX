@@ -3,7 +3,7 @@ using SharedX.Core.Interfaces;
 namespace OrderEngineX.Application.Validations;
 public class OrderCancelRequestValidation: OrderEngineValidation<OrderCancelCommand>
 {
-    public OrderCancelRequestValidation(IMatchingCache matchingCache) : base(matchingCache)
+    public OrderCancelRequestValidation(IBookOfferCache matchingCache) : base(matchingCache)
     {
         ValidateOrderCancelRequest();
     }

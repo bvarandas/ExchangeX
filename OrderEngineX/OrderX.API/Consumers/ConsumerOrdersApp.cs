@@ -19,12 +19,12 @@ public class ConsumerOrdersApp : OutboxBackgroundService<OrderEngine>, IHostedSe
     private readonly ConnectionZmq _config;
     private static Thread ThreadReceiverOrder = null!;
     private readonly IMediatorHandler _mediator;
-    private readonly  IMatchingCache _cache;
+    private readonly  IBookOfferCache _cache;
     private readonly IOutboxCache<OrderEngine> _outboxCache;
     public ConsumerOrdersApp(ILogger<ConsumerOrdersApp> logger,
         IOptions<ConnectionZmq> options,
         IMediatorHandler mediator,
-        IMatchingCache cache,
+        IBookOfferCache cache,
         IOutboxCache<OrderEngine> outboxCache,
         IBus bus) : base(logger,outboxCache, bus)
     {

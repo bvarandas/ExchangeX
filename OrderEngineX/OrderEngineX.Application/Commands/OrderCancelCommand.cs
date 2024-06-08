@@ -4,8 +4,8 @@ using SharedX.Core.Matching.OrderEngine;
 namespace OrderEngineX.Application.Commands.Order;
 public class OrderCancelCommand : OrderEngineCommand
 {
-    private readonly IMatchingCache _cache;
-    public OrderCancelCommand(OrderEngine order, IMatchingCache cache)
+    private readonly IBookOfferCache _cache;
+    public OrderCancelCommand(OrderEngine order, IBookOfferCache cache)
     {
         Timestamp = DateTime.Now;
         Order = order;
