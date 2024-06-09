@@ -7,7 +7,7 @@ using Security.Application.Services;
 using SecurityX.Core.Notifications;
 using SharedX.Core.Entities;
 namespace SecurityEngineTests;
-public class SecurityControllerTests
+public class SecurityApplicationTests
 {
     [Fact]
     public async void Get_ReturnsAViewResult_WithAListOfSecurities()

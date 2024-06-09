@@ -27,6 +27,7 @@ public class SecurityController : BaseController
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
         var result = await _securityService.Get(null!, cancellationToken);
+
         var listSecurities = result.Value.Values.ToList();
         return View(listSecurities);
     }
@@ -35,8 +36,9 @@ public class SecurityController : BaseController
     [Route("all")]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
-        var securities = await _securityService.Get(null!, cancellationToken);
-        return Ok(securities);
+        var result = await _securityService.Get(null!, cancellationToken);
+        var listSecurities = result.Value.Values.ToList();
+        return View(listSecurities);
     }
 
     [HttpGet]
@@ -47,14 +49,16 @@ public class SecurityController : BaseController
         if (securities == null)
             return NotFound();
 
-        return Ok(securities);
+        var listSecurities = securities.Value.Values.ToList();
+
+        return View(listSecurities);
     }
 
     [HttpPost]
     [Route("")]
     public async Task<IActionResult> Add(SecurityEngine security, CancellationToken cancellationToken)
     {
-        if (!ModelState.IsValid) return View(security);
+        if (!ModelState.IsValid) return BadRequest(ModelState);
 
         var result =  await _securityService.Add(security, cancellationToken);
         if (IsValidOperation())
@@ -67,8 +71,8 @@ public class SecurityController : BaseController
     [Route("")]
     public async Task<IActionResult> Update(SecurityEngine security, CancellationToken cancellationToken)
     {
-        if (!ModelState.IsValid) return View(security);
-        
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
         var result = await _securityService.Update(security, cancellationToken);
 
         if (IsValidOperation())
@@ -79,19 +83,15 @@ public class SecurityController : BaseController
 
     [HttpDelete]
     [Route("")]
-    public IActionResult Remove(SecurityEngine security, CancellationToken cancellationToken)
+    public async Task<IActionResult> Remove(SecurityEngine security, CancellationToken cancellationToken)
     {
-        if (!ModelState.IsValid) return View(security);
+        if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        _securityService.Delete(security, cancellationToken);
+        var result = await _securityService.Delete(security, cancellationToken);
         
         if (IsValidOperation())
             ViewBag.Sucesso = "Ativo Registrado com sucesso!";
 
         return Ok(security);
     }
-
-
-
-
 }
