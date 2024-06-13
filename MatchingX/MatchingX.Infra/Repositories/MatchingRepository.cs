@@ -116,12 +116,12 @@ public class MatchingRepository : IMatchingRepository
                     if (orderEngine.Side == SideTrade.Buy)
                     {
                         filter = filter & builder.Eq(o => o.Side, SideTrade.Sell);
-                        sort = Builders<OrderEngine>.Sort.Ascending("Price");
+                        sort = Builders<OrderEngine>.Sort.Descending("Price");
                     }
                     else if (orderEngine.Side == SideTrade.Sell)
                     {
                         filter = filter & builder.Eq(o => o.Side, SideTrade.Buy);
-                        sort = Builders<OrderEngine>.Sort.Descending("Price");
+                        sort = Builders<OrderEngine>.Sort.Ascending("Price");
                     }
 
                     if (orderEngine.TimeInForce != TimeInForce.FOK)
@@ -242,12 +242,12 @@ public class MatchingRepository : IMatchingRepository
                     if (orderEngine.Side == SideTrade.Buy)
                     {
                         filter = filter & builder.Eq(o => o.Side, SideTrade.Sell);
-                        sort = Builders<OrderEngine>.Sort.Ascending("Price");
+                        sort = Builders<OrderEngine>.Sort.Descending("Price");
                     }
                     else if (orderEngine.Side == SideTrade.Sell)
                     {
                         filter = filter & builder.Eq(o => o.Side, SideTrade.Buy);
-                        sort = Builders<OrderEngine>.Sort.Descending("Price");
+                        sort = Builders<OrderEngine>.Sort.Ascending("Price");
                     }
                     
                     filter = filter & builder.Gte(o => o.LeavesQuantity, orderEngine.LeavesQuantity);
