@@ -15,6 +15,7 @@ using MarketDataX.Application.Commands;
 using MediatR;
 using MarketDataX.Infra.Data;
 using MarketDataX.Infra.Repositories;
+using FluentResults;
 
 namespace DropCopyX.ServerApp;
 internal class NativeInjectorBoostrapper
@@ -78,7 +79,7 @@ internal class NativeInjectorBoostrapper
         //services.AddSingleton<INotificationHandler<ExecutedTradeEvent>, ExecutedTradeEventHandler>();
 
         // Domain - Commands
-        services.AddSingleton<IRequestHandler<SnapshotCommand, bool>, SnapshotCommandHandler>();
+        services.AddSingleton<IRequestHandler<SnapshotCommand, Result>, SnapshotCommandHandler>();
 
         // Infra - Data
         services.AddSingleton<IFixSessionMarketDataCache, FixSessionMarketDataCache>();

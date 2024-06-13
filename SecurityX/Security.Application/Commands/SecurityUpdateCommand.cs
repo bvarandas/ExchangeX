@@ -3,9 +3,10 @@ using SharedX.Core.Entities;
 namespace Security.Application.Commands;
 public class SecurityUpdateCommand : SecurityEngineCommand
 {
-    public SecurityUpdateCommand(SecurityEngine securityEngine)
+    public SecurityUpdateCommand(SecurityEngine securityEngine,  CancellationToken cancellationToken)
     {
         SecurityEngine = securityEngine;
+        CancellationToken = cancellationToken;
     }
 
     public override bool IsValid()

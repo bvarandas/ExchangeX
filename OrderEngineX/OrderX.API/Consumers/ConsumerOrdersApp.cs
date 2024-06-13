@@ -94,7 +94,7 @@ public class ConsumerOrdersApp : OutboxBackgroundService<OrderEngine>, IHostedSe
                 command = new OrderOpenedCommand(order, _cache);
                 break;
         }
-        _mediator.SendCommand(command);
+        _mediator.Send(command);
     }
 
     public Task StopAsync(CancellationToken cancellationToken)

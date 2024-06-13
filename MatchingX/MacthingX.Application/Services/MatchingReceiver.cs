@@ -32,17 +32,17 @@ public class MatchingReceiver : IMatchingReceiver
             case Execution.ToOpen:
                 this.SetStrategy(ref order);
                 _contextStrategy.ReceivedOrder(order);
-                _mediator.RaiseEvent(new OrderOpenedEvent(order));
+                _mediator.Publish(new OrderOpenedEvent(order));
                 break;
             case Execution.ToCancel:
                 this.SetStrategy(ref order);
                 _contextStrategy.ReceivedOrder(order);
-                _mediator.RaiseEvent(new OrderCanceledEvent(order));
+                _mediator.Publish(new OrderCanceledEvent(order));
                 break;
             case Execution.ToModify:
                 this.SetStrategy(ref order);
                 _contextStrategy.ReceivedOrder(order);
-                _mediator.RaiseEvent(new OrderModifiedEvent(order));
+                _mediator.Publish(new OrderModifiedEvent(order));
                 break;
         }
     }

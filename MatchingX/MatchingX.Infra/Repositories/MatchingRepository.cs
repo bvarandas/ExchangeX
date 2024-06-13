@@ -6,6 +6,7 @@ using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Enums;
 using SharedX.Core.Matching;
 using MongoDB.Bson;
+using FluentResults;
 
 namespace MatchingX.Infra.Repositories;
 public class MatchingRepository : IMatchingRepository
@@ -18,7 +19,7 @@ public class MatchingRepository : IMatchingRepository
         _logger = logger;
     }
 
-    public async Task<bool> UpsertOrderMatchingAsync(OrderEngine orderEngine, CancellationToken cancellation)
+    public async Task<Result> UpsertOrderMatchingAsync(OrderEngine orderEngine, CancellationToken cancellation)
     {
         bool result = false;
         var clientSessionOptions = new ClientSessionOptions();
@@ -47,17 +48,20 @@ public class MatchingRepository : IMatchingRepository
             {
                 _logger.LogError(ex.Message, ex);
                 await session.AbortTransactionAsync();
+                return Result.Fail(new Error(ex.Message));
+
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message, ex);
                 await session.AbortTransactionAsync();
+                return Result.Fail(new Error(ex.Message));
             }
         }
-        return result;
+        return Result.Ok();
     } 
 
-    public async Task<bool> RemoveOrdersMatchingAsync(List<long> IdOrders, CancellationToken cancellation)
+    public async Task<Result> RemoveOrdersMatchingAsync(List<long> IdOrders, CancellationToken cancellation)
     {
         bool result = false;
         var clientSessionOptions = new ClientSessionOptions();
@@ -78,14 +82,16 @@ public class MatchingRepository : IMatchingRepository
             {
                 _logger.LogError(ex.Message, ex);
                 await session.AbortTransactionAsync();
+                return Result.Fail(new Error(ex.Message));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message, ex);
                 await session.AbortTransactionAsync();
+                return Result.Fail(new Error(ex.Message));
             }
         }
-        return result;
+        return Result.Ok();
     }
 
     public async Task<(OrderStatus, Dictionary<long, OrderEngine>)> MatchingLimitAsync(OrderEngine orderEngine,  CancellationToken cancellation)

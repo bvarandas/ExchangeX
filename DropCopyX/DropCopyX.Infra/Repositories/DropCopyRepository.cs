@@ -17,9 +17,10 @@ public class DropCopyRepository : IDropCopyRepository
         _context = context;
     }
 
-    public async Task<Result<bool>> AddExecutionReports(IList<ExecutionReport> executions, CancellationToken cancellation)
+    public async Task<Result> AddExecutionReports(IList<ExecutionReport> executions, CancellationToken cancellation)
     {
-        Result<bool> result = false;
+        Result result = null;
+        bool resultInsert = false;
         try
         {
             var inserts = new List<WriteModel<ExecutionReport>>();
@@ -28,12 +29,14 @@ public class DropCopyRepository : IDropCopyRepository
                 inserts.Add(new InsertOneModel<ExecutionReport>(execution));
 
             var insertResult = await _context.ExecutionReport.BulkWriteAsync(inserts, null, cancellation);
-            result = insertResult.IsAcknowledged && insertResult.ModifiedCount > 0;
+            resultInsert = insertResult.IsAcknowledged && insertResult.ModifiedCount > 0;
+            result = Result.Ok();
         }
         catch (Exception ex)
         {
-            result.Errors.Add(new Error(ex.Message));
+            //result.Errors.Add(new Error(ex.Message));
             _logger.LogError(ex.Message, ex);
+            result = Result.Fail(new Error(ex.Message));
         }
         return result;
     }

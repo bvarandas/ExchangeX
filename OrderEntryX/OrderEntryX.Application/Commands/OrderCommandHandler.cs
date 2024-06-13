@@ -1,12 +1,13 @@
-﻿using MediatR;
+﻿using FluentResults;
+using MediatR;
 using OrderEntryX.Core.Repositories;
 using SharedX.Core.Bus;
 namespace OrderEntryX.Application.Commands;
 public class OrderCommandHandler :
-    IRequestHandler<NewOrderSingleCommand, bool>,
-    IRequestHandler<OrderCancelRequestCommand, bool>,
-    IRequestHandler<OrderCancelReplaceRequestCommand, bool>,
-    IRequestHandler<OrderMassCancelRequestCommand, bool>
+    IRequestHandler<NewOrderSingleCommand, Result>,
+    IRequestHandler<OrderCancelRequestCommand, Result>,
+    IRequestHandler<OrderCancelReplaceRequestCommand, Result>,
+    IRequestHandler<OrderMassCancelRequestCommand, Result>
 {
     private readonly IOrderEntryRepository _repository;
     private readonly IMediatorHandler _bus;
@@ -17,51 +18,55 @@ public class OrderCommandHandler :
         _bus = bus;
     }
 
-    public async Task<bool> Handle(NewOrderSingleCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(NewOrderSingleCommand command, CancellationToken cancellationToken)
     {
-        await _repository.CreateOrdersAsync(command.Order, cancellationToken);
+        var result = await _repository.CreateOrdersAsync(command.Order, cancellationToken);
 
+        if (result.IsSuccess)
+        {
+            //await _bus.Publish()
+        }
         //if (Comit()) TODO: Fazer Unit of Work
         //{
         //await _bus.RaiseEvent(new OrderFilledEvent(command.Order));
         //}
 
-        return await Task.FromResult(true);
+        return result;
     }
 
-    public async Task<bool> Handle(OrderCancelRequestCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(OrderCancelRequestCommand command, CancellationToken cancellationToken)
     {
-        await _repository.CreateOrdersAsync(command.Order, cancellationToken);
+        var result = await _repository.CreateOrdersAsync(command.Order, cancellationToken);
 
         //if (Comit()) TODO: Fazer Unit of Work
         //{
         //await _bus.RaiseEvent(new OrderFilledEvent(command.Order));
         //}
 
-        return await Task.FromResult(true);
+        return result;
     }
 
-    public async Task<bool> Handle(OrderCancelReplaceRequestCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(OrderCancelReplaceRequestCommand command, CancellationToken cancellationToken)
     {
-        await _repository.CreateOrdersAsync(command.Order, cancellationToken);
+        var result = await _repository.CreateOrdersAsync(command.Order, cancellationToken);
 
         //if (Comit()) TODO: Fazer Unit of Work
         //{
         //await _bus.RaiseEvent(new OrderFilledEvent(command.Order));
         //}
 
-        return await Task.FromResult(true);
+        return result;
     }
 
-    public async Task<bool> Handle(OrderMassCancelRequestCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(OrderMassCancelRequestCommand command, CancellationToken cancellationToken)
     {
-        await _repository.CreateOrdersAsync(command.Order, cancellationToken);
+        var result = await _repository.CreateOrdersAsync(command.Order, cancellationToken);
 
         //if (Comit()) TODO: Fazer Unit of Work
         //{
         //await _bus.RaiseEvent(new OrderFilledEvent(command.Order));
         //}
 
-        return await Task.FromResult(true);
+        return result;
     }
 }

@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using FluentResults;
+using MediatR;
 using Security.Application.Events;
 using SecurityX.Core.Interfaces;
 using SecurityX.Core.Notifications;
@@ -6,9 +7,9 @@ using SharedX.Core.Bus;
 namespace Security.Application.Commands;
 public class SecurityEngineCommandHandler : 
     CommandHandler,
-    IRequestHandler<SecurityNewCommand, bool>,
-    IRequestHandler<SecurityRemoveCommand, bool>,
-    IRequestHandler<SecurityUpdateCommand, bool>
+    IRequestHandler<SecurityNewCommand, Result>,
+    IRequestHandler<SecurityRemoveCommand, Result>,
+    IRequestHandler<SecurityUpdateCommand, Result>
 {
     private readonly ISecurityRepository _securityRepository;
     private readonly IMediatorHandler _bus = null!;
@@ -20,46 +21,46 @@ public class SecurityEngineCommandHandler :
         _securityRepository = securityRepository;
         _bus = bus;
     }
-    public async Task<bool> Handle(SecurityNewCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(SecurityNewCommand command, CancellationToken cancellationToken)
     {
         if (!command.IsValid())
         {
             NotifyValidationErrors(command);
-            return false;
+            return Result.Fail(new Error(""));
         }
         var result = await _securityRepository.UpsertSecurityAsync(command.SecurityEngine, cancellationToken);
         
         if (result.IsSuccess)
-            await _bus.RaiseEvent(new SecurityChangedEvent(command.SecurityEngine));
+            await _bus.Publish(new SecurityChangedEvent(command.SecurityEngine));
 
-        return result.IsSuccess;
+        return Result.Ok();
     }
-    public async Task<bool> Handle(SecurityRemoveCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(SecurityRemoveCommand command, CancellationToken cancellationToken)
     {
         if (!command.IsValid())
         {
             NotifyValidationErrors(command);
-            return false;
+            return Result.Fail(new Error(""));
         }
         var result = await _securityRepository.UpsertSecurityAsync(command.SecurityEngine, cancellationToken);
 
         if (result.IsSuccess)
-            await _bus.RaiseEvent(new SecurityChangedEvent(command.SecurityEngine));
+            await _bus.Publish(new SecurityChangedEvent(command.SecurityEngine));
 
-        return result.IsSuccess;
+        return Result.Ok();
     }
-    public async Task<bool> Handle(SecurityUpdateCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(SecurityUpdateCommand command, CancellationToken cancellationToken)
     {
         if (!command.IsValid())
         {
             NotifyValidationErrors(command);
-            return false;
+            return Result.Fail(new Error(""));
         }
         var result = await _securityRepository.UpsertSecurityAsync(command.SecurityEngine, cancellationToken);
 
         if (result.IsSuccess)
-            await _bus.RaiseEvent(new SecurityChangedEvent(command.SecurityEngine));
+            await _bus.Publish(new SecurityChangedEvent(command.SecurityEngine));
 
-        return result.IsSuccess;
+        return Result.Ok();
     }
 }

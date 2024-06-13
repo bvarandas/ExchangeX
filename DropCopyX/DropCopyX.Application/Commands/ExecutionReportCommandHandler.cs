@@ -1,9 +1,10 @@
 ﻿using DropCopyX.Core.Repositories;
+using FluentResults;
 using MediatR;
 using SharedX.Core.Bus;
 namespace DropCopyX.Application.Commands;
 public class ExecutionReportCommandHandler : 
-    IRequestHandler<ExecutionReportCommand, bool>
+    IRequestHandler<ExecutionReportCommand, Result>
 {
     private readonly IDropCopyRepository _repository;
     private readonly IMediatorHandler _bus;
@@ -15,9 +16,9 @@ public class ExecutionReportCommandHandler :
         _repository = repository;
         _bus = bus;
     }
-    public async Task<bool> Handle(ExecutionReportCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(ExecutionReportCommand request, CancellationToken cancellationToken)
     {
-        await _repository.AddExecutionReports(request.ExecutionReports, cancellationToken);
-        return true;
+        var result = await _repository.AddExecutionReports(request.ExecutionReports, cancellationToken);
+        return result;
     }
 }

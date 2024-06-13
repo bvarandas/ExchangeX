@@ -1,10 +1,15 @@
 ﻿using System.Reflection;
+using FluentResults;
 using MediatR;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
 using Security.API.Consumer;
 using Security.API.Publisher;
 using Security.Application.Commands;
 using Security.Application.Events;
 using Security.Application.Services;
+using Security.Infra.Data;
 using Security.Infra.Repositories;
 using SecurityX.Core.Interfaces;
 using SecurityX.Core.Notifications;
@@ -46,11 +51,11 @@ internal class NativeInjectorBoostrapper
             .SetIsOriginAllowed((host) => true)
             .AllowCredentials();
         }));
-
+        
         // Domain - Commands
-        services.AddSingleton<IRequestHandler<SecurityNewCommand, bool>, SecurityEngineCommandHandler>();
-        services.AddSingleton<IRequestHandler<SecurityRemoveCommand, bool>, SecurityEngineCommandHandler>();
-        services.AddSingleton<IRequestHandler<SecurityUpdateCommand, bool>, SecurityEngineCommandHandler>();
+        services.AddSingleton<IRequestHandler<SecurityNewCommand, Result>, SecurityEngineCommandHandler>();
+        services.AddSingleton<IRequestHandler<SecurityRemoveCommand, Result>, SecurityEngineCommandHandler>();
+        services.AddSingleton<IRequestHandler<SecurityUpdateCommand, Result>, SecurityEngineCommandHandler>();
 
         //Domain - Events 
         services.AddSingleton<INotificationHandler<SecurityChangedEvent>, SecurityEngineEventHandler>();
@@ -59,6 +64,13 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<ISecurityService, SecurityService>();
 
         // Infra - Data
+        services.AddSingleton<IMongoDatabase>(sp =>
+        {
+            var client = new MongoClient(config.GetValue<string>("DatabaseSettings:ConnectionString"));
+            return client.GetDatabase(config.GetValue<string>("DatabaseSettings:DatabaseName"));
+        });
+
+        services.AddSingleton<ISecurityContext, SecurityContext>();
         services.AddSingleton<ISecurityCache, SecurityCache>();
         services.AddSingleton<ISecurityRepository, SecurityRepository>();
 

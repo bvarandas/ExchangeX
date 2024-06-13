@@ -16,7 +16,7 @@ public class CommandHandler
     {
         foreach (var error in message.ValidationResult.Errors)
         {
-            _bus.RaiseEvent(new DomainNotification(message.MessageType, error.ErrorMessage));
+            _bus.Publish(new DomainNotification(message.MessageType, error.ErrorMessage));
         }
     }
 }

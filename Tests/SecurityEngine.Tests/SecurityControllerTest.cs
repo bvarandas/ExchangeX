@@ -4,11 +4,14 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Security.API.Controllers;
 using Security.Application.Services;
+using SecurityX.Core.Interfaces;
 using SecurityX.Core.Notifications;
 using SharedX.Core.Entities;
 namespace SecurityEngineTests;
 public class SecurityControllerTests
 {
+    
+
     [Fact]
     public async void Get_ReturnsAViewResult_WithAListOfSecurities()
     {

@@ -65,16 +65,16 @@ public class TradeOrderService : ITradeOrderService, IDisposable
                 switch (order.OrderStatus)
                 {
                     case OrderStatus.New:
-                        Bus.SendCommand(new MatchingOpenedCommand(order));
+                        Bus.Send(new MatchingOpenedCommand(order));
                         break;
                     case OrderStatus.Filled:
-                        Bus.SendCommand(new MatchingFilledCommand(order));
+                        Bus.Send(new MatchingFilledCommand(order));
                         break;
                     case OrderStatus.PartiallyFilled:
-                        Bus.SendCommand(new MatchingPartiallyFilledCommand(order));
+                        Bus.Send(new MatchingPartiallyFilledCommand(order));
                         break;
                     case OrderStatus.Cancelled:
-                        Bus.SendCommand(new MatchingCancelCommand(order));
+                        Bus.Send(new MatchingCancelCommand(order));
                         break;
                 }
 
@@ -98,7 +98,7 @@ public class TradeOrderService : ITradeOrderService, IDisposable
         while (true)
         {
             if (QueueExecutedTraded.TryDequeue(out  Dictionary<long, DropCopyReport> reports))
-                Bus.SendCommand(new ExecutedTradeCommand(reports));
+                Bus.Send(new ExecutedTradeCommand(reports));
 
             if (_running)
                 break;

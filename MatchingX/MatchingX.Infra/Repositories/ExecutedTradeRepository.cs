@@ -1,10 +1,12 @@
-﻿using MatchingX.Core.Filters;
+﻿using FluentResults;
+using MatchingX.Core.Filters;
 using MatchingX.Core.Repositories;
 using MatchingX.Infra.Data;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using SharedX.Core.Matching.DropCopy;
+using StackExchange.Redis;
 
 namespace MatchingX.Infra.Repositories;
 public class ExecutedTradeRepository : IExecutedTradeRepository
@@ -17,9 +19,10 @@ public class ExecutedTradeRepository : IExecutedTradeRepository
         _logger = logger;
     }
 
-    public async Task<bool> CreateExecutedTradeAsync( Dictionary<long, DropCopyReport> dicExecutedTrade, CancellationToken cancellationToken)
+    public async Task<Result> CreateExecutedTradeAsync( Dictionary<long, DropCopyReport> dicExecutedTrade, CancellationToken cancellationToken)
     {
-        bool result = false;
+        Result result = null!;
+        bool resultInsert = false;
         try
         {
             var inserts = new List<WriteModel<DropCopyReport>>();
@@ -28,15 +31,20 @@ public class ExecutedTradeRepository : IExecutedTradeRepository
                 inserts.Add(new InsertOneModel<DropCopyReport>(trade.Value));
             
             var insertResult = await _context.ExecutedTrade.BulkWriteAsync(inserts, null, cancellationToken);
-            result = insertResult.IsAcknowledged && insertResult.ModifiedCount > 0;
+            resultInsert = insertResult.IsAcknowledged && insertResult.ModifiedCount > 0;
+            if (resultInsert)
+            {
+                result = Result.Ok();
+            }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex.Message, ex);
+            result = Result.Fail(new Error(ex.Message));
         }
         return result;
     }
-    public async Task<IEnumerable<DropCopyReport>> GetExecutedTradeAsync(ExecutedTradeParams specParams, CancellationToken cancellationToken)
+    public async Task<Result<IEnumerable<DropCopyReport>>> GetExecutedTradeAsync(ExecutedTradeParams specParams, CancellationToken cancellationToken)
     {
         IEnumerable<DropCopyReport> result = null!;
 
@@ -56,12 +64,14 @@ public class ExecutedTradeRepository : IExecutedTradeRepository
         catch (ArgumentNullException ex)
         {
             _logger.LogError(ex.Message, ex);
+            return Result.Fail(new Error(ex.Message));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex.Message, ex);
+            return Result.Fail(new Error(ex.Message));
         }
 
-        return result;
+        return Result.Ok( result);
     }
 }

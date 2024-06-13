@@ -1,9 +1,10 @@
-﻿using MarketDataX.Core.Interfaces;
+﻿using FluentResults;
+using MarketDataX.Core.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using SharedX.Core.Bus;
 namespace MarketDataX.Application.Commands;
-public class SnapshotCommandHandler : IRequestHandler<SnapshotCommand, bool>
+public class SnapshotCommandHandler : IRequestHandler<SnapshotCommand, Result>
 {
     private readonly IMarketDataRepository _marketDataRepository = null!;
     private readonly IMediatorHandler _bus = null!;
@@ -16,7 +17,7 @@ public class SnapshotCommandHandler : IRequestHandler<SnapshotCommand, bool>
         _logger = logger;
 
     }
-    public async Task<bool> Handle(SnapshotCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(SnapshotCommand command, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Command de para gravar Snapshot de marketdata ");
 

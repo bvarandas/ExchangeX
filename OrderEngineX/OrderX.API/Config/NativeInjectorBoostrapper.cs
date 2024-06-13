@@ -18,6 +18,7 @@ using SharedX.Infra.Order.Repositories;
 using SharedX.Infra.Order.Data;
 using Sharedx.Infra.Outbox.Services;
 using Sharedx.Infra.Outbox.Cache;
+using FluentResults;
 
 namespace OrderEngineX.API.Config;
 internal class NativeInjectorBoostrapper
@@ -88,9 +89,9 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<INotificationHandler<OrderTradeCancelEvent>, OrderTradeEventHandler>();
 
         // Domain - Command
-        services.AddSingleton<IRequestHandler<OrderCancelCommand, bool>, OrderEngineCommandHandler>();
-        services.AddSingleton<IRequestHandler<OrderCancelReplaceCommand, bool>, OrderEngineCommandHandler>();
-        services.AddSingleton<IRequestHandler<OrderOpenedCommand, bool>, OrderEngineCommandHandler>();
+        services.AddSingleton<IRequestHandler<OrderCancelCommand, Result>, OrderEngineCommandHandler>();
+        services.AddSingleton<IRequestHandler<OrderCancelReplaceCommand, Result>, OrderEngineCommandHandler>();
+        services.AddSingleton<IRequestHandler<OrderOpenedCommand, Result>, OrderEngineCommandHandler>();
 
         // Infra - Data
         services.AddSingleton<IExecutionReportCache, ExecutionReportCache>();

@@ -1,10 +1,11 @@
-﻿using MacthingX.Application.Events;
+﻿using FluentResults;
+using MacthingX.Application.Events;
 using MatchingX.Core.Repositories;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using SharedX.Core.Bus;
 namespace MacthingX.Application.Commands;
-public class ExecutedTradeCommandHandler : IRequestHandler<ExecutedTradeCommand, bool>
+public class ExecutedTradeCommandHandler : IRequestHandler<ExecutedTradeCommand, Result>
 {
     private readonly IExecutedTradeRepository _repository;
     private readonly IMediatorHandler _bus;
@@ -19,12 +20,13 @@ public class ExecutedTradeCommandHandler : IRequestHandler<ExecutedTradeCommand,
         _bus = bus;
     }
 
-    public async Task<bool> Handle(ExecutedTradeCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(ExecutedTradeCommand command, CancellationToken cancellationToken)
     {
         _logger.LogInformation($"Registrando execução de {command.ExecutedTrades.Count} ordens");
-        await _repository.CreateExecutedTradeAsync(command.ExecutedTrades, cancellationToken);
-        await _bus.RaiseEvent(new ExecutedTradeEvent(command.ExecutedTrades));
+        var result = await _repository.CreateExecutedTradeAsync(command.ExecutedTrades, cancellationToken);
+        if (result.IsSuccess)
+            await _bus.Publish(new ExecutedTradeEvent(command.ExecutedTrades));
         
-        return await Task.FromResult(true);
+        return result;
     }
 }

@@ -7,6 +7,7 @@ using DropCopyX.Infra.Client;
 using DropCopyX.Infra.Data;
 using DropCopyX.Infra.Repositories;
 using DropCopyX.ServerApp.Services;
+using FluentResults;
 using MassTransit;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -76,7 +77,7 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton(typeof(IOutboxCache<>), typeof(OutboxCache<>));
 
         // Domain - Commands
-        services.AddSingleton<IRequestHandler<ExecutionReportCommand, bool>, ExecutionReportCommandHandler>();
+        services.AddSingleton<IRequestHandler<ExecutionReportCommand, Result>, ExecutionReportCommandHandler>();
 
         // Infra - Data
         services.AddSingleton<IFixSessionDropCopyCache, FixSessionDropCopyCache>();

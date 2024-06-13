@@ -65,7 +65,7 @@ public class ConsumerDropCopyApp : OutboxBackgroundService<ExecutionReport>, IHo
                         var execution = msg[1].DeserializeFromByteArrayProtobuf<ExecutionReport>();
 
                         _cache.AddExecutionReport(execution);
-                        _mediator.SendCommand(new ExecutionReportCommand(listExecutions));
+                        _mediator.Send(new ExecutionReportCommand(listExecutions));
 
                         Thread.Sleep(10);
                     }

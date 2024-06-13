@@ -21,14 +21,14 @@ public class SecurityService : ISecurityService
     }
     public async Task<Result<bool>> Add(SecurityEngine security, CancellationToken cancellationToken)
     {
-        var result = _bus.SendCommand(new SecurityNewCommand(security, cancellationToken));
-        
-        return Result.Ok(true);
+        var result = await _bus.Send(new SecurityNewCommand(security, cancellationToken));
+
+        return result;
     }
     public async Task<Result<bool>> Delete(SecurityEngine security, CancellationToken cancellationToken)
     {
-        var result = _bus.SendCommand(new SecurityRemoveCommand(security, cancellationToken));
-        return Result.Ok(true);
+        var result = await _bus.Send(new SecurityRemoveCommand(security, cancellationToken));
+        return result;
     }
     public async Task<Result<Dictionary<string, SecurityEngine>>> Get(string[] ids, CancellationToken cancellationToken)
     {
@@ -39,12 +39,12 @@ public class SecurityService : ISecurityService
         {
             dicResult = dicResult.Where(x => ids.Contains(x.Key)).ToDictionary(i => i.Key, i => i.Value);
         }
-        return Result.Ok(dicResult);
+        return result;
     }
     public async Task<Result<bool>> Update(SecurityEngine security, CancellationToken cancellationToken)
     {
-        var result = _bus.SendCommand(new SecurityRemoveCommand(security, cancellationToken));
-        return Result.Ok(true);
+        var result = await _bus.Send(new SecurityUpdateCommand(security, cancellationToken));
+        return result;
     }
 }
 public interface ISecurityService

@@ -1,4 +1,5 @@
-﻿using MacthingX.Application.Commands.Match.OrderStatus;
+﻿using FluentResults;
+using MacthingX.Application.Commands.Match.OrderStatus;
 using MatchingX.Application.Commands;
 using MatchingX.Core.Interfaces;
 using MatchingX.Core.Notifications;
@@ -8,10 +9,10 @@ using SharedX.Core.Bus;
 namespace MacthingX.Application.Commands;
 public class MatchingStatusCommandHandler : 
     CommandHandler,
-    IRequestHandler<MatchingOpenedCommand, bool>,
-    IRequestHandler<MatchingFilledCommand, bool>,
-    IRequestHandler<MatchingPartiallyFilledCommand, bool>,
-    IRequestHandler<MatchingCancelCommand, bool>
+    IRequestHandler<MatchingOpenedCommand, Result>,
+    IRequestHandler<MatchingFilledCommand, Result>,
+    IRequestHandler<MatchingPartiallyFilledCommand, Result>,
+    IRequestHandler<MatchingCancelCommand, Result>
 {
     private readonly IMediatorHandler _bus;
     private readonly IMatchingRepository _matchRepository;
@@ -26,26 +27,26 @@ public class MatchingStatusCommandHandler :
         _tradeRepository = tradeRepository;
         _matchRepository = matchRepository;
     }
-    public Task<bool> Handle(MatchingOpenedCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(MatchingOpenedCommand request, CancellationToken cancellationToken)
     {
-        var matchResult = _matchRepository.UpsertOrderMatchingAsync(request.Order, cancellationToken);
+        var matchResult = await _matchRepository.UpsertOrderMatchingAsync(request.Order, cancellationToken);
         return matchResult;
     }
-    public Task<bool> Handle(MatchingFilledCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(MatchingFilledCommand request, CancellationToken cancellationToken)
     {
         var listOrderId = new List<long>() { request.Order.OrderID };
-        var matchResult = _matchRepository.RemoveOrdersMatchingAsync(listOrderId, cancellationToken);
+        var matchResult = await _matchRepository.RemoveOrdersMatchingAsync(listOrderId, cancellationToken);
         return matchResult;
     }
-    public Task<bool> Handle(MatchingPartiallyFilledCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(MatchingPartiallyFilledCommand request, CancellationToken cancellationToken)
     {
-        var matchResult = _matchRepository.UpsertOrderMatchingAsync(request.Order, cancellationToken);
+        var matchResult = await _matchRepository.UpsertOrderMatchingAsync(request.Order, cancellationToken);
         return matchResult;
     }
-    public Task<bool> Handle(MatchingCancelCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(MatchingCancelCommand request, CancellationToken cancellationToken)
     {
         var listOrderId = new List<long>() { request.Order.OrderID };
-        var matchResult = _matchRepository.RemoveOrdersMatchingAsync(listOrderId, cancellationToken);
+        var matchResult = await _matchRepository.RemoveOrdersMatchingAsync(listOrderId, cancellationToken);
         return matchResult;
     }
 }

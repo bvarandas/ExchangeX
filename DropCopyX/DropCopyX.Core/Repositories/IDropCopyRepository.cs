@@ -3,5 +3,5 @@ using SharedX.Core.Matching.DropCopy;
 namespace DropCopyX.Core.Repositories;
 public interface IDropCopyRepository
 {
-    Task<Result<bool>> AddExecutionReports(IList<ExecutionReport> executions, CancellationToken cancellation);
+    Task<Result> AddExecutionReports(IList<ExecutionReport> executions, CancellationToken cancellation);
 }

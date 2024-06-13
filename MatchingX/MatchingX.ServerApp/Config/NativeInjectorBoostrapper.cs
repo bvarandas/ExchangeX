@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using FluentResults;
 using MacthingX.Application.Commands;
 using MacthingX.Application.Commands.Match.OrderStatus;
 using MacthingX.Application.Commands.Match.OrderType;
@@ -112,10 +113,10 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IRequestHandler<MatchingStopLimitCommand, (OrderStatus, Dictionary<long, OrderEngine>)>, MatchingCommandHandler>();
         services.AddSingleton<IRequestHandler<MatchingStopCommand, (OrderStatus, Dictionary<long, OrderEngine>)>, MatchingCommandHandler>();
 
-        services.AddSingleton<IRequestHandler<MatchingOpenedCommand,bool>, MatchingStatusCommandHandler>();
-        services.AddSingleton<IRequestHandler<MatchingFilledCommand, bool>, MatchingStatusCommandHandler>();
-        services.AddSingleton<IRequestHandler<MatchingPartiallyFilledCommand, bool>, MatchingStatusCommandHandler>();
-        services.AddSingleton<IRequestHandler<MatchingCancelCommand, bool>, MatchingStatusCommandHandler>();
+        services.AddSingleton<IRequestHandler<MatchingOpenedCommand, Result>, MatchingStatusCommandHandler>();
+        services.AddSingleton<IRequestHandler<MatchingFilledCommand, Result>, MatchingStatusCommandHandler>();
+        services.AddSingleton<IRequestHandler<MatchingPartiallyFilledCommand, Result>, MatchingStatusCommandHandler>();
+        services.AddSingleton<IRequestHandler<MatchingCancelCommand, Result>, MatchingStatusCommandHandler>();
 
         // Domain - Services
         services.AddSingleton<IMatchingReceiver,    MatchingReceiver>();

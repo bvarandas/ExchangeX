@@ -1,12 +1,7 @@
-﻿using FluentResults;
-using MediatR;
+﻿using MediatR;
 using SharedX.Core.Commands;
 using SharedX.Core.Enums;
-using SharedX.Core.Events;
 using SharedX.Core.Matching.OrderEngine;
-using SharedX.Core.Querys;
-using System.Collections;
-
 namespace SharedX.Core.Bus;
 public class InMemmoryBus : IMediatorHandler
 {
@@ -15,14 +10,6 @@ public class InMemmoryBus : IMediatorHandler
     {
         _mediator = mediator;
     }
-    public Task SendCommand<T>(T command) where T : Command
-    {
-        return _mediator.Send(command);
-    }
-    public Task RaiseEvent<T>(T @event) where T : Event
-    {
-        return _mediator.Publish(@event);
-    }
     public Task<(OrderStatus, Dictionary<long, OrderEngine>)> SendMatchCommand<T>(T command)
         where T : MatchCommand
         //where R : (OrderStatus, Dictionary<long, OrderEngine>)
@@ -30,5 +17,41 @@ public class InMemmoryBus : IMediatorHandler
         var result = _mediator.Send(command).Result;
         return Task.FromResult( result);
 
+    }
+
+    public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
+    {
+        return _mediator.Send(request, cancellationToken);
+    }
+
+    public Task Send<TRequest>(TRequest request, CancellationToken cancellationToken = default) where TRequest : IRequest
+    {
+        return _mediator.Send(request, cancellationToken);
+    }
+
+    public Task<object?> Send(object request, CancellationToken cancellationToken = default)
+    {
+        return _mediator.Send(request, cancellationToken);
+    }
+
+    public IAsyncEnumerable<TResponse> CreateStream<TResponse>(IStreamRequest<TResponse> request, CancellationToken cancellationToken = default)
+    {
+        return _mediator.CreateStream(request, cancellationToken);
+        
+    }
+
+    public IAsyncEnumerable<object?> CreateStream(object request, CancellationToken cancellationToken = default)
+    {
+        return _mediator.CreateStream(request, cancellationToken);
+    }
+
+    public Task Publish(object notification, CancellationToken cancellationToken = default)
+    {
+        return _mediator.Publish(notification, cancellationToken);
+    }
+
+    public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default) where TNotification : INotification
+    {
+        return _mediator.Publish(notification, cancellationToken);
     }
 }

@@ -1,12 +1,8 @@
 ﻿using FluentResults;
-using FluentValidation;
 using MarketDataX.Core.Interfaces;
 using MarketDataX.Infra.Data;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
 using MongoDB.Driver;
-using QuickFix.Fields;
-using SharedX.Core.Entities;
 using SharedX.Core.Matching.MarketData;
 namespace MarketDataX.Infra.Repositories;
 public class MarketDataRepository : IMarketDataRepository
@@ -20,10 +16,10 @@ public class MarketDataRepository : IMarketDataRepository
         _context = context;
     }
 
-    public async Task<bool> UpsertMarketDataSnapshotAsync(MarketDataSnapshot marketDataSnapshot, CancellationToken cancellation)
+    public async Task<Result> UpsertMarketDataSnapshotAsync(MarketDataSnapshot marketDataSnapshot, CancellationToken cancellation)
     {
-        bool result = false;
-        
+        bool resultUpsert = false;
+        Result result = null!;
         try
         {
             var builder = Builders<MarketDataSnapshot>.Filter;
@@ -35,15 +31,19 @@ public class MarketDataRepository : IMarketDataRepository
             options: new ReplaceOptions { IsUpsert = true },
             cancellation);
 
-            result = resultReplace.IsAcknowledged && resultReplace.ModifiedCount > 0;
+            resultUpsert = resultReplace.IsAcknowledged && resultReplace.ModifiedCount > 0;
+            if (resultUpsert)
+                result = Result.Ok();
         }
         catch (ArgumentNullException ex)
         {
             _logger.LogError(ex.Message, ex);
+            result = Result.Fail(new Error(ex.Message));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex.Message, ex);
+            result = Result.Fail(new Error(ex.Message));
         }
         
         return result;
@@ -52,7 +52,8 @@ public class MarketDataRepository : IMarketDataRepository
 
     public async Task<Result<MarketDataSnapshot>> GetSnapshotAsync(string symbol,DateTime date , CancellationToken cancellation)
     {
-        MarketDataSnapshot result = null!;
+        Result<MarketDataSnapshot> result = null!;
+        MarketDataSnapshot resultSnapshot = null!;
         try
         {
             string formatDate = "yyyyMMdd";
@@ -60,14 +61,16 @@ public class MarketDataRepository : IMarketDataRepository
             var filter = builder.Eq(o => o.Symbol, symbol) & 
                          builder.Eq(o=>o.LastUpdateTime.ToString(formatDate), date.ToString(formatDate));
 
-            result = await _context.MarketDataSnapshot.Find(filter).SingleAsync(cancellation);
+            resultSnapshot = await _context.MarketDataSnapshot.Find(filter).SingleAsync(cancellation);
+            result = Result.Ok(resultSnapshot);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex.Message, ex);
+            result = Result.Fail(new Error(ex.Message));
         }
 
-        return Result.Ok(result);
+        return result;
     }
 
     public async Task<Result<Dictionary<string, MarketDataSnapshot>>> GetAllSnapshotAsync(string symbol, CancellationToken cancellation)
