@@ -39,6 +39,7 @@ public enum RedisDataBases
     Security=3,
     Fix = 4,    // DropCopy e MarketData
     Outbox = 5,
+    Trade = 6
     
 }
 //public enum Redis

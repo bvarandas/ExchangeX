@@ -27,49 +27,65 @@ public class ConsumerSecurityApp: BackgroundService
         _securityCache = securityCache;
     }
 
-    public override Task StartAsync(CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("Initializing o receiver Orders ZeroMQ...");
-        ThreadReceiverSecurity = new Thread(() => ReceiverOrders(cancellationToken));
-        ThreadReceiverSecurity.Name = nameof(ThreadReceiverSecurity);
-        ThreadReceiverSecurity.Start();
+    //public override Task StartAsync(CancellationToken cancellationToken)
+    //{
+    //    _logger.LogInformation("Initializing o receiver Securities ZeroMQ...");
+    //    ThreadReceiverSecurity = new Thread(() => ReceiverSecurities(cancellationToken));
+    //    ThreadReceiverSecurity.Name = nameof(ThreadReceiverSecurity);
+    //    ThreadReceiverSecurity.Start();
 
-        return Task.CompletedTask;
-    }
+    //    return Task.CompletedTask;
+    //}
 
-    private void ReceiverOrders(CancellationToken stoppingToken)
+    private void ReceiverSecurities(CancellationToken stoppingToken)
     {
-        using (_receiver = new RequestSocket(_config.OrderEntryToOrderEngine.Uri))
+        bool isConnected = false;
+        do
         {
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
-                var message = _receiver.ReceiveFrameString();
-                switch(message)
+                _logger.LogInformation("Iniciando o Securities receiver do ZeroMQ...");
+                using (_receiver = new RequestSocket(_config.OrderEntryToOrderEngine.Uri))
                 {
-                    case RequestTypeSecurity.List:
+                    _logger.LogInformation("Receiver de Securities Conectado!!!");
+                    isConnected = true;
+
+                    while (!stoppingToken.IsCancellationRequested)
+                    {
+                        var message = _receiver.ReceiveFrameString();
+                        switch (message)
                         {
-                            var dicSecurity = _securityCache.GetAllSecurityAsync().Result.Value;
-                            _receiver.SendFrame(dicSecurity.SerializeToByteArrayProtobuf<Dictionary<string, SecurityEngine>>());
+                            case RequestTypeSecurity.List:
+                                {
+                                    var dicSecurity = _securityCache.GetAllSecurityAsync().Result.Value;
+                                    _receiver.SendFrame(dicSecurity.SerializeToByteArrayProtobuf<Dictionary<string, SecurityEngine>>());
+                                }
+                                break;
+                            case RequestTypeSecurity.Status:
+                                {
+                                    var dicSecurity = _securityCache.GetAllSecurityAsync().Result.Value;
+                                    _receiver.SendFrame(dicSecurity.SerializeToByteArrayProtobuf<Dictionary<string, SecurityEngine>>());
+                                }
+                                break;
                         }
-                        break;
-                    case RequestTypeSecurity.Status:
-                        {
-                            var dicSecurity = _securityCache.GetAllSecurityAsync().Result.Value;
-                            _receiver.SendFrame(dicSecurity.SerializeToByteArrayProtobuf<Dictionary<string, SecurityEngine>>());
-                        }
-                        break;
+
+                        Thread.Sleep(10);
+                    }
                 }
-                
-                Thread.Sleep(10);
             }
-        }
+            catch (Exception ex)
+            {
+                isConnected = false;
+                _logger.LogError(ex.Message, ex);
+            }
+        } while (!isConnected);
     }
 
     public override Task StopAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Finishing the publisher ZeroMQ...");
+        _logger.LogInformation("Finishing the consumer ZeroMQ...");
         _receiver.Disconnect(_config.OrderEntryToOrderEngine.Uri);
-        _logger.LogInformation("Publisher ZeroMq...Finishing!");
+        _logger.LogInformation("Consumer ZeroMq...Finishing!");
         return base.StopAsync(cancellationToken);
     }
 

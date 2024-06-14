@@ -3,5 +3,5 @@ using SharedX.Core.Matching.DropCopy;
 namespace MatchingX.Infra.Data;
 public interface IExecutedTradeContext
 {
-    IMongoCollection<DropCopyReport> ExecutedTrade { get; }
+    IMongoCollection<TradeReport> ExecutedTrade { get; }
 }

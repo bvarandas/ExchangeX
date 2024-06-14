@@ -11,10 +11,10 @@ public class SecurityEngineCommandHandler :
     IRequestHandler<SecurityRemoveCommand, Result>,
     IRequestHandler<SecurityUpdateCommand, Result>
 {
-    private readonly ISecurityRepository _securityRepository;
+    private readonly ISecurityEngineRepository _securityRepository;
     private readonly IMediatorHandler _bus = null!;
     public SecurityEngineCommandHandler(IMediatorHandler bus,
-        ISecurityRepository securityRepository,
+        ISecurityEngineRepository securityRepository,
         INotificationHandler<DomainNotification> notifications) 
         : base(bus, notifications)
     {

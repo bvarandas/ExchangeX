@@ -19,16 +19,16 @@ public class ExecutedTradeRepository : IExecutedTradeRepository
         _logger = logger;
     }
 
-    public async Task<Result> CreateExecutedTradeAsync( Dictionary<long, DropCopyReport> dicExecutedTrade, CancellationToken cancellationToken)
+    public async Task<Result> CreateExecutedTradeAsync( Dictionary<long, TradeReport> dicExecutedTrade, CancellationToken cancellationToken)
     {
         Result result = null!;
         bool resultInsert = false;
         try
         {
-            var inserts = new List<WriteModel<DropCopyReport>>();
+            var inserts = new List<WriteModel<TradeReport>>();
             
             foreach (var trade in dicExecutedTrade)
-                inserts.Add(new InsertOneModel<DropCopyReport>(trade.Value));
+                inserts.Add(new InsertOneModel<TradeReport>(trade.Value));
             
             var insertResult = await _context.ExecutedTrade.BulkWriteAsync(inserts, null, cancellationToken);
             resultInsert = insertResult.IsAcknowledged && insertResult.ModifiedCount > 0;
@@ -44,13 +44,13 @@ public class ExecutedTradeRepository : IExecutedTradeRepository
         }
         return result;
     }
-    public async Task<Result<IEnumerable<DropCopyReport>>> GetExecutedTradeAsync(ExecutedTradeParams specParams, CancellationToken cancellationToken)
+    public async Task<Result<IEnumerable<TradeReport>>> GetExecutedTradeAsync(ExecutedTradeParams specParams, CancellationToken cancellationToken)
     {
-        IEnumerable<DropCopyReport> result = null!;
+        IEnumerable<TradeReport> result = null!;
 
         try
         {
-            var builder = Builders<DropCopyReport>.Filter;
+            var builder = Builders<TradeReport>.Filter;
             var filter = builder.Empty;
 
             if (!string.IsNullOrEmpty(specParams.Search))

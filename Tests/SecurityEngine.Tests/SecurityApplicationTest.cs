@@ -13,7 +13,7 @@ using SharedX.Core.Entities;
 namespace SecurityEngineTests;
 public class SecurityApplicationTests
 {
-    private readonly Mock<ISecurityRepository> _securityRepositoryMock = null!;
+    private readonly Mock<ISecurityEngineRepository> _securityRepositoryMock = null!;
     private readonly Mock<IMediatorHandler> _mediatorMock;
     private readonly Mock<ILogger<SecurityService>> _loggerSecurityServiceMock;
     private readonly Mock<SecurityEngineCommandHandler> _handlerSecurityMock;

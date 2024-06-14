@@ -1,17 +1,11 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Security.Application.Commands;
 using Security.Application.Services;
-using SecurityX.Core.Interfaces;
 using SecurityX.Core.Notifications;
-using SharedX.Core.Bus;
 using SharedX.Core.Entities;
-using SharedX.Core.Matching.MarketData;
-using System.Runtime.CompilerServices;
-using System.Threading;
-
 namespace Security.API.Controllers;
-[Route("security")]
+[ApiController]
+[Route("[controller]")]
 public class SecurityController : BaseController
 {
     private readonly ISecurityService _securityService = null!;
@@ -29,7 +23,7 @@ public class SecurityController : BaseController
         var result = await _securityService.Get(null!, cancellationToken);
 
         var listSecurities = result.Value.Values.ToList();
-        return View(listSecurities);
+        return Ok(listSecurities);
     }
 
     [HttpGet]
@@ -37,12 +31,16 @@ public class SecurityController : BaseController
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         var result = await _securityService.Get(null!, cancellationToken);
-        var listSecurities = result.Value.Values.ToList();
-        return View(listSecurities);
+
+        if (result.Value is null)
+            return NotFound();
+
+        var listSecurities = result.Value!.Values.ToList();
+        return Ok(listSecurities);
     }
 
     [HttpGet]
-    [Route("detail/{id:string}")]
+    [Route("detail/{id}")]
     public async Task<IActionResult> Detail(string id, CancellationToken cancellationToken)
     {
         var securities = await _securityService.Get(new[] { id }, cancellationToken);
@@ -51,7 +49,7 @@ public class SecurityController : BaseController
 
         var listSecurities = securities.Value.Values.ToList();
 
-        return View(listSecurities);
+        return Ok(listSecurities);
     }
 
     [HttpPost]
@@ -64,7 +62,7 @@ public class SecurityController : BaseController
         if (IsValidOperation())
             ViewBag.Sucesso = "Ativo Registrado com sucesso!";
 
-        return Ok(security);
+        return Created("", security);
     }
 
     [HttpPut]
@@ -78,7 +76,7 @@ public class SecurityController : BaseController
         if (IsValidOperation())
             ViewBag.Sucesso = "Ativo Registrado com sucesso!";
 
-        return Ok(security);
+        return NoContent();
     }
 
     [HttpDelete]

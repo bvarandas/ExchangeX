@@ -6,7 +6,8 @@
       "serviceActions": {
         "matchinx.api": "StartDebugging",
         "testenginex": "StartDebugging",
-        "orderenginex.api": "StartDebugging"
+        "orderenginex.api": "StartDebugging",
+        "security.api": "StartDebugging"
       }
     }
   }

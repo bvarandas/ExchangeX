@@ -25,9 +25,9 @@ public class SecurityRepositoriesTest
     private readonly Mock<IMediatorHandler> _mediatorMock;
     private readonly Mock<ILogger<SecurityService>> _loggerSecurityServiceMock;
 
-    private readonly Mock<ISecurityRepository> _securityRepositoryMock = null!;
+    private readonly Mock<ISecurityEngineRepository> _securityRepositoryMock = null!;
     
-    private readonly Mock<ILogger<SecurityRepository>> _loggerSecurityRepositoryMock;
+    private readonly Mock<ILogger<SecurityEngineRepository>> _loggerSecurityRepositoryMock;
     private readonly Mock<SecurityEngineCommandHandler> _handlerSecurityMock;
     public SecurityRepositoriesTest()
     {
@@ -46,11 +46,11 @@ public class SecurityRepositoriesTest
             .Returns(collectionMock);
         
         // action
-        var result = new SecurityContext(dbMock.Object);
+        var result = new SecurityEngineContext(dbMock.Object);
 
         // Assert
         Assert.NotNull(result);
-        Assert.IsType<SecurityContext>(result);
+        Assert.IsType<SecurityEngineContext>(result);
 
         Assert.Equal(result.SecurityEngine, collectionMock);
     }
@@ -89,8 +89,8 @@ public class SecurityRepositoriesTest
             .Returns(mockCollection.Object);
 
         // Action 
-        var context = new SecurityContext(dbMock.Object);
-        var repo = new SecurityRepository(context, _loggerSecurityRepositoryMock.Object);
+        var context = new SecurityEngineContext(dbMock.Object);
+        var repo = new SecurityEngineRepository(context, _loggerSecurityRepositoryMock.Object);
 
         var result = await repo.GetAllSecurityiesAsync(cancellationToken);
 

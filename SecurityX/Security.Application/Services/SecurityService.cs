@@ -8,11 +8,11 @@ using SharedX.Core.Entities;
 namespace Security.Application.Services;
 public class SecurityService : ISecurityService
 {
-    private readonly ISecurityRepository _securityRepository;
+    private readonly ISecurityEngineRepository _securityRepository;
     private readonly ILogger<SecurityService> _logger;
     private readonly IMediatorHandler _bus = null!;
     public SecurityService(IMediatorHandler bus,
-        ISecurityRepository securityRepository, 
+        ISecurityEngineRepository securityRepository, 
         ILogger<SecurityService> logger)
     {
         _bus = bus;

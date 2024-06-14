@@ -1,13 +1,13 @@
 version: '3.4'
 
 services:
-  matchingx:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    ports:
-      - "80"
-    networks:
-      - exchange
+  # matchingx:
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Development
+  #   ports:
+  #     - "80"
+  #   networks:
+  #     - exchange
   
   zookeeper:
     container_name: zookeeper
@@ -105,11 +105,19 @@ services:
   #   networks:
   #     - exchange
 
-  orderenginex:
+  # orderenginex:
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Development
+  #   ports:
+  #     - "5024:5024"
+  #   networks:
+  #     - exchange
+
+  security.api:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
-      - "5024:5024"
+      - "5025:80"
     networks:
       - exchange
 
@@ -121,3 +129,4 @@ volumes:
 networks:
     exchange:
         driver: bridge
+

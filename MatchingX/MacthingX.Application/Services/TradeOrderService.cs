@@ -26,7 +26,7 @@ public class TradeOrderService : ITradeOrderService, IDisposable
     protected readonly ISecurityCache _securityCache;
     protected readonly IMediatorHandler Bus;
     protected readonly ConcurrentQueue<OrderEngine> QueueOrderStatusChanged;
-    protected readonly ConcurrentQueue<Dictionary<long, DropCopyReport>> QueueExecutedTraded;
+    protected readonly ConcurrentQueue<Dictionary<long, TradeReport>> QueueExecutedTraded;
     
     private readonly Thread ThreadExecutedTrade;
     private readonly Thread ThreadOrdersStatus;
@@ -44,7 +44,7 @@ public class TradeOrderService : ITradeOrderService, IDisposable
         _matchingCache = matchingCache;
         _securityCache = securityCache;
 
-        QueueExecutedTraded = new ConcurrentQueue<Dictionary<long, DropCopyReport>>();
+        QueueExecutedTraded = new ConcurrentQueue<Dictionary<long, TradeReport>>();
         QueueOrderStatusChanged = new ConcurrentQueue<OrderEngine>();
 
         ThreadExecutedTrade = new Thread(new ThreadStart(ExecutedTradeOutcome));
@@ -97,7 +97,7 @@ public class TradeOrderService : ITradeOrderService, IDisposable
     {
         while (true)
         {
-            if (QueueExecutedTraded.TryDequeue(out  Dictionary<long, DropCopyReport> reports))
+            if (QueueExecutedTraded.TryDequeue(out  Dictionary<long, TradeReport> reports))
                 Bus.Send(new ExecutedTradeCommand(reports));
 
             if (_running)
@@ -156,11 +156,11 @@ public class TradeOrderService : ITradeOrderService, IDisposable
         CreateTradeCapture(order, dicOrders);
     }
 
-    private Dictionary<long, DropCopyReport> CreateExecutionReport(OrderEngine order, Dictionary<long, OrderEngine> dicOrders) 
+    private Dictionary<long, TradeReport> CreateExecutionReport(OrderEngine order, Dictionary<long, OrderEngine> dicOrders) 
     {
         var now = DateTime.Now; 
 
-        var result = new Dictionary<long, DropCopyReport>();
+        var result = new Dictionary<long, TradeReport>();
         
         var report = new ExecutionReport();
         report.MinQty = order.MinQty;
@@ -213,9 +213,9 @@ public class TradeOrderService : ITradeOrderService, IDisposable
 
         return result;
     }
-    private Dictionary<long, DropCopyReport> CreateTradeCapture(OrderEngine order, Dictionary<long, OrderEngine> dicOrders)
+    private Dictionary<long, TradeReport> CreateTradeCapture(OrderEngine order, Dictionary<long, OrderEngine> dicOrders)
     {
-        var result =new Dictionary<long, DropCopyReport>();
+        var result =new Dictionary<long, TradeReport>();
         var report = new TradeCaptureReport()
         {
             TradeReportTransType = 0,

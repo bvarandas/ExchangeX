@@ -2,7 +2,7 @@
 namespace SharedX.Core.Matching.DropCopy;
 
 [ProtoContract]
-public class TradeCaptureReport : DropCopyReport
+public class TradeCaptureReport : TradeReport
 {
     [ProtoMember(1)]
     public ushort TradeReportTransType { get; set; } // 0=new, 1=cancel

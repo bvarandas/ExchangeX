@@ -1,11 +1,11 @@
 version: '3.4'
 
 services:
-  matchingx:
-    image: ${DOCKER_REGISTRY-}matching
-    build:
-      context: .
-      dockerfile: MatchingX/MatchingX.ServerApp/Dockerfile
+  # matchingx:
+  #   image: ${DOCKER_REGISTRY-}matching
+  #   build:
+  #     context: .
+  #     dockerfile: MatchingX/MatchingX.ServerApp/Dockerfile
  
   # orderentryx:
   #   image: ${DOCKER_REGISTRY-}orderentry
@@ -25,8 +25,8 @@ services:
   redis:
     image: redis
   
-  adminer:
-    image: adminer
+  # adminer:
+  #   image: adminer
 
   zookeeper:
     image: zookeeper
@@ -41,9 +41,16 @@ services:
   #     dockerfile: TestEngineX/TestEngineX/Dockerfile
 
 
-  orderenginex:
-    image: ${DOCKER_REGISTRY-}orderenginexapi
+  # orderenginex:
+  #   image: ${DOCKER_REGISTRY-}orderenginexapi
+  #   build:
+  #     context: .
+  #     dockerfile: OrderEngineX/OrderX.API/Dockerfile
+
+
+  security.api:
+    image: ${DOCKER_REGISTRY-}securityapi
     build:
       context: .
-      dockerfile: OrderEngineX/OrderX.API/Dockerfile
+      dockerfile: SecurityX/Security.API/Dockerfile
 

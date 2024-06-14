@@ -4,6 +4,7 @@ public  class ConnectionZmq
     public PushPull MatchingToDropCopy { get; set; } = null!;
     public PushPull MatchingToMarketData { get; set; } = null!;
     public PushPull MatchingToOrderEngine { get; set; } = null!;
+    public PushPull MatchingToTradeEngine { get; set; } = null!;
     public PushPull OrderEntryToOrderEngine { get; set; } = null!;
     public PushPull OrderEngineToMatching { get; set; } = null!;
     public PushPull SecurityToMatching { get; set; } = null!;

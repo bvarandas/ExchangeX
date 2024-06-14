@@ -3,7 +3,7 @@ using OrderEngineX.API.Config;
 using Serilog;
 using SharedX.Core.Specs;
 
-Console.WriteLine("Hello, World!");
+
 var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 var config = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())

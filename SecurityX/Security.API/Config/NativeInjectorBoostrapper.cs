@@ -16,7 +16,7 @@ using SecurityX.Core.Notifications;
 using SecurityX.Infra.Cache;
 using SharedX.Core.Bus;
 using SharedX.Core.Specs;
-namespace DropCopyX.ServerApp;
+namespace SecurityX.ServerApp;
 internal class NativeInjectorBoostrapper
 {
     public static void RegisterServices(IServiceCollection services, IConfiguration config)
@@ -25,13 +25,14 @@ internal class NativeInjectorBoostrapper
 
         services.Configure<QueueSettings>(config.GetSection(nameof(QueueSettings)));
         services.Configure<ConnectionZmq>(config.GetSection(nameof(ConnectionZmq)));
-                
+        services.Configure<ConnectionRedis>(config.GetSection(nameof(ConnectionRedis)));
+
         // FIX - Application
 
         //services.AddSingleton<IFixServerApp, FixServerApp>();
-        
+
         // Domain Bus (Mediator)
-        services.AddScoped<IMediatorHandler, InMemmoryBus>();
+        services.AddSingleton<IMediatorHandler, InMemmoryBus>();
         //services.AddScoped<IOrderBook, OrderBook>();
 
         //SignalR
@@ -58,6 +59,7 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IRequestHandler<SecurityUpdateCommand, Result>, SecurityEngineCommandHandler>();
 
         //Domain - Events 
+        services.AddSingleton<INotificationHandler<DomainNotification>, DomainNotificationHandler>();
         services.AddSingleton<INotificationHandler<SecurityChangedEvent>, SecurityEngineEventHandler>();
 
         // Service
@@ -70,9 +72,9 @@ internal class NativeInjectorBoostrapper
             return client.GetDatabase(config.GetValue<string>("DatabaseSettings:DatabaseName"));
         });
 
-        services.AddSingleton<ISecurityContext, SecurityContext>();
+        services.AddSingleton<ISecurityEngineContext, SecurityEngineContext>();
         services.AddSingleton<ISecurityCache, SecurityCache>();
-        services.AddSingleton<ISecurityRepository, SecurityRepository>();
+        services.AddSingleton<ISecurityEngineRepository, SecurityEngineRepository>();
 
         services.AddHostedService<PublisherSecurityApp>();
         services.AddHostedService<ConsumerSecurityApp>();

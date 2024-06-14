@@ -54,7 +54,7 @@ public class ConsumerDropCopyApp : OutboxBackgroundService<ExecutionReport>, IHo
             {
                 _logger.LogInformation("Iniciando o DropCopy receiver do ZeroMQ...");
 
-                using (_receiver = new PullSocket(_config.MatchingToDropCopy.Uri))
+                using (_receiver = new PullSocket(">"+_config.MatchingToDropCopy.Uri))
                 {
                     _logger.LogInformation("Receiver de Dropcopy Conectado!!!");
                     isConnected = true;

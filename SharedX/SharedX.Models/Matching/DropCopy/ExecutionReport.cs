@@ -3,7 +3,7 @@ using SharedX.Core.Account;
 using SharedX.Core.Enums;
 namespace SharedX.Core.Matching.DropCopy;
 [ProtoContract]
-public class ExecutionReport : DropCopyReport
+public class ExecutionReport : TradeReport
 {
     [ProtoMember(1)]
     public string Symbol { get; set; } = string.Empty;
