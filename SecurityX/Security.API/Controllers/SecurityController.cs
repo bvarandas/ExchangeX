@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Security.Application.Services;
+using SecurityX.Core.Interfaces;
 using SecurityX.Core.Notifications;
 using SharedX.Core.Entities;
 namespace Security.API.Controllers;
@@ -9,12 +10,14 @@ namespace Security.API.Controllers;
 public class SecurityController : BaseController
 {
     private readonly ISecurityService _securityService = null!;
-
+    private readonly ISecurityCache _securityCache = null!;
     public SecurityController(
         ISecurityService securityService,
+        ISecurityCache securityCache,
         INotificationHandler<DomainNotification> notifications)
         :base(notifications)
     {
+        _securityCache = securityCache;
         _securityService = securityService;
     }
 
@@ -54,11 +57,14 @@ public class SecurityController : BaseController
 
     [HttpPost]
     [Route("")]
-    public async Task<IActionResult> Add(SecurityEngine security, CancellationToken cancellationToken)
+    public async Task<IActionResult> Add([FromBody]SecurityEngine security, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var result =  await _securityService.Add(security, cancellationToken);
+        var result =  await _securityService.Add(security, _securityCache, cancellationToken);
+        if (result.IsFailed)
+            return BadRequest(result.Errors.First());
+        
         if (IsValidOperation())
             ViewBag.Sucesso = "Ativo Registrado com sucesso!";
 
@@ -71,7 +77,9 @@ public class SecurityController : BaseController
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var result = await _securityService.Update(security, cancellationToken);
+        var result = await _securityService.Update(security, _securityCache, cancellationToken);
+        if (result.IsFailed)
+            return BadRequest(result.Errors.First());
 
         if (IsValidOperation())
             ViewBag.Sucesso = "Ativo Registrado com sucesso!";
@@ -85,10 +93,13 @@ public class SecurityController : BaseController
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var result = await _securityService.Delete(security, cancellationToken);
+        var result = await _securityService.Delete(security, _securityCache, cancellationToken);
         
+        if (result.IsFailed)
+            return BadRequest(result.Errors.First());
+
         if (IsValidOperation())
-            ViewBag.Sucesso = "Ativo Registrado com sucesso!";
+            ViewBag.Sucesso = "Ativo Removido  com sucesso!";
 
         return Ok(security);
     }

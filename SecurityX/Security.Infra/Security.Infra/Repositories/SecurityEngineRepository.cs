@@ -39,13 +39,12 @@ public class SecurityEngineRepository : ISecurityEngineRepository
         return Result.Ok(result);
     }
 
-    public async Task<Result<bool>> UpsertSecurityAsync(SecurityEngine security, CancellationToken cancellationToken)
+    public async Task<Result> UpsertSecurityAsync(SecurityEngine security, CancellationToken cancellationToken)
     {
-        bool result = false;
         try
         {
             var builder = Builders<SecurityEngine>.Filter;
-            var filter = builder.Eq(o => o.SecurityID, security.SecurityID);
+            var filter = builder.Eq(o => o.Id, security.Id);
 
             var resultReplace = await _context.SecurityEngine.ReplaceOneAsync(filter,
                 replacement: security,
@@ -57,20 +56,18 @@ public class SecurityEngineRepository : ISecurityEngineRepository
             _logger.LogError(ex.Message, ex);
             return Result.Fail(new Error(ex.Message));
         }
-        return Result.Ok(result);
+        return Result.Ok();
     }
 
-    public async Task<Result<bool>> RemoveSecurityAsync(SecurityEngine security, CancellationToken cancellationToken)
+    public async Task<Result> RemoveSecurityAsync(SecurityEngine security, CancellationToken cancellationToken)
     {
-        bool result = false;
         try
         {
             var builder = Builders<SecurityEngine>.Filter;
-            var filter = builder.Eq(o => o.SecurityID, security.SecurityID);
+            var filter = builder.Eq(o => o.Id, security.Id);
 
-            var resultReplace = await _context.SecurityEngine.ReplaceOneAsync(filter,
-                replacement: security,
-                options: new ReplaceOptions { IsUpsert = true },
+            var resultReplace = await _context.SecurityEngine.DeleteOneAsync(filter,
+                //options: new DeleteOptions {    IsUpsert = true },
                 cancellationToken);
         }
         catch (Exception ex)
@@ -78,7 +75,7 @@ public class SecurityEngineRepository : ISecurityEngineRepository
             _logger.LogError(ex.Message, ex);
             return Result.Fail(new Error(ex.Message));
         }
-        return Result.Ok(result);
+        return Result.Ok();
     }
 
 

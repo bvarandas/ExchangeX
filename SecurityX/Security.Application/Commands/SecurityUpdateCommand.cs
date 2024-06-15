@@ -1,17 +1,20 @@
 ﻿using Security.Application.Validations;
+using SecurityX.Core.Interfaces;
 using SharedX.Core.Entities;
 namespace Security.Application.Commands;
 public class SecurityUpdateCommand : SecurityEngineCommand
 {
-    public SecurityUpdateCommand(SecurityEngine securityEngine,  CancellationToken cancellationToken)
+    private readonly ISecurityCache _securityCache = null!;
+    public SecurityUpdateCommand(SecurityEngine securityEngine, ISecurityCache securityCache, CancellationToken cancellationToken)
     {
         SecurityEngine = securityEngine;
         CancellationToken = cancellationToken;
+        _securityCache = securityCache;
     }
 
     public override bool IsValid()
     {
-        ValidationResult = new SecurityUpdateValidation().Validate(this);
+        ValidationResult = new SecurityUpdateValidation(_securityCache).Validate(this);
         return ValidationResult.IsValid;
     }
 }

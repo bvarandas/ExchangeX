@@ -19,4 +19,15 @@ public class CommandHandler
             _bus.Publish(new DomainNotification(message.MessageType, error.ErrorMessage));
         }
     }
+
+    protected string GetNotifyValidationErrors(Command message)
+    {
+        string listError = string.Empty;
+        
+        foreach (var error in message.ValidationResult.Errors)
+        {
+            listError = string.Concat(message.MessageType, ":", error.ErrorMessage);
+        }
+        return listError;
+    }
 }

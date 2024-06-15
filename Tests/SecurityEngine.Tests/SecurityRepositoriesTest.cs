@@ -288,9 +288,9 @@ public class SecurityRepositoriesTest
         _securityRepositoryMock.Verify();
     }
 
-    private Result<bool> GetResultAddOk()
+    private Result GetResultAddOk()
     {
-        var result = Result.Ok(true);
+        var result = Result.Ok();
         return result;
     }
 
@@ -306,9 +306,9 @@ public class SecurityRepositoriesTest
         return result;
     }
 
-    private Result<bool> GetResultAddFail()
+    private Result GetResultAddFail()
     {
-        var result = Result.Ok(false);
+        var result = Result.Ok();
         return  result;
     }
 

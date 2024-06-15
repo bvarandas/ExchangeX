@@ -1,11 +1,16 @@
 ﻿using FluentValidation;
-using QuickFix.Fields;
 using Security.Application.Commands;
-
+using SecurityX.Core.Interfaces;
 namespace Security.Application.Validations;
 public abstract class SecurityValidation<T> : 
     AbstractValidator<T> where T: SecurityEngineCommand
 {
+    private readonly ISecurityCache _securityCache;
+    public SecurityValidation(ISecurityCache securityCache)
+    {
+        _securityCache = securityCache;
+    }
+
     protected void ValidateNew()
     {
         ValidateSymbol();
@@ -20,6 +25,7 @@ public abstract class SecurityValidation<T> :
 
     protected void ValidateUpdate()
     {
+        ValidateId();
         ValidateSymbol();
         ValidateSecurityId();
         ValidateSecuritySourceId();
@@ -32,11 +38,21 @@ public abstract class SecurityValidation<T> :
 
     protected void ValidateRemove()
     {
+        ValidateId();
         ValidateSymbol();
         ValidateSecurityId();
         //ValidateSecuritySourceId();
         //ValidateSecurityStatus();
         //ValidateSecurityDescription();
+    }
+
+    private void ValidateId()
+    {
+        RuleFor(o => o.SecurityEngine.Id)
+            .NotEqual(string.Empty)
+            .NotEqual("0")
+            .WithMessage("2-Unknown Id")
+            .WithErrorCode("2");
     }
 
     private void ValidateSymbol()

@@ -13,7 +13,7 @@ public class SecurityCache: ISecurityCache
 {
     private static ConcurrentQueue<SecurityEngine> SecurityEngineQueue = null!;
     private readonly ConnectionRedis _config;
-    private readonly IDatabase _dbSecurity;
+    private  IDatabase _dbSecurity;
     private readonly ILogger<SecurityCache> _logger;
     private readonly ConnectionMultiplexer _redis;
     private readonly RedisKey _key;
@@ -62,6 +62,7 @@ public class SecurityCache: ISecurityCache
         SecurityEngineQueue.Enqueue(security);
         RedisValue value = new RedisValue(JsonSerializer.Serialize<SecurityEngine>(security));
         var key = string.Concat(_key, ":", security.Symbol);
+
         await _dbSecurity.HashSetAsync(key,
             new HashEntry[]
             {

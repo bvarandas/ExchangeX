@@ -1,5 +1,6 @@
 ﻿using FluentResults;
 using MediatR;
+using MongoDB.Bson;
 using Security.Application.Events;
 using SecurityX.Core.Interfaces;
 using SecurityX.Core.Notifications;
@@ -26,41 +27,48 @@ public class SecurityEngineCommandHandler :
         if (!command.IsValid())
         {
             NotifyValidationErrors(command);
-            return Result.Fail(new Error(""));
+            return Result.Fail(new Error(GetNotifyValidationErrors(command)));
         }
+        command.SecurityEngine.Id = ObjectId.GenerateNewId().ToString();
         var result = await _securityRepository.UpsertSecurityAsync(command.SecurityEngine, cancellationToken);
-        
-        if (result.IsSuccess)
-            await _bus.Publish(new SecurityChangedEvent(command.SecurityEngine));
 
-        return Result.Ok();
+        if (result.IsSuccess)
+        {
+            await _bus.Publish(new SecurityChangedEvent(command.SecurityEngine));
+            return Result.Ok();
+        }
+        return result;
     }
     public async Task<Result> Handle(SecurityRemoveCommand command, CancellationToken cancellationToken)
     {
         if (!command.IsValid())
         {
             NotifyValidationErrors(command);
-            return Result.Fail(new Error(""));
+            return Result.Fail(new Error(GetNotifyValidationErrors(command)));
         }
-        var result = await _securityRepository.UpsertSecurityAsync(command.SecurityEngine, cancellationToken);
+        var result = await _securityRepository.RemoveSecurityAsync(command.SecurityEngine, cancellationToken);
 
         if (result.IsSuccess)
+        {
             await _bus.Publish(new SecurityChangedEvent(command.SecurityEngine));
-
-        return Result.Ok();
+            return Result.Ok();
+        }
+        return result;
     }
     public async Task<Result> Handle(SecurityUpdateCommand command, CancellationToken cancellationToken)
     {
         if (!command.IsValid())
         {
             NotifyValidationErrors(command);
-            return Result.Fail(new Error(""));
+            return Result.Fail(new Error(GetNotifyValidationErrors(command)));
         }
         var result = await _securityRepository.UpsertSecurityAsync(command.SecurityEngine, cancellationToken);
 
         if (result.IsSuccess)
+        {
             await _bus.Publish(new SecurityChangedEvent(command.SecurityEngine));
-
-        return Result.Ok();
+            return Result.Ok();
+        }
+        return result;
     }
 }
