@@ -17,6 +17,8 @@ using MatchingX.Infra.FixClientApp;
 using MatchingX.Infra.Repositories;
 using MatchingX.ServerApp.Consumer;
 using MatchingX.ServerApp.Publisher;
+using Medallion.Threading;
+using Medallion.Threading.ZooKeeper;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,6 +45,7 @@ internal class NativeInjectorBoostrapper
         services.Configure<QueueSettings>(config.GetSection(nameof(QueueSettings)));
         services.Configure<ConnectionRedis>(config.GetSection(nameof(ConnectionRedis)));
         services.Configure<ConnectionZmq>(config.GetSection(nameof(ConnectionZmq)));
+        services.Configure<ConnectionZooKeeper>(config.GetSection(nameof(ConnectionZooKeeper)));
 
         services.AddMassTransit(x =>
         {
@@ -90,13 +93,18 @@ internal class NativeInjectorBoostrapper
             .SetIsOriginAllowed((host) => true)
             .AllowCredentials();
         }));
+
+        // ZooKeeper - DistributedSynchronizator
+        services.AddSingleton<IDistributedLockProvider>(
+            new  ZooKeeperDistributedSynchronizationProvider(config["ConnectionZooKeeper:ConnectionString"]!, 
+                options=>options.ConnectTimeout(TimeSpan.FromSeconds(5))));
+
         // Outbox 
         services.AddSingleton(typeof(IOutboxBackgroundService<>), typeof(OutboxBackgroundService<>));
         services.AddSingleton(typeof(IOutboxCache<>), typeof(OutboxCache<>));
 
         // Domain - Events
         services.AddSingleton<INotificationHandler<DomainNotification>, DomainNotificationHandler>();
-
         services.AddSingleton<INotificationHandler<ExecutedTradeEvent>, ExecutedTradeEventHandler>();
 
         services.AddSingleton<INotificationHandler<OrderCanceledEvent>, OrderEventHandler>();

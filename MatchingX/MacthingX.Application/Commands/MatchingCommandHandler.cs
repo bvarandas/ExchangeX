@@ -38,10 +38,9 @@ public class MatchingCommandHandler :
     public async Task<(OrderStatus, Dictionary<long, OrderEngine>)> Handle(MatchingLimitCommand command, CancellationToken cancellationToken)
     {
         string nameLock = string.Concat(command.Order.Symbol, "_", command.Order.Side.ToString());
-        await using (await _distributedLockProvider.TryAcquireLockAsync(nameLock,TimeSpan.FromSeconds(10) ,cancellationToken))
+        await using (await _distributedLockProvider.TryAcquireLockAsync(nameLock,TimeSpan.FromSeconds(3) ,cancellationToken))
         {
             var resultMatch = await _matchRepository.MatchingLimitAsync(command.Order, cancellationToken);
-
             return resultMatch;
         }
     }
@@ -49,10 +48,9 @@ public class MatchingCommandHandler :
     public async Task<(OrderStatus, Dictionary<long, OrderEngine>)> Handle(MatchingMarketCommand command, CancellationToken cancellationToken)
     {
         string nameLock = string.Concat(command.Order.Symbol, "_", command.Order.Side.ToString());
-        await using (await _distributedLockProvider.TryAcquireLockAsync(nameLock, TimeSpan.FromSeconds(10), cancellationToken))
+        await using (await _distributedLockProvider.TryAcquireLockAsync(nameLock, TimeSpan.FromSeconds(3), cancellationToken))
         {
-            var resultMatch = await _matchRepository.MatchingLimitAsync(command.Order, cancellationToken);
-
+            var resultMatch = await _matchRepository.MatchingMarketAsync(command.Order, cancellationToken);
             return resultMatch;
         }
     }
@@ -60,10 +58,9 @@ public class MatchingCommandHandler :
     public async Task<(OrderStatus, Dictionary<long, OrderEngine>)> Handle(MatchingStopLimitCommand command, CancellationToken cancellationToken)
     {
         string nameLock = string.Concat(command.Order.Symbol, "_", command.Order.Side.ToString());
-        await using (await _distributedLockProvider.TryAcquireLockAsync(nameLock, TimeSpan.FromSeconds(10), cancellationToken))
+        await using (await _distributedLockProvider.TryAcquireLockAsync(nameLock, TimeSpan.FromSeconds(3), cancellationToken))
         {
             var resultMatch = await _matchRepository.MatchingLimitAsync(command.Order, cancellationToken);
-
             return resultMatch;
         }
     }
@@ -71,10 +68,9 @@ public class MatchingCommandHandler :
     public async Task<(OrderStatus, Dictionary<long, OrderEngine>)> Handle(MatchingStopCommand command, CancellationToken cancellationToken)
     {
         string nameLock = string.Concat(command.Order.Symbol, "_", command.Order.Side.ToString());
-        await using (await _distributedLockProvider.TryAcquireLockAsync(nameLock, TimeSpan.FromSeconds(10), cancellationToken))
+        await using (await _distributedLockProvider.TryAcquireLockAsync(nameLock, TimeSpan.FromSeconds(3), cancellationToken))
         {
-            var resultMatch = await _matchRepository.MatchingLimitAsync(command.Order, cancellationToken);
-
+            var resultMatch = await _matchRepository.MatchingMarketAsync(command.Order, cancellationToken);
             return resultMatch;
         }
     }
