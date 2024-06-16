@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2024-06-13T18:38:31.244Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36" etag="fimX8zrBApD1Uzxp6Xe6" version="24.5.4" type="device">
+<mxfile host="app.diagrams.net" modified="2024-06-16T14:28:22.992Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36" etag="LIi7Brl3c_kapN9t1FXD" version="24.5.4" type="device">
   <diagram name="Page-1" id="3rnBCiRVLusEH87E3wuf">
-    <mxGraphModel dx="2882" dy="4659" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="2472" dy="4591" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -212,17 +212,16 @@
           </mxCell>
         </object>
         <object placeholders="1" c4Type="Relationship" c4Technology="Protobuf&#xa;ZeroMQ" c4Description="Envio de &#xa;Securities Status" label="&lt;div style=&quot;text-align: left; font-size: 9px;&quot;&gt;&lt;div style=&quot;text-align: center; font-size: 9px;&quot;&gt;&lt;b style=&quot;font-size: 9px;&quot;&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;text-align: center; font-size: 9px;&quot;&gt;[%c4Technology%]&lt;/div&gt;&lt;/div&gt;" id="LvskD6dqJf4KLE0YIMtO-2">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=9;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#d92e27;elbow=vertical;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=1;edgeStyle=orthogonalEdgeStyle;curved=0;flowAnimation=0;shadow=1;entryX=0.141;entryY=1.007;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="dFCQOi211sB1c6jUqXax-41" target="Hoqyl7UX3lz1ubSUXwdo-4" edge="1">
-            <mxGeometry x="-0.128" y="-30" width="240" relative="1" as="geometry">
+          <mxCell style="endArrow=blockThin;html=1;fontSize=9;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#d92e27;elbow=vertical;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=1;edgeStyle=orthogonalEdgeStyle;curved=0;flowAnimation=0;shadow=1;entryX=0.938;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="dFCQOi211sB1c6jUqXax-41" target="PPNamZcTnFpF1Wu-K322-4" edge="1">
+            <mxGeometry x="-0.4894" y="-10" width="240" relative="1" as="geometry">
               <mxPoint x="989" y="-738.4666666666667" as="sourcePoint" />
               <mxPoint x="924" y="-520" as="targetPoint" />
               <Array as="points">
-                <mxPoint x="70" y="-644" />
-                <mxPoint x="70" y="-1010" />
-                <mxPoint x="160" y="-1010" />
-                <mxPoint x="160" y="-1050" />
+                <mxPoint x="50" y="-644" />
+                <mxPoint x="50" y="-1540" />
+                <mxPoint x="-280" y="-1540" />
               </Array>
-              <mxPoint x="30" y="30" as="offset" />
+              <mxPoint as="offset" />
             </mxGeometry>
           </mxCell>
         </object>
@@ -946,7 +945,7 @@
           </mxCell>
         </object>
         <object placeholders="1" c4Type="Relationship" c4Technology="Protobuf&#xa;masstransit" c4Description="Ordem &#xa;Compra/Venda&#xa;" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;text-align: center&quot;&gt;[%c4Technology%]&lt;/div&gt;&lt;/div&gt;" id="PrdEhwjul59J3segotWO-1">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=5;endFill=1;strokeColor=#f76300;elbow=vertical;metaEdit=1;jumpStyle=arc;jumpSize=16;rounded=1;edgeStyle=orthogonalEdgeStyle;curved=0;fillColor=#000066;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;flowAnimation=1;entryX=0.689;entryY=-0.01;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="PPNamZcTnFpF1Wu-K322-49" target="PPNamZcTnFpF1Wu-K322-4">
+          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=5;endFill=1;strokeColor=#f76300;elbow=vertical;metaEdit=1;jumpStyle=arc;jumpSize=16;rounded=1;edgeStyle=orthogonalEdgeStyle;curved=0;fillColor=#000066;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;flowAnimation=1;entryX=0.689;entryY=-0.01;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="PPNamZcTnFpF1Wu-K322-49" target="PPNamZcTnFpF1Wu-K322-4" edge="1">
             <mxGeometry x="-0.0221" y="37" width="240" relative="1" as="geometry">
               <mxPoint x="199" y="-2160" as="sourcePoint" />
               <mxPoint x="-419" y="-1740" as="targetPoint" />
@@ -959,7 +958,7 @@
           </mxCell>
         </object>
         <object placeholders="1" c4Type="Relationship" c4Technology="Protobuf&#xa;ZeroMQ" c4Description="Envio de &#xa;Trade " label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;text-align: center&quot;&gt;[%c4Technology%]&lt;/div&gt;&lt;/div&gt;" id="PrdEhwjul59J3segotWO-2">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=5;endFill=1;strokeColor=#be211a;elbow=vertical;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=1;edgeStyle=orthogonalEdgeStyle;curved=0;flowAnimation=1;shadow=1;exitX=1.001;exitY=0.148;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.424;entryY=-0.005;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="-goyh2AKBP8jGNE-5dfg-23" target="PPNamZcTnFpF1Wu-K322-52">
+          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=5;endFill=1;strokeColor=#be211a;elbow=vertical;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=1;edgeStyle=orthogonalEdgeStyle;curved=0;flowAnimation=1;shadow=1;exitX=1.001;exitY=0.148;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.424;entryY=-0.005;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="-goyh2AKBP8jGNE-5dfg-23" target="PPNamZcTnFpF1Wu-K322-52" edge="1">
             <mxGeometry x="-0.9129" y="-31" width="240" relative="1" as="geometry">
               <mxPoint x="132" y="-1111" as="sourcePoint" />
               <mxPoint x="-180" y="-763" as="targetPoint" />
@@ -969,6 +968,19 @@
                 <mxPoint x="645" y="-1450" />
               </Array>
               <mxPoint x="-1" y="6" as="offset" />
+            </mxGeometry>
+          </mxCell>
+        </object>
+        <object placeholders="1" c4Type="Relationship" c4Technology="Protobuf&#xa;ZeroMQ" c4Description="Envio de &#xa;Securities Status" label="&lt;div style=&quot;text-align: left; font-size: 9px;&quot;&gt;&lt;div style=&quot;text-align: center; font-size: 9px;&quot;&gt;&lt;b style=&quot;font-size: 9px;&quot;&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;text-align: center; font-size: 9px;&quot;&gt;[%c4Technology%]&lt;/div&gt;&lt;/div&gt;" id="4bBy0V1ZSrKxO6fA2COD-1">
+          <mxCell style="endArrow=blockThin;html=1;fontSize=9;fontColor=#404040;strokeWidth=5;endFill=1;strokeColor=#be211a;elbow=vertical;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=1;edgeStyle=orthogonalEdgeStyle;curved=0;flowAnimation=1;shadow=1;entryX=1;entryY=0.858;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" target="dFCQOi211sB1c6jUqXax-19" edge="1">
+            <mxGeometry x="-0.2122" y="30" width="240" relative="1" as="geometry">
+              <mxPoint x="110" y="-760" as="sourcePoint" />
+              <mxPoint x="170" y="-1110" as="targetPoint" />
+              <Array as="points">
+                <mxPoint x="30" y="-760" />
+                <mxPoint x="30" y="-730" />
+              </Array>
+              <mxPoint as="offset" />
             </mxGeometry>
           </mxCell>
         </object>

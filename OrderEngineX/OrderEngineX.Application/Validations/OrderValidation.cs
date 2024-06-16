@@ -1,16 +1,23 @@
 ﻿using FluentValidation;
 using OrderEngineX.Application.Commands;
+using OrderEngineX.Core.Interfaces;
+using SharedX.Core.Entities;
 using SharedX.Core.Enums;
 using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
+using System.Diagnostics.SymbolStore;
+using static StackExchange.Redis.Role;
+
 namespace MacthingX.Application.Validations;
 public abstract class OrderValidation<T> : 
     AbstractValidator<T> where T: 
     OrderEngineCommand
 {
+    private readonly ISecurityEngineCache _securityEngineCache;
     private readonly IBookOfferCache _matchingCache;
-    public OrderValidation(IBookOfferCache matchingCache)
+    public OrderValidation(IBookOfferCache matchingCache, ISecurityEngineCache securityEngineCache)
     {
+        _securityEngineCache = securityEngineCache;
         _matchingCache = matchingCache;
     }
     protected void ValidateNewOrderSingle()
@@ -26,8 +33,10 @@ public abstract class OrderValidation<T> :
             7 = DeliverTo firm not available at this time
             18 = Invalid price increment
          */
+
         ValidateNewOrderSingleSymbol();
         ValidateNewOrderSingleOrderId();
+        ValidateSecurityOrder();
         ValidateAccountId();
         ValidateParticipatorId();
         ValidateStopPx();
@@ -36,6 +45,10 @@ public abstract class OrderValidation<T> :
         ValidateTimeInForceFOK();
         ValidateTimeInForceGTC();
         ValidateTimeInForceIOC();
+        ValidateSecurityLowPriceLimitOrder();
+        ValidateSecurityHighPriceLimitOrder();
+        ValidateSecurityMaxTradeVolume();
+        ValidateSecurityMinTradeVolume();
     }
 
     protected void ValidateOrderCancelRequest()
@@ -49,6 +62,7 @@ public abstract class OrderValidation<T> :
          5 = OrigOrdModTime <586> did not match last TransactTime <60> of order
          6 = Duplicate ClOrdID <11> received
          */
+        ValidateSecurityOrder();
         ValidateOrderToLateToCancel();
         ValidateOrderCancelOrderId();
         ValidateOrderExits();
@@ -69,7 +83,7 @@ public abstract class OrderValidation<T> :
          */
         ValidateReplaceClOrdID();
         ValidateReplaceSymbol();
-
+        ValidateSecurityOrder();
         ValidateReplaceOrderId();
         ValidateReplaceAccountId();
         ValidateReplaceParticipatorId();
@@ -81,7 +95,7 @@ public abstract class OrderValidation<T> :
 
     protected void ValidateCancelReplaceOrder()
     {
-        
+
 
         /*
          0 = Too late to cancel
@@ -92,6 +106,7 @@ public abstract class OrderValidation<T> :
          5 = OrigOrdModTime <586> did not match last TransactTime <60> of order
          6 = Duplicate ClOrdID <11> received
          */
+        ValidateSecurityOrder();
         ValidateOrderToLateToCancel();
         ValidateOrderCancelOrderId();
         ValidateOrderExits();
@@ -285,6 +300,87 @@ public abstract class OrderValidation<T> :
             .Must(IsNotDuplicatedClOrdID)
             .WithMessage("6-Duplicate ClOrdID <11> received")
             .WithErrorCode("6"); 
+    }
+
+    private void ValidateSecurityOrder()
+    {
+        RuleFor(o => o.Order)
+            .Must(IsSecurityExists)
+            .WithMessage("2-Unknown Security: Symbol not found")
+            .WithErrorCode("2");
+    }
+    private void ValidateSecurityLowPriceLimitOrder()
+    {
+        RuleFor(o => o.Order)
+            .Must(IsNotPriceLessThanLowLimitPrice)
+            .WithMessage("18-Invalid price increment: Order Price is less than low limit price security")
+            .WithErrorCode("18");
+    }
+
+    private void ValidateSecurityHighPriceLimitOrder()
+    {
+        RuleFor(o => o.Order)
+            .Must(IsNotPriceGreaterThanHighLimitPrice)
+            .WithMessage("18-Invalid price increment: Order Price is greater than high limit price security")
+            .WithErrorCode("18");
+    }
+
+    private void ValidateSecurityMaxTradeVolume()
+    {
+        RuleFor(o => o.Order)
+            .Must(IsNotQuantitySecurityGreaterThanMaxTradeVol)
+            .WithMessage("0-Other: Order Quantity is greater than Max Trade volume security")
+            .WithErrorCode("18");
+    }
+    private void ValidateSecurityMinTradeVolume()
+    {
+        RuleFor(o => o.Order)
+            .Must(IsNotQuantitySecurityLessThanMinTradeVol)
+            .WithMessage("0-Other: Order Price is greater than high limit price security")
+            .WithErrorCode("18");
+    }
+    private bool IsSecurityExists(OrderEngine order) =>
+        _securityEngineCache.TryGetSecurity(order.Symbol, out SecurityEngine security);
+        
+    
+    private bool IsNotPriceLessThanLowLimitPrice(OrderEngine order)
+    {
+        if (_securityEngineCache.TryGetSecurity(order.Symbol, out SecurityEngine security))
+        { 
+            if (security.LowLimitPrice > order.Price)
+                return false;
+        }
+        return true;
+    }
+
+    private bool IsNotPriceGreaterThanHighLimitPrice( OrderEngine order)
+    {
+        if (_securityEngineCache.TryGetSecurity(order.Symbol, out SecurityEngine security))
+        {
+            if (security.HighLimitPrice < order.Price)
+                return false;
+        }
+        return true;
+    }
+
+    private bool IsNotQuantitySecurityGreaterThanMaxTradeVol( OrderEngine order)
+    {
+        if (_securityEngineCache.TryGetSecurity(order.Symbol, out SecurityEngine security))
+        {
+            if (security.MaxTradeVol < order.Quantity)
+                return false;
+        }
+        return true;
+    }
+
+    private bool IsNotQuantitySecurityLessThanMinTradeVol( OrderEngine order)
+    {
+        if ( _securityEngineCache.TryGetSecurity(order.Symbol, out SecurityEngine security))
+        {
+            if (security.MinTradeVol > order.Quantity)
+                return false;
+        }
+        return true;
     }
 
     private bool IsOrderExists(OrderEngine order)

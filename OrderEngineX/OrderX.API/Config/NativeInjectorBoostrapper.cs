@@ -99,6 +99,8 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IOrderReportCache, OrderReportCache>();
         services.AddSingleton<IOrderStopCache, OrderStopCache>();
         services.AddSingleton<IBookOfferCache, BookOfferCache>();
+        
+        services.AddSingleton<ISecurityEngineCache, SecurityEngineCache>();
 
         services.AddSingleton<IOrderRepository, OrderRepository>();
         services.AddSingleton<IOrderContext, OrderContext>();

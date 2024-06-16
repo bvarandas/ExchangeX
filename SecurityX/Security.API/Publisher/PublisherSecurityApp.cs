@@ -12,11 +12,11 @@ public class PublisherSecurityApp : BackgroundService
     private PushSocket _sender;
     private readonly ConnectionZmq _config;
     private readonly ISecurityCache _cache;
-    private static Thread TreadSenderMarketData = null!;
+    private static Thread TreadSenderSecurity = null!;
+    
     public PublisherSecurityApp(ILogger<PublisherSecurityApp> logger,
         IOptions<ConnectionZmq> options, ISecurityCache cache)
     {
-        //_semaphore = new Semaphore(1, 2, "prioridadeIncremental");
         _logger = logger;
         _config = options.Value;
         _cache = cache;
@@ -25,14 +25,14 @@ public class PublisherSecurityApp : BackgroundService
     {
         _logger.LogInformation("Iniciando o Sender Securities ZeroMQ...");
 
-        TreadSenderMarketData = new Thread(() => SenderMarketData(cancellationToken));
-        TreadSenderMarketData.Name = nameof(TreadSenderMarketData);
-        TreadSenderMarketData.Start();
+        TreadSenderSecurity = new Thread(() => SenderSecurity(cancellationToken));
+        TreadSenderSecurity.Name = nameof(TreadSenderSecurity);
+        TreadSenderSecurity.Start();
 
         return base.StartAsync(cancellationToken);
     }
 
-    private void SenderMarketData(CancellationToken stoppingToken)
+    private void SenderSecurity(CancellationToken stoppingToken)
     {
         using (_sender = new PushSocket("@"+_config.SecurityToMarketData.Uri))
         {

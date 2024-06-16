@@ -29,11 +29,13 @@ public class SecurityRepositoriesTest
     
     private readonly Mock<ILogger<SecurityEngineRepository>> _loggerSecurityRepositoryMock;
     private readonly Mock<SecurityEngineCommandHandler> _handlerSecurityMock;
+    private readonly Mock<ISecurityCache> _securityCacheMock;
     public SecurityRepositoriesTest()
     {
         _securityRepositoryMock     = new();
         _loggerSecurityRepositoryMock  = new();
         _handlerSecurityMock        = new();
+        _securityCacheMock = new();
     }
     [Fact(DisplayName ="Create a Project Context")]
     public void CreateProjectContext()
@@ -112,7 +114,7 @@ public class SecurityRepositoriesTest
         var ids = new string[] { id1, id2 };
         _securityRepositoryMock.Setup(repo => repo.GetAllSecurityiesAsync(cancellationToken))
             .ReturnsAsync(GetTestSecurities());
-        var service = new SecurityService(_mediatorMock.Object, _securityRepositoryMock.Object, _loggerSecurityServiceMock.Object);
+        var service = new SecurityService(_mediatorMock.Object, _securityRepositoryMock.Object, _loggerSecurityServiceMock.Object, _securityCacheMock.Object);
 
         // Act
         var result = await service.Get(ids, cancellationToken);
@@ -142,10 +144,10 @@ public class SecurityRepositoriesTest
         _mediatorMock.Setup(m => m.Send(It.IsAny<SecurityNewCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(GetResultSendFail);
             
-        var service = new SecurityService(_mediatorMock.Object, _securityRepositoryMock.Object, _loggerSecurityServiceMock.Object);
+        var service = new SecurityService(_mediatorMock.Object, _securityRepositoryMock.Object, _loggerSecurityServiceMock.Object, _securityCacheMock.Object);
         
         // Act
-        var result = await service.Add( securityEngine, cancellationToken);
+        var result = await service.Add( securityEngine, _securityCacheMock.Object, cancellationToken);
 
         // Assert
         var failResult = Assert.IsType<Result<bool>>(result);
@@ -168,10 +170,10 @@ public class SecurityRepositoriesTest
         _mediatorMock.Setup(m => m.Send(It.IsAny<SecurityNewCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(GetResultSendOK);
 
-        var service = new SecurityService(_mediatorMock.Object, _securityRepositoryMock.Object, _loggerSecurityServiceMock.Object);
+        var service = new SecurityService(_mediatorMock.Object, _securityRepositoryMock.Object, _loggerSecurityServiceMock.Object, _securityCacheMock.Object);
 
         // Act
-        var result = await service.Add(securityEngine, cancellationToken);
+        var result = await service.Add(securityEngine, _securityCacheMock.Object, cancellationToken);
 
         // Assert
         var failResult = Assert.IsType<Result<bool>>(result);
@@ -196,9 +198,9 @@ public class SecurityRepositoriesTest
         _mediatorMock.Setup(m => m.Send(It.IsAny<SecurityUpdateCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(GetResultSendFail);
 
-        var service = new SecurityService(_mediatorMock.Object, _securityRepositoryMock.Object, _loggerSecurityServiceMock.Object);
+        var service = new SecurityService(_mediatorMock.Object, _securityRepositoryMock.Object, _loggerSecurityServiceMock.Object, _securityCacheMock.Object);
         // Act
-        var result = await service.Update(securityEngine, cancellationToken);
+        var result = await service.Update(securityEngine, _securityCacheMock.Object, cancellationToken);
 
         // Assert
         var failResult = Assert.IsType<Result<bool>>(result);
@@ -223,9 +225,9 @@ public class SecurityRepositoriesTest
         _mediatorMock.Setup(m => m.Send(It.IsAny<SecurityUpdateCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(GetResultSendOK);
 
-        var service = new SecurityService(_mediatorMock.Object, _securityRepositoryMock.Object, _loggerSecurityServiceMock.Object);
+        var service = new SecurityService(_mediatorMock.Object, _securityRepositoryMock.Object, _loggerSecurityServiceMock.Object, _securityCacheMock.Object);
         // Act
-        var result = await service.Update(securityEngine, cancellationToken);
+        var result = await service.Update(securityEngine, _securityCacheMock.Object, cancellationToken);
 
         // Assert
         var failResult = Assert.IsType<Result<bool>>(result);
@@ -250,9 +252,9 @@ public class SecurityRepositoriesTest
         _mediatorMock.Setup(m => m.Send(It.IsAny<SecurityRemoveCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(GetResultSendFail);
 
-        var service = new SecurityService(_mediatorMock.Object, _securityRepositoryMock.Object, _loggerSecurityServiceMock.Object);
+        var service = new SecurityService(_mediatorMock.Object, _securityRepositoryMock.Object, _loggerSecurityServiceMock.Object, _securityCacheMock.Object);
         // Act
-        var result = await service.Delete(securityEngine, cancellationToken);
+        var result = await service.Delete(securityEngine, _securityCacheMock.Object, cancellationToken);
 
         // Assert
         var failResult = Assert.IsType<Result<bool>>(result);
@@ -277,9 +279,9 @@ public class SecurityRepositoriesTest
         _mediatorMock.Setup(m => m.Send(It.IsAny<SecurityRemoveCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(GetResultSendOK);
 
-        var service = new SecurityService(_mediatorMock.Object, _securityRepositoryMock.Object, _loggerSecurityServiceMock.Object);
+        var service = new SecurityService(_mediatorMock.Object, _securityRepositoryMock.Object, _loggerSecurityServiceMock.Object, _securityCacheMock.Object);
         // Act
-        var result = await service.Delete(securityEngine, cancellationToken);
+        var result = await service.Delete(securityEngine, _securityCacheMock.Object, cancellationToken);
 
         // Assert
         var failResult = Assert.IsType<Result<bool>>(result);

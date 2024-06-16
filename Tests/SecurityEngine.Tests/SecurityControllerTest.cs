@@ -19,13 +19,15 @@ public class SecurityControllerTests
         var cancellationToken = new CancellationTokenSource().Token;
 
         var mockSecurity = new Mock<ISecurityService>();
+        var mockSecurityCache = new Mock<ISecurityCache>();
+
         //var mockNotifications = new Mock<INotificationHandler<DomainNotification>>();
         var mockNotifications = new Mock<DomainNotificationHandler>();
 
         mockSecurity.Setup(repo => repo.Get(null!, cancellationToken))
 
             .ReturnsAsync(GetTestSecurities());
-        var controller = new SecurityController(mockSecurity.Object, mockNotifications.Object);
+        var controller = new SecurityController(mockSecurity.Object, mockSecurityCache.Object, mockNotifications.Object);
 
         // Act
         var result = await controller.GetAll(cancellationToken);
@@ -44,6 +46,8 @@ public class SecurityControllerTests
         var cancellationToken = new CancellationTokenSource().Token;
 
         var mockSecurity = new Mock<ISecurityService>();
+        var mockSecurityCache = new Mock<ISecurityCache>();
+
         //var mockNotifications = new Mock<INotificationHandler<DomainNotification>>();
         var mockNotifications = new Mock<DomainNotificationHandler>();
 
@@ -51,7 +55,7 @@ public class SecurityControllerTests
         mockSecurity.Setup(repo => repo.Get(ids, cancellationToken))
 
             .ReturnsAsync(GetTestSecurities());
-        var controller = new SecurityController(mockSecurity.Object, mockNotifications.Object);
+        var controller = new SecurityController(mockSecurity.Object, mockSecurityCache.Object, mockNotifications.Object);
 
         // Act
         
@@ -71,13 +75,15 @@ public class SecurityControllerTests
         var cancellationToken = new CancellationTokenSource().Token;
 
         var mockSecurity = new Mock<ISecurityService>();
+        var mockSecurityCache = new Mock<ISecurityCache>();
+
         //var mockNotifications = new Mock<INotificationHandler<DomainNotification>>();
         var mockNotifications = new Mock<DomainNotificationHandler>();
 
         mockSecurity.Setup(repo => repo.Get(null, cancellationToken))           
 
             .ReturnsAsync(GetTestSecurities());
-        var controller = new SecurityController(mockSecurity.Object, mockNotifications.Object);
+        var controller = new SecurityController(mockSecurity.Object, mockSecurityCache.Object, mockNotifications.Object);
 
         // Act
         var result = await controller.Index(cancellationToken);
@@ -95,14 +101,16 @@ public class SecurityControllerTests
         var cancellationToken = new CancellationTokenSource().Token;
 
         var mockSecurity = new Mock<ISecurityService>();
+        var mockSecurityCache = new Mock<ISecurityCache>();
+
         //var mockNotifications = new Mock<INotificationHandler<DomainNotification>>();
         var mockNotifications = new Mock<DomainNotificationHandler>();
 
-        mockSecurity.Setup(repo => repo.Add(GetTestSecurity(), cancellationToken))
+        mockSecurity.Setup(repo => repo.Add(GetTestSecurity(), mockSecurityCache.Object, cancellationToken))
             .ReturnsAsync(GetResultAddOk);
             //.ReturnsAsync(GetResultAddOk());
 
-        var controller = new SecurityController(mockSecurity.Object, mockNotifications.Object);
+        var controller = new SecurityController(mockSecurity.Object, mockSecurityCache.Object, mockNotifications.Object);
         controller.ModelState.AddModelError("SessionName", "Required");
 
         // Act
@@ -119,14 +127,16 @@ public class SecurityControllerTests
         var cancellationToken = new CancellationTokenSource().Token;
 
         var mockSecurity = new Mock<ISecurityService>();
+        var mockSecurityCache = new Mock<ISecurityCache>();
+
         //var mockNotifications = new Mock<INotificationHandler<DomainNotification>>();
         var mockNotifications = new Mock<DomainNotificationHandler>();
 
-        mockSecurity.Setup(repo => repo.Add(GetTestSecurity(), cancellationToken))
+        mockSecurity.Setup(repo => repo.Add(GetTestSecurity(), mockSecurityCache.Object, cancellationToken))
             .ReturnsAsync(GetResultAddOk);
         //.ReturnsAsync(GetResultAddOk());
 
-        var controller = new SecurityController(mockSecurity.Object, mockNotifications.Object);
+        var controller = new SecurityController(mockSecurity.Object, mockSecurityCache.Object, mockNotifications.Object);
         //controller.ModelState.AddModelError("SessionName", "Required");
 
         // Act
@@ -146,14 +156,16 @@ public class SecurityControllerTests
         var cancellationToken = new CancellationTokenSource().Token;
 
         var mockSecurity = new Mock<ISecurityService>();
+        var mockSecurityCache = new Mock<ISecurityCache>();
+
         //var mockNotifications = new Mock<INotificationHandler<DomainNotification>>();
         var mockNotifications = new Mock<DomainNotificationHandler>();
 
-        mockSecurity.Setup(repo => repo.Update(GetTestSecurity(), cancellationToken))
+        mockSecurity.Setup(repo => repo.Update(GetTestSecurity(), mockSecurityCache.Object, cancellationToken))
             .ReturnsAsync(GetResultAddOk);
         //.ReturnsAsync(GetResultAddOk());
 
-        var controller = new SecurityController(mockSecurity.Object, mockNotifications.Object);
+        var controller = new SecurityController(mockSecurity.Object, mockSecurityCache.Object, mockNotifications.Object);
         controller.ModelState.AddModelError("SessionName", "Required");
 
         // Act
@@ -171,14 +183,16 @@ public class SecurityControllerTests
         var cancellationToken = new CancellationTokenSource().Token;
 
         var mockSecurity = new Mock<ISecurityService>();
+        var mockSecurityCache = new Mock<ISecurityCache>();
+
         //var mockNotifications = new Mock<INotificationHandler<DomainNotification>>();
         var mockNotifications = new Mock<DomainNotificationHandler>();
 
-        mockSecurity.Setup(repo => repo.Update(GetTestSecurity(), cancellationToken))
+        mockSecurity.Setup(repo => repo.Update(GetTestSecurity(), mockSecurityCache.Object, cancellationToken))
             .ReturnsAsync(GetResultAddOk);
         //.ReturnsAsync(GetResultAddOk());
 
-        var controller = new SecurityController(mockSecurity.Object, mockNotifications.Object);
+        var controller = new SecurityController(mockSecurity.Object, mockSecurityCache.Object, mockNotifications.Object);
         //controller.ModelState.AddModelError("SessionName", "Required");
 
         // Act
@@ -199,14 +213,16 @@ public class SecurityControllerTests
         var cancellationToken = new CancellationTokenSource().Token;
 
         var mockSecurity = new Mock<ISecurityService>();
+        var mockSecurityCache = new Mock<ISecurityCache>();
+
         //var mockNotifications = new Mock<INotificationHandler<DomainNotification>>();
         var mockNotifications = new Mock<DomainNotificationHandler>();
 
-        mockSecurity.Setup(repo => repo.Delete(GetTestSecurity(), cancellationToken))
+        mockSecurity.Setup(repo => repo.Delete(GetTestSecurity(), mockSecurityCache.Object, cancellationToken))
             .ReturnsAsync(GetResultAddOk);
         //.ReturnsAsync(GetResultAddOk());
 
-        var controller = new SecurityController(mockSecurity.Object, mockNotifications.Object);
+        var controller = new SecurityController(mockSecurity.Object, mockSecurityCache.Object, mockNotifications.Object);
         controller.ModelState.AddModelError("SessionName", "Required");
 
         // Act
@@ -224,14 +240,16 @@ public class SecurityControllerTests
         var cancellationToken = new CancellationTokenSource().Token;
 
         var mockSecurity = new Mock<ISecurityService>();
+        var mockSecurityCache = new Mock<ISecurityCache>();
+
         //var mockNotifications = new Mock<INotificationHandler<DomainNotification>>();
         var mockNotifications = new Mock<DomainNotificationHandler>();
 
-        mockSecurity.Setup(repo => repo.Delete(GetTestSecurity(), cancellationToken))
+        mockSecurity.Setup(repo => repo.Delete(GetTestSecurity(), mockSecurityCache.Object, cancellationToken))
             .ReturnsAsync(GetResultAddOk);
         //.ReturnsAsync(GetResultAddOk());
 
-        var controller = new SecurityController(mockSecurity.Object, mockNotifications.Object);
+        var controller = new SecurityController(mockSecurity.Object, mockSecurityCache.Object, mockNotifications.Object);
         //controller.ModelState.AddModelError("SessionName", "Required");
 
         // Act
