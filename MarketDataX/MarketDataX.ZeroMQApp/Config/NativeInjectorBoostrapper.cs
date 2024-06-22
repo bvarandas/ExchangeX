@@ -16,6 +16,7 @@ using MediatR;
 using MarketDataX.Infra.Data;
 using MarketDataX.Infra.Repositories;
 using FluentResults;
+using MongoDB.Driver;
 
 namespace DropCopyX.ServerApp;
 internal class NativeInjectorBoostrapper
@@ -82,6 +83,12 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IRequestHandler<SnapshotCommand, Result>, SnapshotCommandHandler>();
 
         // Infra - Data
+        services.AddSingleton<IMongoDatabase>(sp =>
+        {
+            var client = new MongoClient(config.GetValue<string>("DatabaseSettings:ConnectionString"));
+            return client.GetDatabase(config.GetValue<string>("DatabaseSettings:DatabaseName"));
+        });
+
         services.AddSingleton<IFixSessionMarketDataCache, FixSessionMarketDataCache>();
         services.AddSingleton<IMarketDataContext, MarketDataContext>();
         services.AddSingleton<IMarketDataRepository, MarketDataRepository>();

@@ -7,4 +7,6 @@ public interface IMarketDataContext
     IMongoCollection<MarketDataSnapshot> MarketDataSnapshot { get; }
     IMongoCollection<MarketData> MarketData { get; }
     IMongoCollection<Login> Login { get; }
+
+    MongoClient MongoClient { get; }
 }

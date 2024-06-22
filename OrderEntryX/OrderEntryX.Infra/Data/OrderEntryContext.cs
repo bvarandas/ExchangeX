@@ -1,18 +1,25 @@
-﻿using Microsoft.Extensions.Configuration;
-using MongoDB.Driver;
-using OrderEntryX.Core.Entities;
+﻿using MongoDB.Driver;
 using SharedX.Core.Entities;
 namespace OrderEntryX.Infra.Data;
 public class OrderEntryContext :  IOrderEntryContext
 {
-    public IMongoCollection<Login> Login { get; }
-
-    public OrderEntryContext(IConfiguration configuration)
+    private readonly IMongoDatabase _database;
+    private const string OrderEntryCollectionName = "OrderEntry";
+    public MongoClient MongoClient { get; }
+    public IMongoCollection<Login> _login;
+    public OrderEntryContext(IMongoDatabase database)
     {
-        var client = new MongoClient(configuration.GetValue<string>("DatabaseSettings:ConnectionString"));
-        var database = client.GetDatabase(configuration.GetValue<string>("DatabaseSettings:DatabaseName"));
-
-        Login = database.GetCollection<Login>(
-            configuration.GetValue<string>("DatabaseSettings:CollectionNameLogin"));
+        this._database = database;
+        MongoClient = (MongoClient)database.Client;
+    }
+    public IMongoCollection<Login> Login
+    {
+        get
+        {
+            if (_login is null)
+                _login = _database.GetCollection<Login>(OrderEntryCollectionName);
+            
+            return _login!;
+        }
     }
 }

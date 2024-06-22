@@ -19,6 +19,7 @@ using SharedX.Infra.Order.Data;
 using Sharedx.Infra.Outbox.Services;
 using Sharedx.Infra.Outbox.Cache;
 using FluentResults;
+using MongoDB.Driver;
 
 namespace OrderEngineX.API.Config;
 internal class NativeInjectorBoostrapper
@@ -94,6 +95,12 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IRequestHandler<OrderOpenedCommand, Result>, OrderEngineCommandHandler>();
 
         // Infra - Data
+        services.AddSingleton<IMongoDatabase>(sp =>
+        {
+            var client = new MongoClient(config.GetValue<string>("DatabaseSettings:ConnectionString"));
+            return client.GetDatabase(config.GetValue<string>("DatabaseSettings:DatabaseName"));
+        });
+
         services.AddSingleton<IExecutionReportCache, ExecutionReportCache>();
         services.AddSingleton<IOrderEngineCache, OrderEngineCache>();
         services.AddSingleton<IOrderReportCache, OrderReportCache>();

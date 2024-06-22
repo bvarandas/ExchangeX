@@ -1,17 +1,26 @@
-﻿using Microsoft.Extensions.Configuration;
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
 using SharedX.Core.Matching;
 namespace MatchingX.Infra.Data;
 public class TradeContext : ITradeContext
 {
-    public IMongoCollection<Trade> Trade {  get;  }
+    private const string TradeCollectionName = "Trade";
+    private readonly IMongoDatabase _database;
+    public IMongoCollection<Trade> _trade;
     public MongoClient MongoClient { get; }
-    public TradeContext(IConfiguration configuration)
+    public TradeContext(IMongoDatabase database)
     {
-        MongoClient = new MongoClient(configuration.GetValue<string>("DatabaseSettings:ConnectionString"));
-        var database = MongoClient.GetDatabase(configuration.GetValue<string>("DatabaseSettings:DatabaseName"));
+        this._database = database;
+        MongoClient = (MongoClient)database.Client;
+    }
 
-        Trade = database.GetCollection<Trade>(
-            configuration.GetValue<string>("DatabaseSettings:CollectionTrade"));
+    public IMongoCollection<Trade> Trade
+    {
+        get
+        {
+            if (_trade is null)
+                _trade = _database.GetCollection<Trade>(TradeCollectionName);
+
+            return _trade!;
+        }
     }
 }

@@ -46,7 +46,7 @@ public class OrderEngineOutboxApp : IConsumer<EnvelopeOutbox<OrderEngine>>
         {
             while(_queueEnvelopeOutbox.TryDequeue(out EnvelopeOutbox<OrderEngine> envelope))
             {
-                switch (envelope.ActivityOutbox.NextActivity)
+                switch (envelope.ActivityOutbox.Activity)
                 {
                     case OutboxActivities.OrderEntryToOrderEngineSent:
                         {

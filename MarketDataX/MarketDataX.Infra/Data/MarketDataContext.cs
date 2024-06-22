@@ -1,26 +1,54 @@
 ﻿using MarketDataX.Core.Entities;
-using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using SharedX.Core.Matching.MarketData;
 namespace MarketDataX.Infra.Data;
 public class MarketDataContext : IMarketDataContext
 {
-    public IMongoCollection<MarketData> MarketData { get; }
-    public IMongoCollection<Login> Login { get; }
-    public IMongoCollection<MarketDataSnapshot> MarketDataSnapshot { get; }
+    private const string MarketDataCollectionName = "MarketData";
+    private const string LoginCollectionName = "Login";
+    private const string MarketDataSnapshotCollectionName = "MarketDataSnapshot";
+    
+    private readonly IMongoDatabase _database;
+    public MongoClient MongoClient { get; }
 
-    public MarketDataContext(IConfiguration configuration)
+    public IMongoCollection<MarketData> _marketData ;
+    public IMongoCollection<Login> _login;
+    public IMongoCollection<MarketDataSnapshot> _marketDataSnapshot;
+
+    public MarketDataContext(IMongoDatabase database)
     {
-        var client = new MongoClient(configuration.GetValue<string>("DatabaseSettings:ConnectionString"));
-        var database = client.GetDatabase(configuration.GetValue<string>("DatabaseSettings:DatabaseName"));
+        this._database = database;
+        MongoClient = (MongoClient)database.Client;
+    }
+    public IMongoCollection<MarketDataSnapshot> MarketDataSnapshot
+    {
+        get
+        {
+            if (_marketDataSnapshot is null)
+                _marketDataSnapshot = _database.GetCollection<MarketDataSnapshot>(MarketDataSnapshotCollectionName);
 
-        Login = database.GetCollection<Login>(
-            configuration.GetValue<string>("DatabaseSettings:CollectionNameLogin"));
+            return _marketDataSnapshot!;
+        }
+    }
+    public IMongoCollection<Login> Login
+    {
+        get
+        {
+            if (_login is null)
+                _login = _database.GetCollection<Login>(LoginCollectionName);
 
-        MarketData = database.GetCollection<MarketData>(
-            configuration.GetValue<string>("DatabaseSettings:CollectionMarketData"));
+            return _login!;
+        }
+    }
 
-        MarketDataSnapshot = database.GetCollection<MarketDataSnapshot>(
-            configuration.GetValue<string>("DatabaseSettings:CollectionMarketDataSnapshot"));
+    public IMongoCollection<MarketData> MarketData
+    {
+        get
+        {
+            if (_marketData is null)
+                _marketData = _database.GetCollection<MarketData>(MarketDataCollectionName);
+
+            return _marketData!;
+        }
     }
 }

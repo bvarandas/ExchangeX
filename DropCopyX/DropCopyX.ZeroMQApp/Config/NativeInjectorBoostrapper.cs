@@ -12,6 +12,7 @@ using MassTransit;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
 using Sharedx.Infra.Outbox.Cache;
 using Sharedx.Infra.Outbox.Services;
 using SharedX.Core.Bus;
@@ -80,6 +81,12 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IRequestHandler<ExecutionReportCommand, Result>, ExecutionReportCommandHandler>();
 
         // Infra - Data
+        services.AddSingleton<IMongoDatabase>(sp =>
+        {
+            var client = new MongoClient(config.GetValue<string>("DatabaseSettings:ConnectionString"));
+            return client.GetDatabase(config.GetValue<string>("DatabaseSettings:DatabaseName"));
+        });
+
         services.AddSingleton<IFixSessionDropCopyCache, FixSessionDropCopyCache>();
         services.AddSingleton<IExecutedTradeCache, TradeCaptureReportCache>();
         services.AddSingleton<IExecutionReportChache, ExecutionReportChache>();

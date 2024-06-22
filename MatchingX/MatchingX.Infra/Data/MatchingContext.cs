@@ -1,19 +1,27 @@
-﻿using Microsoft.Extensions.Configuration;
-using MongoDB.Driver;
-using SharedX.Core.Matching;
+﻿using MongoDB.Driver;
 using SharedX.Core.Matching.OrderEngine;
 namespace MatchingX.Infra.Data;
-
 public class MatchingContext : IMatchingContext
 {
-    public IMongoCollection<OrderEngine> Matching { get; }
+    private const string MatchingCollectionName = "Matching";
+    private readonly IMongoDatabase _database;
+    public IMongoCollection<OrderEngine> _matching;
     public MongoClient MongoClient { get; }
-    public MatchingContext(IConfiguration configuration)
-    {
-        MongoClient = new MongoClient(configuration.GetValue<string>("DatabaseSettings:ConnectionString"));
-        var database = MongoClient.GetDatabase(configuration.GetValue<string>("DatabaseSettings:DatabaseNameMatching"));
 
-        Matching = database.GetCollection<OrderEngine>(
-            configuration.GetValue<string>("DatabaseSettings:CollectionMatching"));
+    public MatchingContext(IMongoDatabase database)
+    {
+        this._database = database;
+        MongoClient = (MongoClient)database.Client;
+    }
+
+    public IMongoCollection<OrderEngine> Matching
+    {
+        get
+        {
+            if (_matching is null)
+                _matching = _database.GetCollection<OrderEngine>(MatchingCollectionName);
+
+            return _matching!;
+        }
     }
 }

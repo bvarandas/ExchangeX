@@ -49,28 +49,30 @@ public class PublisherOrdersApp : BackgroundService
             {
                 while (_orderEntryChache.TryDequeueOrderEntry(out OrderEngine order))
                 {
+                    this.SendOutBoxActivity(order);
+
                     var message = order.SerializeToByteArrayProtobuf<OrderEngine>();
                     _sender.SendMultipartBytes(message);
-
-                    var envelope = new EnvelopeOutbox<OrderEngine>()
-                    {
-                        Id = order.OrderID,
-                        Body = order,
-                        LastTransaction = DateTime.Now,
-                        ActivityOutbox = new ActivityOutbox()
-                        {
-                            Activity = OutboxActivities.OrderEntryToOrderEngineSent,
-                            NextActivity = OutboxActivities.OrderEntryToOrderEngineSent
-                        }
-                    };
-
-                    _managerOutbox.AddActivityAsync(envelope);
                 }
 
                 Thread.Sleep(10);
             }
         }
     }
+
+    private void SendOutBoxActivity(OrderEngine order)
+    {
+        var envelope = new EnvelopeOutbox<OrderEngine>()
+        {
+            Id = order.OrderID,
+            Body = order,
+            LastTransaction = DateTime.Now,
+            ActivityOutbox = new ActivityOutbox() { Activity = OutboxActivities.OrderEntryToOrderEngineSent }
+        };
+
+        _managerOutbox.AddActivityAsync(envelope);
+    }
+
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         return Task.CompletedTask;

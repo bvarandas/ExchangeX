@@ -3,6 +3,8 @@ using SharedX.Core.Interfaces;
 using MassTransit;
 using SharedX.Core.Extensions;
 using SharedX.Core.ValueObjects;
+using FluentResults;
+
 namespace Sharedx.Infra.Outbox.Services;
 public class OutboxBackgroundService<T> :  IOutboxBackgroundService<T> where T : class
 {
@@ -40,15 +42,15 @@ public class OutboxBackgroundService<T> :  IOutboxBackgroundService<T> where T :
     }
     public void SetActivity(ActivityOutbox activity)
     {
-        _logger.LogInformation($"Setando a activity para {activity.Activity} e a próxima para {activity.NextActivity}");
+        _logger.LogInformation($"Setando a activity para {activity.Activity}.");
         _activityOutbox = activity;
     }
 
-    public async Task<bool> AddActivityAsync(EnvelopeOutbox<T> envelope)
+    public async Task<Result> AddActivityAsync(EnvelopeOutbox<T> envelope)
     {
         this.SetActivity( envelope.ActivityOutbox);
 
-        _logger.LogInformation($"Adicionando a activity  {envelope.ActivityOutbox.Activity} e a próxima para {envelope.ActivityOutbox.NextActivity}");
+        _logger.LogInformation($"Adicionando a activity {envelope.ActivityOutbox.Activity}.");
         var result = await _cacheOutbox.UpsertOutboxAsync(envelope);
         return result;
     }
@@ -82,7 +84,7 @@ public class OutboxBackgroundService<T> :  IOutboxBackgroundService<T> where T :
 
     private async void SendActivityQueueAsync(EnvelopeOutbox<T> envelope,  CancellationToken cancellationToken)
     {
-        var endpoint = await _bus.GetSendEndpoint(new Uri(_activityOutbox.NextActivity));
+        var endpoint = await _bus.GetSendEndpoint(new Uri(_activityOutbox.Activity));
         
         var message = envelope.SerializeToByteArrayProtobuf<EnvelopeOutbox<T>>();
 

@@ -3,6 +3,7 @@ using DropCopyX.Infra.Cache;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
 using OrderEntryX.Core.Interfaces;
 using OrderEntryX.Infra.Client;
 using OrderEntryX.Infra.Data;
@@ -75,7 +76,11 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton(typeof(IOutboxBackgroundService<>), typeof(OutboxBackgroundService<>));
 
         // Infra - Data
-        
+        services.AddSingleton<IMongoDatabase>(sp =>
+        {
+            var client = new MongoClient(config.GetValue<string>("DatabaseSettings:ConnectionString"));
+            return client.GetDatabase(config.GetValue<string>("DatabaseSettings:DatabaseName"));
+        });
         services.AddSingleton<ILoginRepository, LoginFixRepository>();
         services.AddSingleton<ILoginFixContext, LoginFixContext>();
 

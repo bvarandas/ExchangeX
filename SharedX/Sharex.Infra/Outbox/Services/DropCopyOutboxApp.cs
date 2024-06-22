@@ -45,7 +45,7 @@ public class DropCopyOutboxApp : IConsumer<EnvelopeOutbox<ExecutionReport>>
         {
             while(_queueEnvelopeOutbox.TryDequeue(out EnvelopeOutbox<ExecutionReport> envelope))
             {
-                switch (envelope.ActivityOutbox.NextActivity)
+                switch (envelope.ActivityOutbox.Activity)
                 {
                     case OutboxActivities.MatchingToDropCopySent:
                         {

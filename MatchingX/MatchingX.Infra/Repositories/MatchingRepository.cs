@@ -4,10 +4,8 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Enums;
-using SharedX.Core.Matching;
 using MongoDB.Bson;
 using FluentResults;
-
 namespace MatchingX.Infra.Repositories;
 public class MatchingRepository : IMatchingRepository
 {

@@ -61,8 +61,8 @@ public class ConsumerOrdersApp : OutboxBackgroundService<OrderEngine>, IHostedSe
                         var message = _receiver.ReceiveFrameBytes();
                         var order = message.DeserializeFromByteArrayProtobuf<OrderEngine>();
                         
-                        SendOrderCommand(order);
-                        DeleteOutboxCacheAsync(order, order.OrderID);
+                        if (SendOrderCommand(order))
+                            DeleteOutboxCacheAsync(order, order.OrderID);
                     }
 
                     Thread.Sleep(10);
@@ -79,7 +79,7 @@ public class ConsumerOrdersApp : OutboxBackgroundService<OrderEngine>, IHostedSe
         } while (!isConnected);
     }
 
-    private void SendOrderCommand(OrderEngine order)
+    private bool SendOrderCommand(OrderEngine order)
     {
         OrderEngineCommand command = null!;
         switch (order.Execution)
@@ -94,7 +94,9 @@ public class ConsumerOrdersApp : OutboxBackgroundService<OrderEngine>, IHostedSe
                 command = new OrderOpenedCommand(order, _cache);
                 break;
         }
-        _mediator.Send(command);
+        
+        var result = _mediator.Send(command);
+        return result.Result.IsSuccess;
     }
 
     public Task StopAsync(CancellationToken cancellationToken)

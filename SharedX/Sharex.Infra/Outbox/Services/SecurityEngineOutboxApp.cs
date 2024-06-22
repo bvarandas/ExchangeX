@@ -47,7 +47,7 @@ public class SecurityEngineOutboxApp :
         {
             while(_queueEnvelopeOutbox.TryDequeue(out EnvelopeOutbox<SecurityEngine> envelope))
             {
-                switch (envelope.ActivityOutbox.NextActivity)
+                switch (envelope.ActivityOutbox.Activity)
                 {
                     case OutboxActivities.SecurityEngineToMarketDataSent:
                         {

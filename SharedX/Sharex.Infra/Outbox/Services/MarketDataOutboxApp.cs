@@ -48,7 +48,7 @@ public class MarketDataOutboxApp :  IConsumer<EnvelopeOutbox<MarketData>>
         {
             while(_queueEnvelopeOutbox.TryDequeue(out EnvelopeOutbox<MarketData> envelope))
             {
-                switch (envelope.ActivityOutbox.NextActivity)
+                switch (envelope.ActivityOutbox.Activity)
                 {
                     case OutboxActivities.MatchingToMarketDataSent:
                         {
