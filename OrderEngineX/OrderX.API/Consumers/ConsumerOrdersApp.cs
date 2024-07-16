@@ -11,6 +11,8 @@ using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
 using Sharedx.Infra.Outbox.Services;
 using MassTransit;
+using ServiceStack;
+
 namespace OrderEngineX.API.Consumers;
 public class ConsumerOrdersApp : OutboxBackgroundService<OrderEngine>, IHostedService
 {
@@ -61,8 +63,9 @@ public class ConsumerOrdersApp : OutboxBackgroundService<OrderEngine>, IHostedSe
                         var message = _receiver.ReceiveFrameBytes();
                         var order = message.DeserializeFromByteArrayProtobuf<OrderEngine>();
                         
-                        if (SendOrderCommand(order))
-                            DeleteOutboxCacheAsync(order, order.OrderID);
+                        var deleted = DeleteOutboxCacheAsync(order, order.OrderID);
+                        if (deleted.IsSuccess())
+                            SendOrderCommand(order);
                     }
 
                     Thread.Sleep(10);

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using NetMQ;
 using NetMQ.Sockets;
 using OrderEngineX.Core.Interfaces;
+using ServiceStack;
 using Sharedx.Infra.Outbox.Services;
 using SharedX.Core.Extensions;
 using SharedX.Core.Interfaces;
@@ -51,8 +52,14 @@ public class ConsumerExecutionReportApp : OutboxBackgroundService<ExecutionRepor
                     {
                         var message = _receiver.ReceiveFrameBytes();
                         var execution = message.DeserializeFromByteArrayProtobuf<ExecutionReport>();
-                        _cache.AddQueueExecutionReport(execution);
-                        DeleteOutboxCacheAsync(execution, execution.ExecID);
+                        
+                        var deleted = DeleteOutboxCacheAsync(execution, execution.ExecID);
+
+                        if (deleted.IsSuccess())
+                        {
+                            _cache.UpsertExecutionReportAsync(execution);
+                        }
+                            
                     }
                     Thread.Sleep(10);
                 }

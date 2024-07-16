@@ -6,6 +6,7 @@ using MacthingX.Application.Interfaces;
 using MatchingX.Core.Interfaces;
 using MatchingX.Core.Repositories;
 using Microsoft.Extensions.Logging;
+using OrderEngineX.Core.Interfaces;
 using SecurityX.Core.Interfaces;
 using SharedX.Core.Bus;
 using SharedX.Core.Enums;
@@ -19,7 +20,7 @@ public class TradeOrderService : ITradeOrderService, IDisposable
 {
     protected bool _running;
     protected readonly ILogger<TradeOrderService> _logger;
-    private readonly IOrderRepository _orderRepository;
+    private readonly IOrderEngineRepository _orderRepository;
     private readonly ITradeRepository _tradeRepository;
     protected readonly IBookOfferCache _bookCache;
     protected readonly IMatchingCache _matchingCache;

@@ -69,9 +69,13 @@ public class ConsumerOrderApp : OutboxBackgroundService<OrderEngine>, IHostedSer
                     {
                         var message = _receiver.ReceiveMultipartBytes()[0];
                         var order = message.DeserializeFromByteArrayProtobuf<OrderEngine>();
-                        _matchReceiver.ReceiveOrder(order);
-                        DeleteOutboxCacheAsync(order, order.OrderID);
-                        Thread.Sleep(10);
+                        
+                        var deleted = DeleteOutboxCacheAsync(order, order.OrderID);
+                        
+                        if (!deleted.IsFaulted && deleted.IsCompleted)
+                        {
+                            _matchReceiver.ReceiveOrder(order);
+                        }
                     }
                 }
             }

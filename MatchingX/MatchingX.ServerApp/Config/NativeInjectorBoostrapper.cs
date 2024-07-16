@@ -5,7 +5,6 @@ using MacthingX.Application.Commands.Match.OrderStatus;
 using MacthingX.Application.Commands.Match.OrderType;
 using MacthingX.Application.Events;
 using MacthingX.Application.Interfaces;
-using MacthingX.Application.Querys;
 using MacthingX.Application.Services;
 using MassTransit;
 using MatchingX.Core.Interfaces;
@@ -33,8 +32,6 @@ using SharedX.Core.Matching;
 using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
 using SharedX.Infra.Cache;
-using SharedX.Infra.Order.Data;
-using SharedX.Infra.Order.Repositories;
 
 namespace MatchinX.API.Config;
 internal class NativeInjectorBoostrapper
@@ -111,11 +108,7 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<INotificationHandler<OrderCanceledEvent>, OrderEventHandler>();
         services.AddSingleton<INotificationHandler<OrderTradedEvent>, OrderEventHandler>();
         services.AddSingleton<INotificationHandler<OrderOpenedEvent>, OrderEventHandler>();
-        
-        // Domain - Querys
-        services.AddSingleton<IRequestHandler<GetTradeIdQuery, Trade>, GetTradeQueryHandler>();
-        services.AddSingleton<IRequestHandler<GetOrderQuery, IEnumerable<OrderEngine>>, GetOrderQueryHandler>();
-
+                
         // Domain - Commands
         services.AddSingleton<IRequestHandler<MatchingLimitCommand, (OrderStatus, Dictionary<long, OrderEngine>)>, MatchingCommandHandler>();
         services.AddSingleton<IRequestHandler<MatchingMarketCommand, (OrderStatus, Dictionary<long, OrderEngine>)>, MatchingCommandHandler>();
@@ -152,13 +145,13 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IMatchingCache, MatchingCache>();
         services.AddSingleton<IMatchContextStrategy, MatchContextStrategy>();
         
-        services.AddSingleton<IOrderRepository, OrderRepository>();
+        
         services.AddSingleton<IExecutedTradeRepository, ExecutedTradeRepository>();
 
         services.AddSingleton<ITradeRepository, TradeRepository>();
         services.AddSingleton<ITradeContext, TradeContext>();
 
-        services.AddSingleton<IOrderContext, OrderContext>();
+        
         services.AddSingleton<IExecutedTradeContext ,ExecutedTradeContext >();
         services.AddSingleton<IMatchingRepository, MatchingRepository>();
         services.AddSingleton<IMatchingContext, MatchingContext>();

@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\OrderEngineX\OrderEngineX.Core\OrderEngineX.Core.csproj" />
     <ProjectReference Include="..\..\SecurityX\SecurityX.Core\SecurityX.Core.csproj" />
     <ProjectReference Include="..\..\SharedX\SharedX.Models\SharedX.Core.csproj" />
     <ProjectReference Include="..\MatchingX.Core\MatchingX.Core.csproj" />

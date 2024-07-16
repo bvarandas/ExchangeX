@@ -93,8 +93,9 @@ public class OutboxBackgroundService<T> :  IOutboxBackgroundService<T> where T :
         //await _cacheOutbox.DeleteOutboxAsync(_activityOutbox.activity, order.OrderID);
     }
 
-    protected async void DeleteOutboxCacheAsync(T body, long id)
+    protected async Task<Result> DeleteOutboxCacheAsync(T body, long id)
     {
+        _logger.LogInformation($"Deletando outbox id {id}");
         var envelope = new EnvelopeOutbox<T>()
         {
             Id = id,
@@ -103,9 +104,9 @@ public class OutboxBackgroundService<T> :  IOutboxBackgroundService<T> where T :
             {
                 Activity = _activityOutbox.Activity
             }
-
         };
-        await _cacheOutbox.DeleteOutboxAsync(envelope);
+        
+        return await _cacheOutbox.DeleteOutboxAsync(envelope);
     }
 
     ~OutboxBackgroundService()

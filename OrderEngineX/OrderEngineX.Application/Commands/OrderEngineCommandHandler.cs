@@ -7,6 +7,7 @@ using OrderEngineX.Application.Commands.Order;
 using SharedX.Core.Matching.OrderEngine;
 using Microsoft.Extensions.Logging;
 using FluentResults;
+using OrderEngineX.Core.Interfaces;
 
 namespace OrderEngineX.Application.Commands;
 public class OrderEngineCommandHandler : CommandHandler,
@@ -15,11 +16,11 @@ public class OrderEngineCommandHandler : CommandHandler,
     IRequestHandler<OrderOpenedCommand, Result>
 {
     private readonly ILogger<OrderEngineCommandHandler> _logger;
-    private readonly IOrderRepository _repository;
+    private readonly IOrderEngineRepository _repository;
     private readonly IMediatorHandler _bus;
     public OrderEngineCommandHandler(
         ILogger<OrderEngineCommandHandler> logger,
-        IOrderRepository repository, 
+        IOrderEngineRepository repository, 
         IMediatorHandler bus, 
         INotificationHandler<DomainNotification> notifications) 
         : base(bus,notifications)  
@@ -39,12 +40,14 @@ public class OrderEngineCommandHandler : CommandHandler,
         command.Order.OrderStatus = SharedX.Core.Enums.OrderStatus.Cancelled;
         command.Order.TransactTime = DateTime.UtcNow;
 
-        var status = await _repository.UpdateOrderAsync(command.Order, cancellationToken);
-        
-        if (status)
+        var status = await _repository.UpsertOrdersAsync(command.Order, cancellationToken);
+
+        if (status.IsSuccess)
+        {
             await _bus.Publish(new OrderTradeCancelEvent(command.Order));
-        
-        return Result.Ok();
+            return Result.Ok();
+        }
+        return status;
     }
 
     public async Task<Result> Handle(OrderCancelReplaceCommand command, CancellationToken cancellationToken)
@@ -56,29 +59,29 @@ public class OrderEngineCommandHandler : CommandHandler,
         }
 
         var orderOld = await _repository.GetOrderByIdAsync(command.Order.OrderID, cancellationToken);
-        
-        if (IsOrderToReplace(orderOld, command.Order))
-        {
-            orderOld.OrderStatus = SharedX.Core.Enums.OrderStatus.Cancelled;
-            orderOld.TransactTime = DateTime.UtcNow;
-            var statusUpdate = await _repository.UpdateOrderAsync(orderOld, cancellationToken);
+        if (orderOld.IsSuccess)
+            if (IsOrderToReplace(orderOld.Value, command.Order))
+            {
+                orderOld.Value.OrderStatus = SharedX.Core.Enums.OrderStatus.Cancelled;
+                orderOld.Value.TransactTime = DateTime.UtcNow;
+                var statusUpdate = await _repository.UpsertOrdersAsync(orderOld.Value, cancellationToken);
             
-            if(statusUpdate)
-                await _bus.Publish(new OrderTradeCancelEvent(orderOld));
+                if(statusUpdate.IsSuccess)
+                    await _bus.Publish(new OrderTradeCancelEvent(orderOld.Value));
 
-            var idOrder = _repository.GetOrderIdAsync(cancellationToken).Result;
-            command.Order.OrderID = idOrder;
-            command.Order.LeavesQuantity = command.Order.Quantity;
-            var statusCreate = await _repository.CreateOrdersAsync(command.Order, cancellationToken);
+                var idOrder = _repository.GetOrderIdAsync(cancellationToken).Result;
+                command.Order.OrderID = idOrder.Value;
+                command.Order.LeavesQuantity = command.Order.Quantity;
+                var statusCreate = await _repository.CreateOrdersAsync(command.Order, cancellationToken);
             
-            if (statusCreate)
-                await _bus.Publish(new OrderTradeNewEvent(command.Order));
-        }
-        else
-        {
-            var status = await _repository.UpdateOrderAsync(command.Order, cancellationToken);
-            await _bus.Publish(new OrderTradeModifyEvent(command.Order));
-        }
+                if (statusCreate.IsSuccess)
+                    await _bus.Publish(new OrderTradeNewEvent(command.Order));
+            }
+            else
+            {
+                var status = await _repository.UpsertOrdersAsync(command.Order, cancellationToken);
+                await _bus.Publish(new OrderTradeModifyEvent(command.Order));
+            }
                 
         return Result.Ok();
     }
@@ -92,7 +95,7 @@ public class OrderEngineCommandHandler : CommandHandler,
         }
 
         var idOrder = _repository.GetOrderIdAsync(cancellationToken).Result;
-        command.Order.OrderID = idOrder;
+        command.Order.OrderID = idOrder.Value;
         command.Order.LeavesQuantity = command.Order.Quantity;
 
         await _repository.CreateOrdersAsync(command.Order, cancellationToken);

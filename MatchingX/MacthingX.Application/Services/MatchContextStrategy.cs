@@ -8,19 +8,15 @@ namespace MacthingX.Application.Services;
 public class MatchContextStrategy : IMatchContextStrategy
 {
     private readonly IEnumerable<IMatch> _matchList;
-    private readonly IOrderRepository _orderRepository;
     private readonly ISecurityCache _securityCache;
     private IMatchingCache _matchingCache;
     private IMatch _actualMatch;
-         
     
     public MatchContextStrategy(IEnumerable<IMatch> matchList, 
-        IOrderRepository orderRepository, 
         IMatchingCache matchingCache,
         ISecurityCache securityCache)
     {
         this._matchList = matchList;
-        this._orderRepository = orderRepository;
         this._matchingCache = matchingCache;
         this._securityCache = securityCache;
 
@@ -37,13 +33,13 @@ public class MatchContextStrategy : IMatchContextStrategy
 
     private async void LoadOrdersOnRestart()
     {
-        var ordersDb = await _orderRepository.GetOrdersOnRestartAsync(default(CancellationToken));
+        //var ordersDb = await _orderRepository.GetOrdersOnRestartAsync(default(CancellationToken));
         
-        if (ordersDb is not null)
-        foreach (var order in ordersDb)
-        {
+        //if (ordersDb is not null)
+        //foreach (var order in ordersDb)
+        //{
 
-        }
+        //}
 
         //var buyOrders = ordersDb.Where(o => o.Side == SideTrade.Buy);
         //var sellOrders = ordersDb.Where(o => o.Side == SideTrade.Sell);

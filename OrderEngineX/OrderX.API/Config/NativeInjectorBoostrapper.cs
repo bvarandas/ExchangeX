@@ -14,12 +14,13 @@ using SharedX.Core.Specs;
 using Sharedx.Infra.Order.Cache;
 using OrderEngineX.Application.Commands.Order;
 using SharedX.Infra.Cache;
-using SharedX.Infra.Order.Repositories;
-using SharedX.Infra.Order.Data;
+
 using Sharedx.Infra.Outbox.Services;
 using Sharedx.Infra.Outbox.Cache;
 using FluentResults;
 using MongoDB.Driver;
+using OrderEngineX.Infra.Repositories;
+using OrderEngineX.Infra.Data;
 
 namespace OrderEngineX.API.Config;
 internal class NativeInjectorBoostrapper
@@ -109,8 +110,8 @@ internal class NativeInjectorBoostrapper
         
         services.AddSingleton<ISecurityEngineCache, SecurityEngineCache>();
 
-        services.AddSingleton<IOrderRepository, OrderRepository>();
-        services.AddSingleton<IOrderContext, OrderContext>();
+        services.AddSingleton<IOrderEngineRepository, OrderEngineRepository>();
+        services.AddSingleton<IOrderEngineContext, OrderEngineContext>();
 
         services.AddHostedService<ConsumerExecutionReportApp>();
         //services.AddHostedService<PublisherOrderReportApp>();

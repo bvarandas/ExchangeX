@@ -1,7 +1,9 @@
-﻿using SharedX.Core.Matching.DropCopy;
+﻿using FluentResults;
+using SharedX.Core.Matching.DropCopy;
 namespace OrderEngineX.Core.Interfaces;
 public interface IExecutionReportCache
 {
-    bool TryDequeueExecutionReport(out ExecutionReport execution);
-    void AddQueueExecutionReport(ExecutionReport execution);
+    Task<Result> DeleteExecutionReportAsync(ExecutionReport execution);
+    Task<Result> UpsertExecutionReportAsync(ExecutionReport execution);
+    Task<Result<Dictionary<long, ExecutionReport>>> GetExecutionReportAsync(string symbol);
 }
