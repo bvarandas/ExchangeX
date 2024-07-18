@@ -12,29 +12,30 @@ using SharedX.Core.Specs;
 using Sharedx.Infra.Outbox.Services;
 using MassTransit;
 using ServiceStack;
+using SharedX.Core.ValueObjects;
 
 namespace OrderEngineX.API.Consumers;
-public class ConsumerOrdersApp : OutboxBackgroundService<OrderEngine>, IHostedService
+public class ConsumerOrdersApp : IConsumer<EnvelopeOutbox<OrderEngine>>, IHostedService
 {
     private readonly ILogger<ConsumerOrdersApp> _logger;
     private PullSocket _receiver;
     private readonly ConnectionZmq _config;
     private static Thread ThreadReceiverOrder = null!;
     private readonly IMediatorHandler _mediator;
-    private readonly  IBookOfferCache _cache;
-    private readonly IOutboxCache<OrderEngine> _outboxCache;
+    private readonly IBookOfferCache _cache;
+    private readonly IOutboxBackgroundService<OrderEngine> _outboxBackgroundService = null!;
     public ConsumerOrdersApp(ILogger<ConsumerOrdersApp> logger,
         IOptions<ConnectionZmq> options,
         IMediatorHandler mediator,
         IBookOfferCache cache,
-        IOutboxCache<OrderEngine> outboxCache,
-        IBus bus) : base(logger,outboxCache, bus)
+        IOutboxBackgroundService<OrderEngine> outboxBackgroundService,
+        IBus bus) 
     {
         _logger = logger;
         _config = options.Value;
         _mediator = mediator;
         _cache = cache;
-        _outboxCache = outboxCache;
+        _outboxBackgroundService = outboxBackgroundService;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
@@ -63,7 +64,7 @@ public class ConsumerOrdersApp : OutboxBackgroundService<OrderEngine>, IHostedSe
                         var message = _receiver.ReceiveFrameBytes();
                         var order = message.DeserializeFromByteArrayProtobuf<OrderEngine>();
                         
-                        var deleted = DeleteOutboxCacheAsync(order, order.OrderID);
+                        var deleted = _outboxBackgroundService.DeleteOutboxCacheAsync(order, order.OrderID);
                         if (deleted.IsSuccess())
                             SendOrderCommand(order);
                     }
@@ -112,6 +113,18 @@ public class ConsumerOrdersApp : OutboxBackgroundService<OrderEngine>, IHostedSe
 
     protected Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        return Task.CompletedTask;
+    }
+
+    public Task Consume(ConsumeContext<EnvelopeOutbox<OrderEngine>> context)
+    {
+        var order = context.Message.Body;
+
+        var deleted = _outboxBackgroundService.DeleteOutboxCacheAsync(order, order.OrderID);
+        
+        if (deleted.IsSuccess())
+            SendOrderCommand(order);
+
         return Task.CompletedTask;
     }
 }

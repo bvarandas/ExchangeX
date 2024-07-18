@@ -6,4 +6,6 @@ public interface IOutboxBackgroundService<T> where T : class
 {
     void SetActivity(ActivityOutbox activity);
     Task<Result> AddActivityAsync(EnvelopeOutbox<T> envelope);
+
+    Task<Result> DeleteOutboxCacheAsync(T body, long id);
 }

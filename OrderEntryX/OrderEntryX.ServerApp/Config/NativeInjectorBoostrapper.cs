@@ -28,8 +28,9 @@ internal class NativeInjectorBoostrapper
 
         services.AddMassTransit(x =>
         {
-            x.AddConsumer<OrderEngineOutboxApp>();
-            x.AddConsumer<DropCopyOutboxApp>();
+            x.AddConsumer(typeof(IOutboxConsumerService<>), typeof(OutboxConsumerService<>));
+            //x.AddConsumer<OrderEngineOutboxApp>();
+            //x.AddConsumer<DropCopyOutboxApp>();
 
             x.UsingRabbitMq((context, cfg) =>
             {

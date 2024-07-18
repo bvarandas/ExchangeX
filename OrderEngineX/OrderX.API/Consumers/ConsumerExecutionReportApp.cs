@@ -4,28 +4,31 @@ using NetMQ;
 using NetMQ.Sockets;
 using OrderEngineX.Core.Interfaces;
 using ServiceStack;
-using Sharedx.Infra.Outbox.Services;
 using SharedX.Core.Extensions;
 using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.DropCopy;
 using SharedX.Core.Specs;
+using SharedX.Core.ValueObjects;
+
 namespace OrderEngineX.API.Consumers;
-public class ConsumerExecutionReportApp : OutboxBackgroundService<ExecutionReport>, IHostedService
+public class ConsumerExecutionReportApp : IConsumer<EnvelopeOutbox<ExecutionReport>>, IHostedService
 {
     private readonly ILogger<ConsumerExecutionReportApp> _logger;
     private PullSocket _receiver;
     private readonly ConnectionZmq _config;
     private readonly IExecutionReportCache _cache;
     private static Thread ThreadReceiverExecutionReport = null!;
+    private readonly IOutboxBackgroundService<ExecutionReport> _outboxBackgroundService = null!;
     public ConsumerExecutionReportApp(ILogger<ConsumerExecutionReportApp> logger
-        ,IOptions<ConnectionZmq> options
-        ,IExecutionReportCache cache
-        ,IOutboxCache<ExecutionReport> outboxCache
-        , IBus bus) : base(logger, outboxCache, bus)
+        , IOptions<ConnectionZmq> options
+        , IExecutionReportCache cache
+        , IOutboxBackgroundService<ExecutionReport> outboxBackgroundService
+        , IBus bus) 
     {
         _logger = logger;
         _config = options.Value;
         _cache = cache;
+        _outboxBackgroundService = outboxBackgroundService;
     }
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -53,9 +56,9 @@ public class ConsumerExecutionReportApp : OutboxBackgroundService<ExecutionRepor
                         var message = _receiver.ReceiveFrameBytes();
                         var execution = message.DeserializeFromByteArrayProtobuf<ExecutionReport>();
                         
-                        var deleted = DeleteOutboxCacheAsync(execution, execution.ExecID);
+                        var deleted = _outboxBackgroundService.DeleteOutboxCacheAsync(execution, execution.ExecID);
 
-                        if (deleted.IsSuccess())
+                        if (deleted.Result.IsSuccess)
                         {
                             _cache.UpsertExecutionReportAsync(execution);
                         }
@@ -87,6 +90,19 @@ public class ConsumerExecutionReportApp : OutboxBackgroundService<ExecutionRepor
 
     protected Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        return Task.CompletedTask;
+    }
+
+    public Task Consume(ConsumeContext<EnvelopeOutbox<ExecutionReport>> context)
+    {
+        var execution = context.Message.Body;
+
+        var deleted = _outboxBackgroundService.DeleteOutboxCacheAsync(execution, execution.ExecID);
+
+        if (deleted.IsSuccess())
+        {
+            _cache.UpsertExecutionReportAsync(execution);
+        }
         return Task.CompletedTask;
     }
 }

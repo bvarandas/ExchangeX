@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using MassTransit.Middleware;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetMQ;
@@ -43,21 +44,34 @@ public class PublisherOrdersApp : BackgroundService
 
     private void SenderOrder(CancellationToken stoppingToken)
     {
-        using (_sender = new PushSocket("@"+_config.OrderEntryToOrderEngine.Uri))
+        bool isConnected = false;
+        do
         {
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
-                while (_orderEntryChache.TryDequeueOrderEntry(out OrderEngine order))
+                using (_sender = new PushSocket("@" + _config.OrderEntryToOrderEngine.Uri))
                 {
-                    this.SendOutBoxActivity(order);
+                    isConnected = true;
+                    while (!stoppingToken.IsCancellationRequested)
+                    {
+                        while (_orderEntryChache.TryDequeueOrderEntry(out OrderEngine order))
+                        {
+                            this.SendOutBoxActivity(order);
 
-                    var message = order.SerializeToByteArrayProtobuf<OrderEngine>();
-                    _sender.SendMultipartBytes(message);
+                            var message = order.SerializeToByteArrayProtobuf<OrderEngine>();
+                            _sender.SendMultipartBytes(message);
+                        }
+
+                        Thread.Sleep(10);
+                    }
                 }
-
-                Thread.Sleep(10);
+            }catch (Exception ex) {
+                isConnected = false;
+                _logger.LogError(ex.Message, ex);
             }
-        }
+            Thread.Sleep(100);
+
+        } while (!isConnected);
     }
 
     private void SendOutBoxActivity(OrderEngine order)

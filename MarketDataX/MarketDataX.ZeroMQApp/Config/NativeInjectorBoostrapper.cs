@@ -17,6 +17,8 @@ using MarketDataX.Infra.Data;
 using MarketDataX.Infra.Repositories;
 using FluentResults;
 using MongoDB.Driver;
+using SharedX.Core.Matching.MarketData;
+using SharedX.Core.ValueObjects;
 
 namespace DropCopyX.ServerApp;
 internal class NativeInjectorBoostrapper
@@ -30,8 +32,8 @@ internal class NativeInjectorBoostrapper
 
         services.AddMassTransit(x =>
         {
-            x.AddConsumer<SecurityEngineOutboxApp>();
-            x.AddConsumer<MarketDataOutboxApp>();
+            x.AddConsumer(typeof(IOutboxConsumerService<>), typeof(OutboxConsumerService<>));
+            //x.AddConsumer<MarketDataOutboxApp>();
 
             x.UsingRabbitMq((context, cfg) =>
             {

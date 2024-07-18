@@ -8,9 +8,15 @@ using SharedX.Core.Bus;
 using SharedX.Core.Matching.DropCopy;
 using SharedX.Core.Specs;
 using TradeEngineX.Core.Interfaces;
-using SharedX.Core.Extensions; 
+using SharedX.Core.Extensions;
+using MassTransit;
+using SharedX.Core.ValueObjects;
+using SharedX.Core.Interfaces;
+using QuickFix.Fields;
+using SharedX.Core.Matching;
+
 namespace TradeEngineX.ServerApp.Consumer;
-public class ConsumerTradeEngineApp : BackgroundService
+public class ConsumerTradeEngineApp : BackgroundService, IConsumer<EnvelopeOutbox<TradeReport>>
 {
     private readonly ILogger<ConsumerTradeEngineApp> _logger;
     private PullSocket _receiver;
@@ -18,15 +24,18 @@ public class ConsumerTradeEngineApp : BackgroundService
     private static Thread ThreadReceiverTrade = null!;
     private readonly IMediatorHandler _mediator;
     private readonly ITradeEngineCache _tradeCache;
+    private readonly IOutboxBackgroundService<TradeReport> _outboxBackgroundService = null!;
     public ConsumerTradeEngineApp(ILogger<ConsumerTradeEngineApp> logger,
         IOptions<ConnectionZmq> options,
         IMediatorHandler mediator,
-        ITradeEngineCache tradeCache)
+        ITradeEngineCache tradeCache,
+        IOutboxBackgroundService<TradeReport> outboxBackgroundService)
     {
         _logger = logger;
         _tradeCache = tradeCache;
         _mediator = mediator;
         _config = options.Value;
+        _outboxBackgroundService = outboxBackgroundService; 
     }
 
     public override Task StartAsync(CancellationToken cancellationToken)
@@ -58,10 +67,10 @@ public class ConsumerTradeEngineApp : BackgroundService
                     {
                         var msg = _receiver.ReceiveMultipartBytes();
                         var trade = msg[1].DeserializeFromByteArrayProtobuf<TradeReport>();
-
-                        _tradeCache.UpsertTradeEngineAsync(trade);
-
-                        Thread.Sleep(10);
+                        var deleted = _outboxBackgroundService.DeleteOutboxCacheAsync(trade, trade.TradeId);
+                        
+                        if (!deleted.IsFaulted && deleted.IsCompleted)
+                            _tradeCache.UpsertTradeEngineAsync(trade);
                     }
                 }
             }catch(Exception ex)
@@ -82,6 +91,18 @@ public class ConsumerTradeEngineApp : BackgroundService
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        return Task.CompletedTask;
+    }
+
+    public Task Consume(ConsumeContext<EnvelopeOutbox<TradeReport>> context)
+    {
+        var trade = context.Message.Body;
+
+        var deleted = _outboxBackgroundService.DeleteOutboxCacheAsync(trade, trade.TradeId);
+
+        if (!deleted.IsFaulted && deleted.IsCompleted)
+            _tradeCache.UpsertTradeEngineAsync(trade);
+
         return Task.CompletedTask;
     }
 }

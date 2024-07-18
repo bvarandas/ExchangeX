@@ -10,20 +10,23 @@ using SharedX.Core.Extensions;
 using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
+using SharedX.Core.ValueObjects;
+
 namespace MatchingX.ServerApp.Consumer;
-public class ConsumerOrderApp : OutboxBackgroundService<OrderEngine>, IHostedService
+public class ConsumerOrderApp : IConsumer<EnvelopeOutbox<OrderEngine>>, IHostedService
 {
     private readonly ILogger<ConsumerOrderApp> _logger;
     private PullSocket _receiver;
     private readonly ConnectionZmq _config;
     private readonly IMatchingReceiver _matchReceiver;
     private static Thread ThreadReceiverOrder= null!;
+    private readonly IOutboxBackgroundService<OrderEngine> _outboxBackgroundService = null!;
     public ConsumerOrderApp(ILogger<ConsumerOrderApp> logger,
         IOptions<ConnectionZmq> options
         ,IMatchingReceiver matchReceiver
         , IOutboxCache<OrderEngine> outboxCache
         , IBus bus
-        ) : base(logger, outboxCache, bus)
+        ) 
     {
         _logger = logger;
         _config = options.Value;
@@ -70,7 +73,7 @@ public class ConsumerOrderApp : OutboxBackgroundService<OrderEngine>, IHostedSer
                         var message = _receiver.ReceiveMultipartBytes()[0];
                         var order = message.DeserializeFromByteArrayProtobuf<OrderEngine>();
                         
-                        var deleted = DeleteOutboxCacheAsync(order, order.OrderID);
+                        var deleted = _outboxBackgroundService.DeleteOutboxCacheAsync(order, order.OrderID);
                         
                         if (!deleted.IsFaulted && deleted.IsCompleted)
                         {
@@ -87,5 +90,19 @@ public class ConsumerOrderApp : OutboxBackgroundService<OrderEngine>, IHostedSer
 
             Thread.Sleep(100);
         }while (!isConnected);
+    }
+
+    public Task Consume(ConsumeContext<EnvelopeOutbox<OrderEngine>> context)
+    {
+        var order = context.Message.Body;
+
+        var deleted = _outboxBackgroundService.DeleteOutboxCacheAsync(order, order.OrderID);
+
+        if (!deleted.IsFaulted && deleted.IsCompleted)
+        {
+            _matchReceiver.ReceiveOrder(order);
+        }
+
+        return Task.CompletedTask;
     }
 }
