@@ -6,6 +6,7 @@ using SharedX.Core.Interfaces;
 using SharedX.Core.Specs;
 using SharedX.Core.ValueObjects;
 using StackExchange.Redis;
+using System.Collections.Concurrent;
 using System.Text.Json;
 
 namespace Sharedx.Infra.Outbox.Cache;
@@ -16,6 +17,9 @@ public class OutboxCache<T>  where T : class,  IOutboxCache<T>
     private readonly ILogger<OutboxCache<T>> _logger;
     private readonly ConnectionMultiplexer _redis;
     private readonly RedisKey _key = new RedisKey("Outbox");
+
+    private readonly ConcurrentQueue<T> _queueZeroMQ = null!;
+    private readonly ConcurrentQueue<T> _queueRabbitMQ= null!;
 
     public OutboxCache(ILogger<OutboxCache<T>> logger, IOptions<ConnectionRedis> config)
     {
@@ -64,4 +68,15 @@ public class OutboxCache<T>  where T : class,  IOutboxCache<T>
             });
         return true;
     }
+
+    public async Task<Result> TryDequeueZeroMQEnvelope(out EnvelopeOutbox<T> envelope)
+    {
+        
+    }
+
+    public async Task<Result> TryDequeueRabbitMQEnvelope(out EnvelopeOutbox<T> envelope)
+    {
+
+    }
+
 }
