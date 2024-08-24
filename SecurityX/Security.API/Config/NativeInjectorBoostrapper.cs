@@ -1,11 +1,7 @@
-﻿using System.Reflection;
-using FluentResults;
+﻿using FluentResults;
 using MediatR;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 using Security.API.Consumer;
-using Security.API.Publisher;
 using Security.Application.Commands;
 using Security.Application.Events;
 using Security.Application.Services;
@@ -16,6 +12,7 @@ using SecurityX.Core.Notifications;
 using SecurityX.Infra.Cache;
 using SharedX.Core.Bus;
 using SharedX.Core.Specs;
+using System.Reflection;
 namespace SecurityX.ServerApp;
 internal class NativeInjectorBoostrapper
 {
@@ -52,7 +49,7 @@ internal class NativeInjectorBoostrapper
             .SetIsOriginAllowed((host) => true)
             .AllowCredentials();
         }));
-        
+
         // Domain - Commands
         services.AddSingleton<IRequestHandler<SecurityNewCommand, Result>, SecurityEngineCommandHandler>();
         services.AddSingleton<IRequestHandler<SecurityRemoveCommand, Result>, SecurityEngineCommandHandler>();
@@ -76,7 +73,6 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<ISecurityCache, SecurityCache>();
         services.AddSingleton<ISecurityEngineRepository, SecurityEngineRepository>();
 
-        services.AddHostedService<PublisherSecurityApp>();
         services.AddHostedService<ConsumerSecurityApp>();
     }
 }

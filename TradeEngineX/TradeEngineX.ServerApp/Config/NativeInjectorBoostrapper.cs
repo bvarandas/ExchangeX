@@ -1,21 +1,20 @@
-﻿using System.Reflection;
+﻿using FluentResults;
+using MassTransit;
+using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using SharedX.Core.Bus;
-using SharedX.Core.Specs;
-using MassTransit;
-using Sharedx.Infra.Outbox.Services;
-using SharedX.Core.Interfaces;
-using Sharedx.Infra.Outbox.Cache;
-using MediatR;
-using FluentResults;
 using MongoDB.Driver;
+using Sharedx.Infra.Outbox.Cache;
+using Sharedx.Infra.Outbox.Services;
+using SharedX.Core.Bus;
+using SharedX.Core.Interfaces;
+using SharedX.Core.Specs;
+using System.Reflection;
 using TradeEngineX.Application.Commands;
 using TradeEngineX.Application.Events;
-using TradeEngineX.Infra.Data;
 using TradeEngineX.Core.Interfaces;
+using TradeEngineX.Infra.Data;
 using TradeEngineX.Infra.Repositories;
-using TradeEngineX.ServerApp.Consumer;
 
 namespace TradeEngineX.ServerApp;
 internal class NativeInjectorBoostrapper
@@ -67,7 +66,8 @@ internal class NativeInjectorBoostrapper
             .AllowCredentials();
         }));
         // Outbox 
-        services.AddSingleton(typeof(IOutboxBackgroundService<>), typeof(OutboxBackgroundService<>));
+        services.AddSingleton(typeof(IOutboxPublisherService<>), typeof(OutboxPublisherService<>));
+        services.AddSingleton(typeof(IOutboxConsumerService<>), typeof(OutboxConsumerService<>));
         services.AddSingleton(typeof(IOutboxCache<>), typeof(OutboxCache<>));
 
         // Domain - Events
@@ -89,7 +89,5 @@ internal class NativeInjectorBoostrapper
 
         services.AddSingleton<ITradeEngineContext, TradeEngineContext>();
         services.AddSingleton<ITradeEngineRepository, TradeEngineRepository>();
-
-        services.AddHostedService<ConsumerTradeEngineApp>();
     }
 }

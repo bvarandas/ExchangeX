@@ -2,8 +2,6 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using QuickFix;
-using TradeReportTransType = QuickFix.Fields.TradeReportTransType;
-
 namespace DropCopyX.ServerApp.Services;
 internal class PublisherFixApp : BackgroundService
 {

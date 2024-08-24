@@ -8,7 +8,7 @@ using SharedX.Core.Entities;
 using SharedX.Core.Extensions;
 using SharedX.Core.Specs;
 namespace Security.API.Consumer;
-public class ConsumerSecurityApp: BackgroundService
+public class ConsumerSecurityApp : BackgroundService
 {
     private readonly ILogger<ConsumerSecurityApp> _logger;
     private RequestSocket _receiver;
@@ -45,7 +45,7 @@ public class ConsumerSecurityApp: BackgroundService
             try
             {
                 _logger.LogInformation("Iniciando o Securities receiver do ZeroMQ...");
-                using (_receiver = new RequestSocket(_config.OrderEntryToOrderEngine.Uri))
+                using (_receiver = new RequestSocket(_config.ReceiverEngine.Uri))
                 {
                     _logger.LogInformation("Receiver de Securities Conectado!!!");
                     isConnected = true;
@@ -84,7 +84,7 @@ public class ConsumerSecurityApp: BackgroundService
     public override Task StopAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Finishing the consumer ZeroMQ...");
-        _receiver.Disconnect(_config.OrderEntryToOrderEngine.Uri);
+        _receiver.Disconnect(_config.ReceiverEngine.Uri);
         _logger.LogInformation("Consumer ZeroMq...Finishing!");
         return base.StopAsync(cancellationToken);
     }

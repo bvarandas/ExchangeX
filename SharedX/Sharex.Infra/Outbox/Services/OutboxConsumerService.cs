@@ -4,20 +4,19 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetMQ;
 using NetMQ.Sockets;
-using QuickFix.Config;
 using SharedX.Core.Extensions;
 using SharedX.Core.Interfaces;
-using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
 using SharedX.Core.ValueObjects;
-
 namespace Sharedx.Infra.Outbox.Services;
 public class OutboxConsumerService<T> : 
-    IOutboxConsumerService<T> where T : class,
-    IConsumer<T>,
-    IHostedService
+    BackgroundService,
+    IOutboxConsumerService<EnvelopeOutbox<T>>,
+    IConsumer<EnvelopeOutbox<T>> where T : class
+    
 {
     private readonly IOutboxCache<T> _cacheOutbox;
+    private readonly IReceiverEngine<T> _receiverEngine;
     private readonly ILogger<OutboxConsumerService<T>> _logger;
     private readonly ConnectionZmq _config;
     private PullSocket _receiver;
@@ -25,20 +24,22 @@ public class OutboxConsumerService<T> :
     public OutboxConsumerService(
         IOutboxCache<T> cacheOutbox, 
         ILogger<OutboxConsumerService<T>> logger,
-        IOptions<ConnectionZmq> options)
+        IOptions<ConnectionZmq> options,
+        IReceiverEngine<T> receiverEngine)
     {
         _cacheOutbox = cacheOutbox;
         _logger = logger;
         _config = options.Value;
+        _receiverEngine = receiverEngine;
     }
 
-    protected Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         return Task.CompletedTask;
     }
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Iniciando o Receiver Order ZeroMQ...");
+        _logger.LogInformation("Iniciando o Receiver de Envelopes ZeroMQ...");
 
         ThreadReceiverEnvelope = new Thread(() => ReceiverEnvelope(cancellationToken));
         ThreadReceiverEnvelope.Name = nameof(ThreadReceiverEnvelope);
@@ -54,10 +55,10 @@ public class OutboxConsumerService<T> :
         {
             try
             {
-                _logger.LogInformation($"Receiver de ordens tentando conectar..{_config.OrderEngineToMatching.Uri}");
-                using (_receiver = new PullSocket(">" + _config.OrderEngineToMatching.Uri))
+                _logger.LogInformation($"Receiver de envelopes tentando conectar..{_config.ReceiverEngine.Uri}");
+                using (_receiver = new PullSocket(">" + _config.ReceiverEngine.Uri))
                 {
-                    _logger.LogInformation("Receiver de ordens Conectado!!!");
+                    _logger.LogInformation("Receiver de envelopes Conectado!!!");
                     isConnected = true;
 
                     while (!stoppingToken.IsCancellationRequested)
@@ -69,7 +70,9 @@ public class OutboxConsumerService<T> :
 
                         if (deleted.IsSuccess)
                         {
+                            _receiverEngine.ReceiveEngine(envelope.Body, stoppingToken);
                             /// HACK :Criar interface para receiver geral
+                            
                             /// Matching Engine
                             /// Order Engine
                             /// Drop Copy Engine
@@ -98,8 +101,8 @@ public class OutboxConsumerService<T> :
         var deleted = await _cacheOutbox.DeleteOutboxAsync(envelope);
 
         if (deleted.IsSuccess)
-        {
-            ///_matchReceiver.ReceiveOrder(order);
-        }
+            _receiverEngine.ReceiveEngine(envelope.Body, default(CancellationToken));
     }
+
+    
 }

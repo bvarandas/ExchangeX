@@ -8,23 +8,22 @@ using SharedX.Core.Extensions;
 using SharedX.Core.Interfaces;
 using SharedX.Core.Specs;
 using SharedX.Core.ValueObjects;
-
 namespace Sharedx.Infra.Outbox.Services;
-public class OutBoxPublisherService<T> : 
+public class OutboxPublisherService<T> :
     IOutboxPublisherService<T> where T : class,
     IHostedService
 {
     private readonly IOutboxCache<T> _cacheOutbox;
-    private readonly ILogger<OutBoxPublisherService<T>> _logger;
+    private readonly ILogger<OutboxPublisherService<T>> _logger;
     private readonly IBus _bus;
     private PushSocket _sender;
-    private readonly ConnectionZmq _config;
-    private static Thread ThreadSenderEnvelope = null!;
+    private readonly ConnectionZeroMq _config;
+    private static Thread ThreadSenderRabbitMQEnvelope = null!;
     private static Thread ThreadSenderZeroMQEnvelope = null!;
-    public OutBoxPublisherService(
-        ILogger<OutBoxPublisherService<T>> logger,
+    public OutboxPublisherService(
+        ILogger<OutboxPublisherService<T>> logger,
         IOutboxCache<T> cacheOutbox,
-        IOptions<ConnectionZmq> options,
+        IOptions<ConnectionZeroMq> options,
         IBus bus)
     {
         _config = options.Value;
@@ -36,9 +35,9 @@ public class OutBoxPublisherService<T> :
     {
         _logger.LogInformation("Iniciando o Sender Report ZeroMQ...");
 
-        ThreadSenderEnvelope = new Thread(() => SenderEnvelope(cancellationToken));
-        ThreadSenderEnvelope.Name = nameof(ThreadSenderEnvelope);
-        ThreadSenderEnvelope.Start();
+        ThreadSenderRabbitMQEnvelope = new Thread(() => SenderRabbitMqEnvelope(cancellationToken));
+        ThreadSenderRabbitMQEnvelope.Name = nameof(ThreadSenderRabbitMQEnvelope);
+        ThreadSenderRabbitMQEnvelope.Start();
 
         ThreadSenderZeroMQEnvelope = new Thread(() => SenderZeroMQEnvelope(cancellationToken));
         ThreadSenderZeroMQEnvelope.Name = nameof(ThreadSenderZeroMQEnvelope);
@@ -47,27 +46,42 @@ public class OutBoxPublisherService<T> :
         return Task.CompletedTask;
     }
 
-    private void SenderZeroMQEnvelope(CancellationToken cancellationToken)
+    private async void SenderRabbitMqEnvelope(CancellationToken cancellationToken)
     {
-        while (_cacheOutbox.TryDequeueRabbitMQEnvelope(out EnvelopeOutbox<T> report).Result.IsSuccess)
+        _logger.LogInformation("Iniciando o Publisher RabbitMQ...");
+
+        while (!cancellationToken.IsCancellationRequested)
         {
-            var message = report.SerializeToByteArrayProtobuf<EnvelopeOutbox<T>>();
-            _bus.Publish(message);
+            while (_cacheOutbox.TryDequeueRabbitMQEnvelope(out EnvelopeOutbox<T> envelope).Result.IsSuccess)
+            {
+                var inserted = await _cacheOutbox.UpsertOutboxAsync(envelope);
+                if (inserted.IsSuccess)
+                {
+                    var message = envelope.SerializeToByteArrayProtobuf<EnvelopeOutbox<T>>();
+                    await _bus.Publish(message);
+                }
+            }
+
+            Thread.Sleep(10);
         }
     }
 
-    private void SenderEnvelope(CancellationToken stoppingToken)
+    private async void SenderZeroMQEnvelope(CancellationToken stoppingToken)
     {
         _logger.LogInformation("Iniciando o Publisher ZeroMQ...");
 
-        using (_sender = new PushSocket(_config.MatchingToDropCopy.Uri))
+        using (_sender = new PushSocket(_config.PushPullAddress.Uri))
         {
             while (!stoppingToken.IsCancellationRequested)
             {
                 while (_cacheOutbox.TryDequeueZeroMQEnvelope(out EnvelopeOutbox<T> envelope).Result.IsSuccess)
                 {
-                    var message = envelope.SerializeToByteArrayProtobuf<EnvelopeOutbox<T>>();
-                    _sender.SendMultipartBytes(message);
+                    var inserted = await _cacheOutbox.UpsertOutboxAsync(envelope);
+                    if (inserted.IsSuccess)
+                    {
+                        var message = envelope.SerializeToByteArrayProtobuf<EnvelopeOutbox<T>>();
+                        _sender.SendMultipartBytes(message);
+                    }
                 }
 
                 Thread.Sleep(10);

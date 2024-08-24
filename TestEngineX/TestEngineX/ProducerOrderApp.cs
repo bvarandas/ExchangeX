@@ -3,12 +3,12 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetMQ;
 using NetMQ.Sockets;
+using SharedX.Core.Account;
+using SharedX.Core.Enums;
 using SharedX.Core.Extensions;
 using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
 using System.Collections.Concurrent;
-using SharedX.Core.Enums;
-using SharedX.Core.Account;
 namespace TestEngineX;
 public class ProducerOrderApp : BackgroundService
 {
@@ -25,7 +25,7 @@ public class ProducerOrderApp : BackgroundService
     {
         _logger = logger;
         _config = options.Value;
-        OrderQueue= new ConcurrentQueue<OrderEngine>();
+        OrderQueue = new ConcurrentQueue<OrderEngine>();
     }
     public override Task StartAsync(CancellationToken cancellationToken)
     {
@@ -47,7 +47,7 @@ public class ProducerOrderApp : BackgroundService
         return Task.CompletedTask;
     }
 
-    
+
     private void SenderOrder(CancellationToken stoppingToken)
     {
         bool isConnected = false;
@@ -55,8 +55,8 @@ public class ProducerOrderApp : BackgroundService
         {
             try
             {
-                _logger.LogInformation($"Sender de ordens tentando conectar..{_config.OrderEntryToOrderEngine.Uri}");
-                using (_sender = new PushSocket("@"+_config.OrderEntryToOrderEngine.Uri))
+                _logger.LogInformation($"Sender de ordens tentando conectar..{_config.PublisherEngine.Uri}");
+                using (_sender = new PushSocket("@" + _config.PublisherEngine.Uri))
                 //using (_sender = new PushSocket(""))
                 {
                     _logger.LogInformation("Sender de ordens Conectado!!!");
@@ -90,7 +90,7 @@ public class ProducerOrderApp : BackgroundService
             var order = new OrderEngine();
             order.Symbol = "btcusd";
             order.Side = SideTrade.Buy;
-            order.Account = new Limit() { AccountId = 10012,  };
+            order.Account = new Limit() { AccountId = 10012, };
             order.TimeInForce = TimeInForce.FOK;
             order.AccountId = 10012;
             order.Execution = Execution.ToOpen;

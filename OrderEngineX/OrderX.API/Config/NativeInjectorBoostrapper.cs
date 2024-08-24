@@ -1,26 +1,23 @@
-﻿using System.Reflection;
+﻿using FluentResults;
 using MassTransit;
 using MediatR;
-using OrderEngineX.API.Consumers;
-using OrderEngineX.API.Publishers;
+using MongoDB.Driver;
 using OrderEngineX.Application.Commands;
+using OrderEngineX.Application.Commands.Order;
 using OrderEngineX.Application.Events;
 using OrderEngineX.Core.Interfaces;
 using OrderEngineX.Core.Notifications;
 using OrderEngineX.Infra.Cache;
+using OrderEngineX.Infra.Data;
+using OrderEngineX.Infra.Repositories;
+using Sharedx.Infra.Order.Cache;
+using Sharedx.Infra.Outbox.Cache;
+using Sharedx.Infra.Outbox.Services;
 using SharedX.Core.Bus;
 using SharedX.Core.Interfaces;
 using SharedX.Core.Specs;
-using Sharedx.Infra.Order.Cache;
-using OrderEngineX.Application.Commands.Order;
 using SharedX.Infra.Cache;
-
-using Sharedx.Infra.Outbox.Services;
-using Sharedx.Infra.Outbox.Cache;
-using FluentResults;
-using MongoDB.Driver;
-using OrderEngineX.Infra.Repositories;
-using OrderEngineX.Infra.Data;
+using System.Reflection;
 
 namespace OrderEngineX.API.Config;
 internal class NativeInjectorBoostrapper
@@ -41,11 +38,11 @@ internal class NativeInjectorBoostrapper
 
             x.UsingRabbitMq((context, cfg) =>
             {
-                
+
                 string hostname = config["QueueSettings:Hostname"]!;
                 string port = config["QueueSettings:port"]!;
 
-                cfg.Host(hostname,port , "/", h =>
+                cfg.Host(hostname, port, "/", h =>
                 {
                     h.Username("guest");
                     h.Password("guest");
@@ -53,11 +50,11 @@ internal class NativeInjectorBoostrapper
                 cfg.ConfigureEndpoints(context);
             });
         });
-        
+
         // FIX - Application
 
         //services.AddSingleton<IFixServerApp, FixServerApp>();
-        
+
         // Domain Bus (Mediator)
         services.AddScoped<IMediatorHandler, InMemmoryBus>();
         //services.AddScoped<IOrderBook, OrderBook>();
@@ -81,7 +78,7 @@ internal class NativeInjectorBoostrapper
         }));
 
         // Outbox
-        services.AddSingleton(typeof(IOutboxBackgroundService<>), typeof(OutboxBackgroundService<>));
+
         services.AddSingleton(typeof(IOutboxCache<>), typeof(OutboxCache<>));
 
         // Domain - Events
@@ -108,15 +105,10 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IOrderReportCache, OrderReportCache>();
         services.AddSingleton<IOrderStopCache, OrderStopCache>();
         services.AddSingleton<IBookOfferCache, BookOfferCache>();
-        
+
         services.AddSingleton<ISecurityEngineCache, SecurityEngineCache>();
 
         services.AddSingleton<IOrderEngineRepository, OrderEngineRepository>();
         services.AddSingleton<IOrderEngineContext, OrderEngineContext>();
-
-        services.AddHostedService<ConsumerExecutionReportApp>();
-        //services.AddHostedService<PublisherOrderReportApp>();
-        services.AddHostedService<PublisherOrderApp>();
-        services.AddHostedService<ConsumerOrdersApp>();
     }
 }

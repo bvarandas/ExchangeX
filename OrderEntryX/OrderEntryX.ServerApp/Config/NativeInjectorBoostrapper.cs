@@ -1,20 +1,20 @@
-﻿using System.Reflection;
-using DropCopyX.Infra.Cache;
+﻿using DropCopyX.Infra.Cache;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 using OrderEntryX.Core.Interfaces;
-using OrderEntryX.Infra.Client;
 using OrderEntryX.Infra.Data;
 using OrderEntryX.ServerApp.Services;
 using Sharedx.Infra.LoginFix.Data;
+using Sharedx.Infra.Outbox.Cache;
 using Sharedx.Infra.Outbox.Services;
 using SharedX.Core.Bus;
 using SharedX.Core.Interfaces;
 using SharedX.Core.Repositories;
 using SharedX.Core.Specs;
 using SharedX.Infra.Repositories;
+using System.Reflection;
 namespace OrderEntryX.ServerApp;
 internal class NativeInjectorBoostrapper
 {
@@ -49,7 +49,7 @@ internal class NativeInjectorBoostrapper
 
         // FIX - Application
         services.AddSingleton<IFixServerApp, FixServerApp>();
-        
+
 
         // Domain Bus (Mediator)
         services.AddScoped<IMediatorHandler, InMemmoryBus>();
@@ -74,7 +74,9 @@ internal class NativeInjectorBoostrapper
         }));
 
         // Outbox
-        services.AddSingleton(typeof(IOutboxBackgroundService<>), typeof(OutboxBackgroundService<>));
+        services.AddSingleton(typeof(IOutboxPublisherService<>), typeof(OutboxPublisherService<>));
+        services.AddSingleton(typeof(IOutboxConsumerService<>), typeof(OutboxConsumerService<>));
+        services.AddSingleton(typeof(IOutboxCache<>), typeof(OutboxCache<>));
 
         // Infra - Data
         services.AddSingleton<IMongoDatabase>(sp =>
@@ -88,7 +90,6 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IOrderEntryChache, OrderEntryChache>();
         services.AddSingleton<IOrderEntryContext, OrderEntryContext>();
 
-        services.AddHostedService<PublisherOrdersApp>();
         services.AddHostedService<ConsumerFixApp>();
     }
 }

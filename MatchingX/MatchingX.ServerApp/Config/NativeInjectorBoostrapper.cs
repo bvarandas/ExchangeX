@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using FluentResults;
+﻿using FluentResults;
 using MacthingX.Application.Commands;
 using MacthingX.Application.Commands.Match.OrderStatus;
 using MacthingX.Application.Commands.Match.OrderType;
@@ -14,8 +13,8 @@ using MatchingX.Infra.Cache;
 using MatchingX.Infra.Data;
 using MatchingX.Infra.FixClientApp;
 using MatchingX.Infra.Repositories;
-using MatchingX.ServerApp.Consumer;
 using MatchingX.ServerApp.Publisher;
+using MatchingX.ServerApp.Receiver;
 using Medallion.Threading;
 using Medallion.Threading.ZooKeeper;
 using MediatR;
@@ -28,10 +27,13 @@ using Sharedx.Infra.Outbox.Services;
 using SharedX.Core.Bus;
 using SharedX.Core.Enums;
 using SharedX.Core.Interfaces;
-using SharedX.Core.Matching;
+using SharedX.Core.Matching.DropCopy;
+using SharedX.Core.Matching.MarketData;
 using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
+using SharedX.Core.ValueObjects;
 using SharedX.Infra.Cache;
+using System.Reflection;
 
 namespace MatchinX.API.Config;
 internal class NativeInjectorBoostrapper
@@ -66,7 +68,7 @@ internal class NativeInjectorBoostrapper
         // FIX - Application
         services.AddSingleton<ITradeClientApp, TradeClientApp>();
         //services.AddSingleton<IApplication, FixServerApp>();
-        
+
         // Domain Bus (Mediator)
         services.AddScoped<IMediatorHandler, InMemmoryBus>();
         //services.AddScoped<IOrderBook, OrderBook>();
@@ -91,11 +93,23 @@ internal class NativeInjectorBoostrapper
 
         // ZooKeeper - DistributedSynchronizator
         services.AddSingleton<IDistributedLockProvider>(
-            new  ZooKeeperDistributedSynchronizationProvider(config["ConnectionZooKeeper:ConnectionString"]!, 
-                options=>options.ConnectTimeout(TimeSpan.FromSeconds(5))));
+            new ZooKeeperDistributedSynchronizationProvider(config["ConnectionZooKeeper:ConnectionString"]!,
+                options => options.ConnectTimeout(TimeSpan.FromSeconds(5))));
+
+        // Services
+        services.AddSingleton(typeof(ReceiverOrder), typeof(IReceiverEngine<OrderEngine>));
+
+        services.AddSingleton(typeof(PublisherDropCopy), typeof(IPublisherEngine<ExecutionReport>));
+        services.AddSingleton(typeof(PublisherMarketData), typeof(IPublisherEngine<MarketData>));
+        services.AddSingleton(typeof(PublisherOrderEngine), typeof(IPublisherEngine<ExecutionReport>));
 
         // Outbox 
-        services.AddSingleton(typeof(IOutboxBackgroundService<>), typeof(OutboxBackgroundService<>));
+        services.AddSingleton(typeof(IOutboxConsumerService<EnvelopeOutbox<MarketData>>),
+                               typeof(OutboxConsumerService<EnvelopeOutbox<MarketData>>));
+
+        services.AddSingleton(typeof(IOutboxConsumerService<EnvelopeOutbox<Security>>),
+                               typeof(OutboxConsumerService<EnvelopeOutbox<Security>>));
+
         services.AddSingleton(typeof(IOutboxCache<>), typeof(OutboxCache<>));
 
         // Domain - Events
@@ -105,7 +119,7 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<INotificationHandler<OrderCanceledEvent>, OrderEventHandler>();
         services.AddSingleton<INotificationHandler<OrderTradedEvent>, OrderEventHandler>();
         services.AddSingleton<INotificationHandler<OrderOpenedEvent>, OrderEventHandler>();
-                
+
         // Domain - Commands
         services.AddSingleton<IRequestHandler<MatchingLimitCommand, (OrderStatus, Dictionary<long, OrderEngine>)>, MatchingCommandHandler>();
         services.AddSingleton<IRequestHandler<MatchingMarketCommand, (OrderStatus, Dictionary<long, OrderEngine>)>, MatchingCommandHandler>();
@@ -118,13 +132,13 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IRequestHandler<MatchingCancelCommand, Result>, MatchingStatusCommandHandler>();
 
         // Domain - Services
-        services.AddSingleton<IMatchingReceiver,    MatchingReceiver>();
-        services.AddSingleton<ITradeOrderService,   TradeOrderService>();
+        services.AddSingleton<IMatchingReceiver, MatchingReceiver>();
+        services.AddSingleton<ITradeOrderService, TradeOrderService>();
 
         var strategies = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(assembly => assembly.GetTypes())
                 .Where(type => typeof(IMatch).IsAssignableFrom(type) && !type.IsInterface && !type.IsAbstract);
-        
+
         foreach (var strategy in strategies)
             services.AddSingleton(typeof(IMatch), strategy);
 
@@ -141,22 +155,17 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IBookOfferCache, BookOfferCache>();
         services.AddSingleton<IMatchingCache, MatchingCache>();
         services.AddSingleton<IMatchContextStrategy, MatchContextStrategy>();
-        
-        
+
+
         services.AddSingleton<IExecutedTradeRepository, ExecutedTradeRepository>();
 
         services.AddSingleton<ITradeRepository, TradeRepository>();
         services.AddSingleton<ITradeContext, TradeContext>();
 
-        
-        services.AddSingleton<IExecutedTradeContext ,ExecutedTradeContext >();
+
+        services.AddSingleton<IExecutedTradeContext, ExecutedTradeContext>();
         services.AddSingleton<IMatchingRepository, MatchingRepository>();
         services.AddSingleton<IMatchingContext, MatchingContext>();
-        
-        // Apps - Services
-        services.AddHostedService<ConsumerOrderApp>();
-        services.AddHostedService<PublisherMarketDataApp>();
-        services.AddHostedService<PublisherOrderEngineApp>();
-        services.AddHostedService<PublisherDropCopyApp>();
+
     }
 }

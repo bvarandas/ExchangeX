@@ -1,11 +1,10 @@
-﻿using System.Reflection;
-using DropCopyX.Application.Commands;
+﻿using DropCopyX.Application.Commands;
 using DropCopyX.Core.Interfaces;
 using DropCopyX.Core.Repositories;
 using DropCopyX.Infra.Cache;
-using DropCopyX.Infra.Client;
 using DropCopyX.Infra.Data;
 using DropCopyX.Infra.Repositories;
+using DropCopyX.ServerApp.Receiver;
 using DropCopyX.ServerApp.Services;
 using FluentResults;
 using MassTransit;
@@ -17,7 +16,11 @@ using Sharedx.Infra.Outbox.Cache;
 using Sharedx.Infra.Outbox.Services;
 using SharedX.Core.Bus;
 using SharedX.Core.Interfaces;
+using SharedX.Core.Matching.DropCopy;
 using SharedX.Core.Specs;
+using SharedX.Core.ValueObjects;
+using System.Reflection;
+
 namespace DropCopyX.ServerApp;
 internal class NativeInjectorBoostrapper
 {
@@ -50,7 +53,7 @@ internal class NativeInjectorBoostrapper
         // FIX - Application
 
         services.AddSingleton<IFixServerApp, FixServerApp>();
-        
+
 
         // Domain Bus (Mediator)
         services.AddScoped<IMediatorHandler, InMemmoryBus>();
@@ -74,8 +77,13 @@ internal class NativeInjectorBoostrapper
             .AllowCredentials();
         }));
 
+        // Services
+        services.AddSingleton(typeof(ReceiverDropCopy), typeof(IReceiverEngine<ExecutionReport>));
+
         // Outbox 
-        services.AddSingleton(typeof(IOutboxBackgroundService<>), typeof(OutboxBackgroundService<>));
+        services.AddSingleton(typeof(IOutboxConsumerService<EnvelopeOutbox<ExecutionReport>>),
+                               typeof(OutboxConsumerService<EnvelopeOutbox<ExecutionReport>>));
+
         services.AddSingleton(typeof(IOutboxCache<>), typeof(OutboxCache<>));
 
         // Domain - Commands
@@ -92,9 +100,8 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IExecutedTradeCache, TradeCaptureReportCache>();
         services.AddSingleton<IExecutionReportChache, ExecutionReportChache>();
         services.AddSingleton<IDropCopyContext, DropCopyContext>();
-        services.AddSingleton<IDropCopyRepository , DropCopyRepository>();
+        services.AddSingleton<IDropCopyRepository, DropCopyRepository>();
 
-        services.AddHostedService<ConsumerDropCopyApp>();
         services.AddHostedService<PublisherFixApp>();
     }
 }

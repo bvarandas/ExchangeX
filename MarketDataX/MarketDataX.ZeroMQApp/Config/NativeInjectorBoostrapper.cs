@@ -1,24 +1,24 @@
-﻿using System.Reflection;
-using MarketDataX.Core.Interfaces;
-using MarketDataX.ServerApp.Services;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using SharedX.Core.Bus;
-using SharedX.Core.Specs;
-using MarketDataX.ServerApp.Consumer;
-using MarketDataX.Infra.Cache;
-using MassTransit;
-using Sharedx.Infra.Outbox.Services;
-using SharedX.Core.Interfaces;
-using Sharedx.Infra.Outbox.Cache;
+﻿using FluentResults;
 using MarketDataX.Application.Commands;
-using MediatR;
+using MarketDataX.Core.Interfaces;
+using MarketDataX.Infra.Cache;
 using MarketDataX.Infra.Data;
 using MarketDataX.Infra.Repositories;
-using FluentResults;
+using MarketDataX.ServerApp.Receiver;
+using MarketDataX.ServerApp.Services;
+using MassTransit;
+using MediatR;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
+using Sharedx.Infra.Outbox.Cache;
+using Sharedx.Infra.Outbox.Services;
+using SharedX.Core.Bus;
+using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.MarketData;
+using SharedX.Core.Specs;
 using SharedX.Core.ValueObjects;
+using System.Reflection;
 
 namespace DropCopyX.ServerApp;
 internal class NativeInjectorBoostrapper
@@ -72,8 +72,19 @@ internal class NativeInjectorBoostrapper
             .SetIsOriginAllowed((host) => true)
             .AllowCredentials();
         }));
+
+        // Services
+        services.AddSingleton(typeof(ReceiverMarketData), typeof(IReceiverEngine<MarketData>));
+        services.AddSingleton(typeof(ReceiverSecurity), typeof(IReceiverEngine<Security>));
+
         // Outbox 
-        services.AddSingleton(typeof(IOutboxBackgroundService<>), typeof(OutboxBackgroundService<>));
+        services.AddSingleton(typeof(IOutboxConsumerService<EnvelopeOutbox<MarketData>>),
+                               typeof(OutboxConsumerService<EnvelopeOutbox<MarketData>>));
+
+        services.AddSingleton(typeof(IOutboxConsumerService<EnvelopeOutbox<Security>>),
+                               typeof(OutboxConsumerService<EnvelopeOutbox<Security>>));
+
+        //services.AddSingleton(typeof(IOutboxBackgroundService<>), typeof(OutboxBackgroundService<>));
         services.AddSingleton(typeof(IOutboxCache<>), typeof(OutboxCache<>));
 
         // Domain - Events
@@ -93,7 +104,6 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IMarketDataContext, MarketDataContext>();
         services.AddSingleton<IMarketDataRepository, MarketDataRepository>();
 
-        services.AddHostedService<ConsumerMarketDataApp>();
         services.AddHostedService<PublisherFixApp>();
     }
 }
