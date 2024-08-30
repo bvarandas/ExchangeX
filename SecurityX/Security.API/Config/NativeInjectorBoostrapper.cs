@@ -1,7 +1,7 @@
 ﻿using FluentResults;
 using MediatR;
 using MongoDB.Driver;
-using Security.API.Consumer;
+using Security.API.Receiver;
 using Security.Application.Commands;
 using Security.Application.Events;
 using Security.Application.Services;
@@ -69,10 +69,11 @@ internal class NativeInjectorBoostrapper
             return client.GetDatabase(config.GetValue<string>("DatabaseSettings:DatabaseName"));
         });
 
+        // Infra - Context
         services.AddSingleton<ISecurityEngineContext, SecurityEngineContext>();
         services.AddSingleton<ISecurityCache, SecurityCache>();
         services.AddSingleton<ISecurityEngineRepository, SecurityEngineRepository>();
 
-        services.AddHostedService<ConsumerSecurityApp>();
+        services.AddHostedService<ReceiverSecurity>();
     }
 }
