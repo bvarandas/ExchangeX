@@ -26,7 +26,7 @@ public class OrderEngineRepository : IOrderEngineRepository
             inserts.Add(new InsertOneModel<OrderEngine>(order));
 
             var insertResult = await _context.OrderEngine.BulkWriteAsync(inserts, null, cancellation);
-            result = insertResult.IsAcknowledged && insertResult.ModifiedCount > 0;
+            result = insertResult.IsAcknowledged && insertResult.InsertedCount > 0;
         }
         catch (Exception ex)
         {
@@ -159,7 +159,7 @@ public class OrderEngineRepository : IOrderEngineRepository
             _logger.LogError(ex.Message, ex);
             return Result.Fail(new Error(ex.Message));
         }
-        return Result.Ok( result);
+        return Result.Ok(result);
     }
     public async Task<Result> UpdateOrderDetailAsync(OrderEngine order, OrderEngineDetail oderDetail, CancellationToken cancellation)
     {

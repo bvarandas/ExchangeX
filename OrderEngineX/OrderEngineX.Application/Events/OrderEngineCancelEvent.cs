@@ -1,11 +1,11 @@
 ﻿using SharedX.Core.Events;
 using SharedX.Core.Matching.OrderEngine;
 namespace OrderEngineX.Application.Events;
-public class OrderTradeCancelEvent : Event
+public class OrderEngineCancelEvent : Event
 {
     public readonly OrderEngine Order;
     public DateTime Timestamp { get; private set; }
-    public OrderTradeCancelEvent(OrderEngine order)
+    public OrderEngineCancelEvent(OrderEngine order)
     {
         Order = order;
         Timestamp = DateTime.Now;

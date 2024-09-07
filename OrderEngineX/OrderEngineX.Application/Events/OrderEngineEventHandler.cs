@@ -1,25 +1,25 @@
 ﻿using MediatR;
-using OrderEngineX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
+using OrderEngineX.Core.Interfaces;
 namespace OrderEngineX.Application.Events;
-public class OrderTradeEventHandler :
-    INotificationHandler<OrderTradeNewEvent>,
+public class OrderEngineEventHandler :
+    INotificationHandler<OrderEngineNewEvent>,
     INotificationHandler<OrderTradeModifyEvent>,
-    INotificationHandler<OrderTradeCancelEvent>,
-    INotificationHandler<OrderTradeRejectedEvent>
+    INotificationHandler<OrderEngineCancelEvent>,
+    INotificationHandler<OrderEngineRejectedEvent>
 {
     private readonly IOrderReportCache _reportCache;
     private readonly IOrderEngineCache _orderCache;
-    private readonly ILogger<OrderTradeEventHandler> _logger;
-    public OrderTradeEventHandler(IOrderEngineCache orderCache, 
-        IOrderReportCache reportCache, 
-        ILogger<OrderTradeEventHandler> logger)
+    private readonly ILogger<OrderEngineEventHandler> _logger;
+    public OrderEngineEventHandler(IOrderEngineCache orderCache,
+        IOrderReportCache reportCache,
+        ILogger<OrderEngineEventHandler> logger)
     {
         _logger = logger;
         _orderCache = orderCache;
         _reportCache = reportCache;
     }
-    public Task Handle(OrderTradeNewEvent request, CancellationToken cancellationToken)
+    public Task Handle(OrderEngineNewEvent request, CancellationToken cancellationToken)
     {
         _orderCache.AddOrder(request.Order);
         return Task.CompletedTask;
@@ -29,12 +29,12 @@ public class OrderTradeEventHandler :
         _orderCache.AddOrder(request.Order);
         return Task.CompletedTask;
     }
-    public Task Handle(OrderTradeCancelEvent request, CancellationToken cancellationToken)
+    public Task Handle(OrderEngineCancelEvent request, CancellationToken cancellationToken)
     {
         _orderCache.AddOrder(request.Order);
         return Task.CompletedTask;
     }
-    public Task Handle(OrderTradeRejectedEvent request, CancellationToken cancellationToken)
+    public Task Handle(OrderEngineRejectedEvent request, CancellationToken cancellationToken)
     {
         _reportCache.AddReport(request.Report);
         return Task.CompletedTask;

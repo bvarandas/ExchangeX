@@ -11,7 +11,8 @@ using System.Text.Json;
 
 
 namespace Sharedx.Infra.Outbox.Cache;
-public class OutboxCache<T> where T : class, IOutboxCache<T>
+public class OutboxCache<T> :
+    IOutboxCache<T> where T : class
 {
     private readonly ConnectionRedis _config;
     private readonly IDatabase _dbOutboxCache;
@@ -33,6 +34,9 @@ public class OutboxCache<T> where T : class, IOutboxCache<T>
         _dbOutboxCache = _redis.GetDatabase((int)RedisDataBases.Outbox);
         _logger = logger;
         _key = new RedisKey("Outbox");
+
+        _queueZeroMQ = new ConcurrentQueue<EnvelopeOutbox<T>>();
+        _queueRabbitMQ = new ConcurrentQueue<EnvelopeOutbox<T>>();
     }
 
     public async Task<Result> DeleteOutboxAsync(EnvelopeOutbox<T> envelope)

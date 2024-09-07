@@ -1,11 +1,11 @@
 version: '3.4'
 
 services:
-  # matchingx:
-  #   image: ${DOCKER_REGISTRY-}matching
-  #   build:
-  #     context: .
-  #     dockerfile: MatchingX/MatchingX.ServerApp/Dockerfile
+  matchingx:
+    image: ${DOCKER_REGISTRY-}matching
+    build:
+      context: .
+      dockerfile: MatchingX/MatchingX.ServerApp/Dockerfile
  
   # orderentryx:
   #   image: ${DOCKER_REGISTRY-}orderentry
@@ -34,18 +34,18 @@ services:
   zoonavigator:
     image: elkozmon/zoonavigator:latest
   
-  # testenginex:
-  #   image: ${DOCKER_REGISTRY-}testenginex
-  #   build:
-  #     context: .
-  #     dockerfile: TestEngineX/TestEngineX/Dockerfile
+  testenginex:
+    image: ${DOCKER_REGISTRY-}testenginex
+    build:
+      context: .
+      dockerfile: TestEngineX/TestEngineX/Dockerfile
 
 
-  # orderenginex:
-  #   image: ${DOCKER_REGISTRY-}orderenginexapi
-  #   build:
-  #     context: .
-  #     dockerfile: OrderEngineX/OrderX.API/Dockerfile
+  orderenginex:
+    image: ${DOCKER_REGISTRY-}orderenginexapi
+    build:
+      context: .
+      dockerfile: OrderEngineX/OrderX.API/Dockerfile
 
 
   security.api:

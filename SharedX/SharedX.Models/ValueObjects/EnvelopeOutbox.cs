@@ -1,9 +1,8 @@
 ﻿using ProtoBuf;
-using SharedX.Core.Specs;
 
 namespace SharedX.Core.ValueObjects;
 [ProtoContract()]
-public class EnvelopeOutbox<T> where T: class
+public class EnvelopeOutbox<T> where T : class
 {
     [ProtoMember(1)]
     public long Id { get; set; }
@@ -15,6 +14,6 @@ public class EnvelopeOutbox<T> where T: class
 
     [ProtoMember(4)]
     public DateTime LastTransaction { get; set; } = DateTime.Now;
-    [ProtoMember(5)]
-    public ConnectionZmq ConnectionZmq { get; set;} 
+    //[ProtoMember(5)]
+    //public ConnectionZmq ConnectionZmq { get; set;} 
 }

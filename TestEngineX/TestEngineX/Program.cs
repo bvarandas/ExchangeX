@@ -2,6 +2,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Sharedx.Infra.Outbox.Cache;
+using SharedX.Core.Interfaces;
+using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
 using System.Reflection;
 using TestEngineX;
@@ -30,7 +33,10 @@ internal class Program
                 //.UseSerilog(Logging.ConfigureLogger)
                 .ConfigureServices(services =>
                 {
+                    services.Configure<QueueSettings>(config.GetSection(nameof(QueueSettings)));
+                    services.Configure<ConnectionRedis>(config.GetSection(nameof(ConnectionRedis)));
                     services.Configure<ConnectionZmq>(config.GetSection(nameof(ConnectionZmq)));
+
                     //services.Configure<QueueCommandSettings>(config.GetSection(nameof(QueueCommandSettings)));
                     //services.AddScoped<ICorrelationIdGenerator, CorrelationIdGenerator>();
                     //services.AddTransient<IMongoDbConnection>((provider) =>
@@ -48,8 +54,9 @@ internal class Program
                     // Domain - Commands
                     //services.AddSingleton<IRequestHandler<InsertOrderBookCommand, Result<bool>>, InsertOrderBookCommandHandler>();
 
+
                     // Infra - Data
-                    //services.AddSingleton<IOrderBookRepository, OrderBookRepository>();
+                    services.AddSingleton(typeof(IOutboxCache<OrderEngine>), typeof(OutboxCache<OrderEngine>));
                     //services.AddSingleton<IOrderBookContext, OrderBookContext>();
                     services.AddHostedService<ProducerOrderApp>();
                 }).Build();

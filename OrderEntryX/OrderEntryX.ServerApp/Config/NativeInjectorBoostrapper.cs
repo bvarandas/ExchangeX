@@ -11,8 +11,10 @@ using Sharedx.Infra.Outbox.Cache;
 using Sharedx.Infra.Outbox.Services;
 using SharedX.Core.Bus;
 using SharedX.Core.Interfaces;
+using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Repositories;
 using SharedX.Core.Specs;
+using SharedX.Core.ValueObjects;
 using SharedX.Infra.Repositories;
 using System.Reflection;
 namespace OrderEntryX.ServerApp;
@@ -28,9 +30,7 @@ internal class NativeInjectorBoostrapper
 
         services.AddMassTransit(x =>
         {
-            x.AddConsumer(typeof(IOutboxConsumerService<>), typeof(OutboxConsumerService<>));
-            //x.AddConsumer<OrderEngineOutboxApp>();
-            //x.AddConsumer<DropCopyOutboxApp>();
+            x.AddConsumer<OutboxConsumerService<EnvelopeOutbox<OrderEngine>>>();
 
             x.UsingRabbitMq((context, cfg) =>
             {
@@ -74,8 +74,9 @@ internal class NativeInjectorBoostrapper
         }));
 
         // Outbox
-        services.AddSingleton(typeof(IOutboxPublisherService<>), typeof(OutboxPublisherService<>));
-        services.AddSingleton(typeof(IOutboxConsumerService<>), typeof(OutboxConsumerService<>));
+        services.AddSingleton(typeof(IOutboxPublisherService<OrderEngine>), typeof(OutboxPublisherService<OrderEngine>));
+        services.AddSingleton(typeof(IOutboxConsumerService<EnvelopeOutbox<OrderEngine>>),
+            typeof(OutboxConsumerService<EnvelopeOutbox<OrderEngine>>));
         services.AddSingleton(typeof(IOutboxCache<>), typeof(OutboxCache<>));
 
         // Infra - Data

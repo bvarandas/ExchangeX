@@ -44,7 +44,7 @@ public class OrderEngineCommandHandler : CommandHandler,
 
         if (status.IsSuccess)
         {
-            await _bus.Publish(new OrderTradeCancelEvent(command.Order));
+            await _bus.Publish(new OrderEngineCancelEvent(command.Order));
             return Result.Ok();
         }
         return status;
@@ -67,7 +67,7 @@ public class OrderEngineCommandHandler : CommandHandler,
                 var statusUpdate = await _repository.UpsertOrdersAsync(orderOld.Value, cancellationToken);
             
                 if(statusUpdate.IsSuccess)
-                    await _bus.Publish(new OrderTradeCancelEvent(orderOld.Value));
+                    await _bus.Publish(new OrderEngineCancelEvent(orderOld.Value));
 
                 var idOrder = _repository.GetOrderIdAsync(cancellationToken).Result;
                 command.Order.OrderID = idOrder.Value;
@@ -75,7 +75,7 @@ public class OrderEngineCommandHandler : CommandHandler,
                 var statusCreate = await _repository.CreateOrdersAsync(command.Order, cancellationToken);
             
                 if (statusCreate.IsSuccess)
-                    await _bus.Publish(new OrderTradeNewEvent(command.Order));
+                    await _bus.Publish(new OrderEngineNewEvent(command.Order));
             }
             else
             {
@@ -99,7 +99,7 @@ public class OrderEngineCommandHandler : CommandHandler,
         command.Order.LeavesQuantity = command.Order.Quantity;
 
         await _repository.CreateOrdersAsync(command.Order, cancellationToken);
-        await _bus.Publish(new OrderTradeNewEvent(command.Order));
+        await _bus.Publish(new OrderEngineNewEvent(command.Order));
 
         return Result.Ok();
     }

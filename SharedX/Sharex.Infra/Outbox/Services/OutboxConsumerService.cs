@@ -9,11 +9,11 @@ using SharedX.Core.Interfaces;
 using SharedX.Core.Specs;
 using SharedX.Core.ValueObjects;
 namespace Sharedx.Infra.Outbox.Services;
-public class OutboxConsumerService<T> : 
+public class OutboxConsumerService<T> :
     BackgroundService,
     IOutboxConsumerService<EnvelopeOutbox<T>>,
     IConsumer<EnvelopeOutbox<T>> where T : class
-    
+
 {
     private readonly IOutboxCache<T> _cacheOutbox;
     private readonly IReceiverEngine<T> _receiverEngine;
@@ -22,7 +22,7 @@ public class OutboxConsumerService<T> :
     private PullSocket _receiver;
     private static Thread ThreadReceiverEnvelope = null!;
     public OutboxConsumerService(
-        IOutboxCache<T> cacheOutbox, 
+        IOutboxCache<T> cacheOutbox,
         ILogger<OutboxConsumerService<T>> logger,
         IOptions<ConnectionZmq> options,
         IReceiverEngine<T> receiverEngine)
@@ -37,7 +37,7 @@ public class OutboxConsumerService<T> :
     {
         return Task.CompletedTask;
     }
-    public Task StartAsync(CancellationToken cancellationToken)
+    public override Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Iniciando o Receiver de Envelopes ZeroMQ...");
 
@@ -66,19 +66,11 @@ public class OutboxConsumerService<T> :
                         var message = _receiver.ReceiveMultipartBytes()[0];
                         var envelope = message.DeserializeFromByteArrayProtobuf<EnvelopeOutbox<T>>();
 
-                        var deleted =await _cacheOutbox.DeleteOutboxAsync(envelope);
+                        var deleted = await _cacheOutbox.DeleteOutboxAsync(envelope);
 
                         if (deleted.IsSuccess)
                         {
                             _receiverEngine.ReceiveEngine(envelope.Body, stoppingToken);
-                            /// HACK :Criar interface para receiver geral
-                            
-                            /// Matching Engine
-                            /// Order Engine
-                            /// Drop Copy Engine
-                            /// Market data Engine
-                            /// Trade Engine
-                            //_matchReceiver.ReceiveOrder(order);
                         }
                     }
                 }
@@ -104,5 +96,5 @@ public class OutboxConsumerService<T> :
             _receiverEngine.ReceiveEngine(envelope.Body, default(CancellationToken));
     }
 
-    
+
 }

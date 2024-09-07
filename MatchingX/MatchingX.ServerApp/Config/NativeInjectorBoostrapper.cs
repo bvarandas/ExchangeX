@@ -49,7 +49,9 @@ internal class NativeInjectorBoostrapper
 
         services.AddMassTransit(x =>
         {
-            x.AddConsumer(typeof(IOutboxConsumerService<>), typeof(OutboxConsumerService<>));
+            x.AddConsumer<OutboxConsumerService<MarketData>>();
+            x.AddConsumer<OutboxConsumerService<Security>>();
+
             x.UsingRabbitMq((context, cfg) =>
             {
                 string hostname = config["QueueSettings:Hostname"]!;
@@ -97,11 +99,11 @@ internal class NativeInjectorBoostrapper
                 options => options.ConnectTimeout(TimeSpan.FromSeconds(5))));
 
         // Services
-        services.AddSingleton(typeof(ReceiverOrder), typeof(IReceiverEngine<OrderEngine>));
+        services.AddSingleton(typeof(IReceiverEngine<OrderEngine>), typeof(ReceiverOrder));
 
-        services.AddSingleton(typeof(PublisherDropCopy), typeof(IPublisherEngine<ExecutionReport>));
-        services.AddSingleton(typeof(PublisherMarketData), typeof(IPublisherEngine<MarketData>));
-        services.AddSingleton(typeof(PublisherOrderEngine), typeof(IPublisherEngine<ExecutionReport>));
+        services.AddSingleton(typeof(IPublisherEngine<ExecutionReport>), typeof(PublisherDropCopy));
+        services.AddSingleton(typeof(IPublisherEngine<MarketData>), typeof(PublisherMarketData));
+        services.AddSingleton(typeof(IPublisherEngine<ExecutionReport>), typeof(PublisherOrderEngine));
 
         // Outbox 
         services.AddSingleton(typeof(IOutboxConsumerService<EnvelopeOutbox<MarketData>>),
@@ -110,7 +112,7 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton(typeof(IOutboxConsumerService<EnvelopeOutbox<Security>>),
                                typeof(OutboxConsumerService<EnvelopeOutbox<Security>>));
 
-        services.AddSingleton(typeof(IOutboxCache<>), typeof(OutboxCache<>));
+        services.AddSingleton(typeof(IOutboxCache<OrderEngine>), typeof(OutboxCache<OrderEngine>));
 
         // Domain - Events
         services.AddSingleton<INotificationHandler<DomainNotification>, DomainNotificationHandler>();
@@ -156,16 +158,18 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IMatchingCache, MatchingCache>();
         services.AddSingleton<IMatchContextStrategy, MatchContextStrategy>();
 
-
         services.AddSingleton<IExecutedTradeRepository, ExecutedTradeRepository>();
 
         services.AddSingleton<ITradeRepository, TradeRepository>();
         services.AddSingleton<ITradeContext, TradeContext>();
 
-
         services.AddSingleton<IExecutedTradeContext, ExecutedTradeContext>();
         services.AddSingleton<IMatchingRepository, MatchingRepository>();
         services.AddSingleton<IMatchingContext, MatchingContext>();
+
+        services.AddHostedService<OutboxConsumerService<OrderEngine>>();
+        //services.AddHostedService<OutboxPublisherService<OrderEngine>>();
+
 
     }
 }

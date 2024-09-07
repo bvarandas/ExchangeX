@@ -6,8 +6,10 @@ using NetMQ.Sockets;
 using SharedX.Core.Account;
 using SharedX.Core.Enums;
 using SharedX.Core.Extensions;
+using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
+using SharedX.Core.ValueObjects;
 using System.Collections.Concurrent;
 namespace TestEngineX;
 public class ProducerOrderApp : BackgroundService
@@ -17,14 +19,17 @@ public class ProducerOrderApp : BackgroundService
     private readonly ConnectionZmq _config;
     private static Thread ThreadSenderOrder = null!;
     private static Thread ThreadFillQueueOrder = null!;
+    private readonly IOutboxCache<OrderEngine> _cache;
 
     private readonly ConcurrentQueue<OrderEngine> OrderQueue;
 
     public ProducerOrderApp(ILogger<ProducerOrderApp> logger,
-        IOptions<ConnectionZmq> options)
+        IOptions<ConnectionZmq> options,
+        IOutboxCache<OrderEngine> cache)
     {
         _logger = logger;
         _config = options.Value;
+        _cache = cache;
         OrderQueue = new ConcurrentQueue<OrderEngine>();
     }
     public override Task StartAsync(CancellationToken cancellationToken)
@@ -66,7 +71,17 @@ public class ProducerOrderApp : BackgroundService
                     {
                         while (OrderQueue.TryDequeue(out OrderEngine order))
                         {
-                            var message = order.SerializeToByteArrayProtobuf<OrderEngine>();
+                            var envelopeOrder = new EnvelopeOutbox<OrderEngine>();
+                            envelopeOrder.Body = order;
+                            envelopeOrder.Id = order.OrderID;
+                            envelopeOrder.LastTransaction = DateTime.UtcNow;
+                            envelopeOrder.ActivityOutbox = new ActivityOutbox() { Activity = "OrderEntry" };
+
+                            _cache.TryEnqueueZeroMQEnvelope(envelopeOrder);
+                            _cache.TryEnqueueRabitMQEnvelope(envelopeOrder);
+                            _cache.UpsertOutboxAsync(envelopeOrder);
+
+                            var message = envelopeOrder.SerializeToByteArrayProtobuf<EnvelopeOutbox<OrderEngine>>();
                             _sender.SendMultipartBytes(message);
                         }
                         Thread.Sleep(1000);

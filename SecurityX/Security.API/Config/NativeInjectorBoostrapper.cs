@@ -1,7 +1,6 @@
 ﻿using FluentResults;
 using MediatR;
 using MongoDB.Driver;
-using Security.API.Receiver;
 using Security.Application.Commands;
 using Security.Application.Events;
 using Security.Application.Services;
@@ -10,7 +9,10 @@ using Security.Infra.Repositories;
 using SecurityX.Core.Interfaces;
 using SecurityX.Core.Notifications;
 using SecurityX.Infra.Cache;
+using Sharedx.Infra.Outbox.Cache;
+using Sharedx.Infra.Outbox.Services;
 using SharedX.Core.Bus;
+using SharedX.Core.Interfaces;
 using SharedX.Core.Specs;
 using System.Reflection;
 namespace SecurityX.ServerApp;
@@ -30,7 +32,6 @@ internal class NativeInjectorBoostrapper
 
         // Domain Bus (Mediator)
         services.AddSingleton<IMediatorHandler, InMemmoryBus>();
-        //services.AddScoped<IOrderBook, OrderBook>();
 
         //SignalR
         services.AddSignalR();
@@ -62,6 +63,10 @@ internal class NativeInjectorBoostrapper
         // Service
         services.AddSingleton<ISecurityService, SecurityService>();
 
+        //Outbox
+        services.AddSingleton(typeof(IOutboxPublisherService<>), typeof(OutboxPublisherService<>));
+        services.AddSingleton(typeof(IOutboxCache<>), typeof(OutboxCache<>));
+
         // Infra - Data
         services.AddSingleton<IMongoDatabase>(sp =>
         {
@@ -74,6 +79,5 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<ISecurityCache, SecurityCache>();
         services.AddSingleton<ISecurityEngineRepository, SecurityEngineRepository>();
 
-        services.AddHostedService<ReceiverSecurity>();
     }
 }

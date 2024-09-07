@@ -2,6 +2,7 @@
 using MassTransit;
 using MediatR;
 using MongoDB.Driver;
+using OrderEngineX.API.Receiver;
 using OrderEngineX.Application.Commands;
 using OrderEngineX.Application.Commands.Order;
 using OrderEngineX.Application.Events;
@@ -15,6 +16,7 @@ using Sharedx.Infra.Outbox.Cache;
 using Sharedx.Infra.Outbox.Services;
 using SharedX.Core.Bus;
 using SharedX.Core.Interfaces;
+using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
 using SharedX.Infra.Cache;
 using System.Reflection;
@@ -32,10 +34,7 @@ internal class NativeInjectorBoostrapper
 
         services.AddMassTransit(x =>
         {
-            x.AddConsumer(typeof(IOutboxConsumerService<>), typeof(OutboxConsumerService<>));
-            //x.AddConsumer<OrderEngineOutboxApp>();
-            //x.AddConsumer<DropCopyOutboxApp>();
-
+            x.AddConsumer<OutboxConsumerService<OrderEngine>>();
             x.UsingRabbitMq((context, cfg) =>
             {
 
@@ -51,9 +50,8 @@ internal class NativeInjectorBoostrapper
             });
         });
 
-        // FIX - Application
-
-        //services.AddSingleton<IFixServerApp, FixServerApp>();
+        // Services
+        services.AddSingleton(typeof(IReceiverEngine<OrderEngine>), typeof(ReceiverOrder));
 
         // Domain Bus (Mediator)
         services.AddScoped<IMediatorHandler, InMemmoryBus>();
@@ -78,15 +76,17 @@ internal class NativeInjectorBoostrapper
         }));
 
         // Outbox
-
-        services.AddSingleton(typeof(IOutboxCache<>), typeof(OutboxCache<>));
+        services.AddSingleton(typeof(IOutboxCache<OrderEngine>), typeof(OutboxCache<OrderEngine>));
+        //services.AddSingleton(typeof(IOutboxPublisherService<OrderEngine>), typeof(OutboxPublisherService<OrderEngine>));
+        //services.AddSingleton(typeof(IOutboxConsumerService<EnvelopeOutbox<OrderEngine>>),
+        //    typeof(OutboxConsumerService<EnvelopeOutbox<OrderEngine>>));
 
         // Domain - Events
         services.AddSingleton<INotificationHandler<DomainNotification>, DomainNotificationHandler>();
 
-        services.AddSingleton<INotificationHandler<OrderTradeNewEvent>, OrderTradeEventHandler>();
-        services.AddSingleton<INotificationHandler<OrderTradeModifyEvent>, OrderTradeEventHandler>();
-        services.AddSingleton<INotificationHandler<OrderTradeCancelEvent>, OrderTradeEventHandler>();
+        services.AddSingleton<INotificationHandler<OrderEngineNewEvent>, OrderEngineEventHandler>();
+        services.AddSingleton<INotificationHandler<OrderTradeModifyEvent>, OrderEngineEventHandler>();
+        services.AddSingleton<INotificationHandler<OrderEngineCancelEvent>, OrderEngineEventHandler>();
 
         // Domain - Command
         services.AddSingleton<IRequestHandler<OrderCancelCommand, Result>, OrderEngineCommandHandler>();
@@ -110,5 +110,9 @@ internal class NativeInjectorBoostrapper
 
         services.AddSingleton<IOrderEngineRepository, OrderEngineRepository>();
         services.AddSingleton<IOrderEngineContext, OrderEngineContext>();
+
+        services.AddHostedService<OutboxConsumerService<OrderEngine>>();
+        services.AddHostedService<OutboxPublisherService<OrderEngine>>();
+
     }
 }

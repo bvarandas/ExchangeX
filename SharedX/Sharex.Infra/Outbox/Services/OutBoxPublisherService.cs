@@ -10,20 +10,21 @@ using SharedX.Core.Specs;
 using SharedX.Core.ValueObjects;
 namespace Sharedx.Infra.Outbox.Services;
 public class OutboxPublisherService<T> :
-    IOutboxPublisherService<T> where T : class,
-    IHostedService
+    BackgroundService,
+    IOutboxPublisherService<T> where T : class
+
 {
     private readonly IOutboxCache<T> _cacheOutbox;
     private readonly ILogger<OutboxPublisherService<T>> _logger;
     private readonly IBus _bus;
     private PushSocket _sender;
-    private readonly ConnectionZeroMq _config;
+    private readonly ConnectionZmq _config;
     private static Thread ThreadSenderRabbitMQEnvelope = null!;
     private static Thread ThreadSenderZeroMQEnvelope = null!;
     public OutboxPublisherService(
         ILogger<OutboxPublisherService<T>> logger,
         IOutboxCache<T> cacheOutbox,
-        IOptions<ConnectionZeroMq> options,
+        IOptions<ConnectionZmq> options,
         IBus bus)
     {
         _config = options.Value;
@@ -31,7 +32,7 @@ public class OutboxPublisherService<T> :
         _logger = logger;
         _bus = bus;
     }
-    public Task StartAsync(CancellationToken cancellationToken)
+    public override Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Iniciando o Sender Report ZeroMQ...");
 
@@ -70,7 +71,7 @@ public class OutboxPublisherService<T> :
     {
         _logger.LogInformation("Iniciando o Publisher ZeroMQ...");
 
-        using (_sender = new PushSocket(_config.PushPullAddress.Uri))
+        using (_sender = new PushSocket(_config.PublisherEngine.Uri))
         {
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -88,7 +89,8 @@ public class OutboxPublisherService<T> :
             }
         }
     }
-    protected Task ExecuteAsync(CancellationToken stoppingToken)
+
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         return Task.CompletedTask;
     }
