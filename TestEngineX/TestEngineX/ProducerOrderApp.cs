@@ -18,7 +18,8 @@ public class ProducerOrderApp : BackgroundService
     private PushSocket _sender;
     private readonly ConnectionZmq _config;
     private static Thread ThreadSenderOrder = null!;
-    private static Thread ThreadFillQueueOrder = null!;
+    private static Thread ThreadSendBuyQueueOrder = null!;
+    private static Thread ThreadSendSellQueueOrder = null!;
     private readonly IOutboxCache<OrderEngine> _cache;
 
     private readonly ConcurrentQueue<OrderEngine> OrderQueue;
@@ -40,9 +41,13 @@ public class ProducerOrderApp : BackgroundService
         ThreadSenderOrder.Name = nameof(ThreadSenderOrder);
         ThreadSenderOrder.Start();
 
-        ThreadFillQueueOrder = new Thread(() => FillOrder(cancellationToken));
-        ThreadFillQueueOrder.Name = nameof(ThreadFillQueueOrder);
-        ThreadFillQueueOrder.Start();
+        //ThreadSendBuyQueueOrder = new Thread(() => SendBuyOrder(cancellationToken));
+        //ThreadSendBuyQueueOrder.Name = nameof(ThreadSendBuyQueueOrder);
+        //ThreadSendBuyQueueOrder.Start();
+
+        ThreadSendSellQueueOrder = new Thread(() => SendSellOrder(cancellationToken));
+        ThreadSendSellQueueOrder.Name = nameof(ThreadSendSellQueueOrder);
+        ThreadSendSellQueueOrder.Start();
 
         return Task.CompletedTask;
     }
@@ -98,7 +103,7 @@ public class ProducerOrderApp : BackgroundService
         } while (!isConnected);
     }
 
-    private void FillOrder(CancellationToken stoppingToken)
+    private void SendBuyOrder(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -112,6 +117,37 @@ public class ProducerOrderApp : BackgroundService
             order.MinQty = 0;
             order.Quantity = 0.5M;
             order.Price = 65802M;
+            order.LastPrice = 0;
+            order.ClOrdID = 123;
+            order.LastQuantity = order.Quantity;
+            order.OrderStatus = OrderStatus.New;
+            order.OrderType = OrderType.Limit;
+            order.ParticipatorId = 10;
+            order.StopPrice = 0;
+            order.OrigClOrdID = 0;
+
+            OrderQueue.Enqueue(order);
+
+            Thread.Sleep(1000);
+        }
+    }
+
+
+    private void SendSellOrder(CancellationToken stoppingToken)
+    {
+
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            var order = new OrderEngine();
+            order.Symbol = "btcusd";
+            order.Side = SideTrade.Sell;
+            order.Account = new Limit() { AccountId = 10013, };
+            order.TimeInForce = TimeInForce.FOK;
+            order.AccountId = 10013;
+            order.Execution = Execution.ToOpen;
+            order.MinQty = 0;
+            order.Quantity = 0.5M;
+            order.Price = 65803M;
             order.LastPrice = 0;
             order.ClOrdID = 123;
             order.LastQuantity = order.Quantity;

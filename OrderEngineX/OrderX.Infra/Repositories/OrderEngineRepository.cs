@@ -7,6 +7,7 @@ using OrderEngineX.Infra.Data;
 using SharedX.Core.Entities;
 using SharedX.Core.Enums;
 using SharedX.Core.Matching.OrderEngine;
+
 namespace OrderEngineX.Infra.Repositories;
 public class OrderEngineRepository : IOrderEngineRepository
 {
@@ -70,6 +71,7 @@ public class OrderEngineRepository : IOrderEngineRepository
             using (var session = await _context.MongoClient.StartSessionAsync())
             {
                 session.StartTransaction();
+
                 try
                 {
 
@@ -84,12 +86,16 @@ public class OrderEngineRepository : IOrderEngineRepository
                     single.OrderId++;
                     result = single.OrderId;
 
+                    filter = Builders<OrderIDEngine>.Filter.Eq(r => r.Id, single.Id);
 
-                    var resultReplace = await _context.OrderId.ReplaceOneAsync(session,
-                        filter,
-                    replacement: new OrderIDEngine() { OrderId = result, Id = single.Id },
-                    options: new ReplaceOptions { IsUpsert = true },
-                    cancellation);
+                    var update = Builders<OrderIDEngine>.Update.Set(r => r.OrderId, result);
+
+
+                    var resultReplace = await _context.OrderId.UpdateOneAsync(session, filter, update);
+                    //    filter,
+                    //update: new OrderIDEngine() { OrderId = result, Id = single.Id },
+                    //options: new ReplaceOptions { IsUpsert = true },
+                    //cancellation);
 
                     await session.CommitTransactionAsync();
                 }

@@ -1,24 +1,19 @@
 ﻿using MatchingX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
-using SharedX.Core.Interfaces;
-using SecurityX.Core.Interfaces;
-using SharedX.Core.Entities;
 
 namespace MacthingX.Application.Services;
 public class MatchContextStrategy : IMatchContextStrategy
 {
     private readonly IEnumerable<IMatch> _matchList;
-    private readonly ISecurityCache _securityCache;
     private IMatchingCache _matchingCache;
     private IMatch _actualMatch;
-    
-    public MatchContextStrategy(IEnumerable<IMatch> matchList, 
-        IMatchingCache matchingCache,
-        ISecurityCache securityCache)
+
+    public MatchContextStrategy(IEnumerable<IMatch> matchList,
+        IMatchingCache matchingCache)
     {
         this._matchList = matchList;
         this._matchingCache = matchingCache;
-        this._securityCache = securityCache;
+
 
         LoadOrdersOnRestart();
     }
@@ -34,7 +29,7 @@ public class MatchContextStrategy : IMatchContextStrategy
     private async void LoadOrdersOnRestart()
     {
         //var ordersDb = await _orderRepository.GetOrdersOnRestartAsync(default(CancellationToken));
-        
+
         //if (ordersDb is not null)
         //foreach (var order in ordersDb)
         //{
@@ -58,7 +53,7 @@ public class MatchContextStrategy : IMatchContextStrategy
     public async Task<bool> MatchOrderAsync(OrderEngine order)
     {
         bool result = false;
-        result  = await this._actualMatch.MatchOrderAsync(order);
+        result = await this._actualMatch.MatchOrderAsync(order);
         return result;
     }
 

@@ -40,7 +40,8 @@ internal class NativeInjectorBoostrapper
                 string hostname = config["QueueSettings:Hostname"]!;
                 string port = config["QueueSettings:port"]!;
 
-                cfg.Host(hostname, port, "/", h =>
+                //cfg.Host(hostname, port, "/", h =>
+                cfg.Host(new Uri("rabbitmq://" + hostname + ":" + port), h =>
                 {
                     h.Username("guest");
                     h.Password("guest");

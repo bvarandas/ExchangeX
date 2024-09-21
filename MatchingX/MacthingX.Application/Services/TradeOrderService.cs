@@ -7,7 +7,6 @@ using MatchingX.Core.Interfaces;
 using MatchingX.Core.Repositories;
 using Microsoft.Extensions.Logging;
 using OrderEngineX.Core.Interfaces;
-using SecurityX.Core.Interfaces;
 using SharedX.Core.Bus;
 using SharedX.Core.Enums;
 using SharedX.Core.Interfaces;
@@ -24,26 +23,24 @@ public class TradeOrderService : ITradeOrderService, IDisposable
     private readonly ITradeRepository _tradeRepository;
     protected readonly IBookOfferCache _bookCache;
     protected readonly IMatchingCache _matchingCache;
-    protected readonly ISecurityCache _securityCache;
     protected readonly IMediatorHandler Bus;
     protected readonly ConcurrentQueue<OrderEngine> QueueOrderStatusChanged;
     protected readonly ConcurrentQueue<Dictionary<long, TradeReport>> QueueExecutedTraded;
-    
+
     private readonly Thread ThreadExecutedTrade;
     private readonly Thread ThreadOrdersStatus;
     public event PriceChangedEventHandler PriceChanged;
 
-    public TradeOrderService(ILogger<TradeOrderService> logger, 
-        IMediatorHandler bus, 
-        IBookOfferCache bookCache, 
-        IMatchingCache matchingCache,
-        ISecurityCache securityCache)
+    public TradeOrderService(ILogger<TradeOrderService> logger,
+        IMediatorHandler bus,
+        IBookOfferCache bookCache,
+        IMatchingCache matchingCache)
     {
         _logger = logger;
         Bus = bus;
         _bookCache = bookCache;
         _matchingCache = matchingCache;
-        _securityCache = securityCache;
+
 
         QueueExecutedTraded = new ConcurrentQueue<Dictionary<long, TradeReport>>();
         QueueOrderStatusChanged = new ConcurrentQueue<OrderEngine>();
@@ -85,7 +82,8 @@ public class TradeOrderService : ITradeOrderService, IDisposable
 
                 if (_running)
                     break;
-            }else
+            }
+            else
                 Thread.Sleep(10);
         }
     }
@@ -98,7 +96,7 @@ public class TradeOrderService : ITradeOrderService, IDisposable
     {
         while (true)
         {
-            if (QueueExecutedTraded.TryDequeue(out  Dictionary<long, TradeReport> reports))
+            if (QueueExecutedTraded.TryDequeue(out Dictionary<long, TradeReport> reports))
                 Bus.Send(new ExecutedTradeCommand(reports));
 
             if (_running)
@@ -117,7 +115,7 @@ public class TradeOrderService : ITradeOrderService, IDisposable
             orderToCancel.OrderStatus = OrderStatus.Cancelled;
             QueueOrderStatusChanged.Enqueue(orderToCancel);
         }
-        
+
         return cancelled;
     }
 
@@ -128,7 +126,7 @@ public class TradeOrderService : ITradeOrderService, IDisposable
             modified = await _bookCache.UpsertBuyOrder(orderEngine);
         else if (orderEngine.Side == SideTrade.Buy)
             modified = await _bookCache.UpsertSellOrder(orderEngine);
-        
+
         return modified;
     }
 
@@ -138,7 +136,8 @@ public class TradeOrderService : ITradeOrderService, IDisposable
         if (orderToCancel.Side == SideTrade.Buy)
         {
             cancelled = await _bookCache.DeleteBuyOrderAsync(orderToCancel.Symbol, orderToCancel.OrderID);
-        }else if (orderToCancel.Side == SideTrade.Buy)
+        }
+        else if (orderToCancel.Side == SideTrade.Buy)
         {
             cancelled = await _bookCache.DeleteSellOrderAsync(orderToCancel.Symbol, orderToCancel.OrderID);
         }
@@ -157,12 +156,12 @@ public class TradeOrderService : ITradeOrderService, IDisposable
         CreateTradeCapture(order, dicOrders);
     }
 
-    private Dictionary<long, TradeReport> CreateExecutionReport(OrderEngine order, Dictionary<long, OrderEngine> dicOrders) 
+    private Dictionary<long, TradeReport> CreateExecutionReport(OrderEngine order, Dictionary<long, OrderEngine> dicOrders)
     {
-        var now = DateTime.Now; 
+        var now = DateTime.Now;
 
         var result = new Dictionary<long, TradeReport>();
-        
+
         var report = new ExecutionReport();
         report.MinQty = order.MinQty;
         report.ParticipatorId = order.ParticipatorId;
@@ -173,7 +172,7 @@ public class TradeOrderService : ITradeOrderService, IDisposable
         report.StopPrice = order.StopPrice;
         report.Symbol = order.Symbol;
         report.Quantity = order.Quantity;
-        report.Side = order.Side; 
+        report.Side = order.Side;
         report.OrigCLOrdID = order.ClOrdID;
         report.OrderID = order.OrderID;
         report.TradeId = order.OrderID;
@@ -206,7 +205,7 @@ public class TradeOrderService : ITradeOrderService, IDisposable
             reportPart.ExecType = 'F';      // Fully or partially 
 
             result.Add(reportPart.TradeId, reportPart);
-            
+
             QueueOrderStatusChanged.Enqueue(orderPart);
         }
 
@@ -216,7 +215,7 @@ public class TradeOrderService : ITradeOrderService, IDisposable
     }
     private Dictionary<long, TradeReport> CreateTradeCapture(OrderEngine order, Dictionary<long, OrderEngine> dicOrders)
     {
-        var result =new Dictionary<long, TradeReport>();
+        var result = new Dictionary<long, TradeReport>();
         var report = new TradeCaptureReport()
         {
             TradeReportTransType = 0,
@@ -282,7 +281,7 @@ public class TradeOrderService : ITradeOrderService, IDisposable
         pair => pair.Key, pair => pair.Value);
     }
 
-    
+
     public bool AddOrder(OrderEngine order)
     {
         bool added = false;

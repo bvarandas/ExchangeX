@@ -56,11 +56,10 @@ public class OutboxPublisherService<T> :
             while (_cacheOutbox.TryDequeueRabbitMQEnvelope(out EnvelopeOutbox<T> envelope).Result.IsSuccess)
             {
                 var inserted = await _cacheOutbox.UpsertOutboxAsync(envelope);
+
                 if (inserted.IsSuccess)
-                {
-                    var message = envelope.SerializeToByteArrayProtobuf<EnvelopeOutbox<T>>();
-                    await _bus.Publish(message);
-                }
+                    await _bus.Publish(envelope);
+
             }
 
             Thread.Sleep(10);
@@ -71,7 +70,7 @@ public class OutboxPublisherService<T> :
     {
         _logger.LogInformation("Iniciando o Publisher ZeroMQ...");
 
-        using (_sender = new PushSocket(_config.PublisherEngine.Uri))
+        using (_sender = new PushSocket("@" + _config.PublisherEngine.Uri))
         {
             while (!stoppingToken.IsCancellationRequested)
             {

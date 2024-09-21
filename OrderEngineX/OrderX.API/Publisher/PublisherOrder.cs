@@ -19,6 +19,7 @@ public class PublisherOrder : IPublisherEngine<OrderEngine>
         envelope.Body = message;
         envelope.Id = message.OrderID;
         envelope.LastTransaction = DateTime.UtcNow;
+        envelope.ActivityOutbox = new ActivityOutbox() { Activity = "OrderEngine" };
 
         _cacheOutbox.TryEnqueueZeroMQEnvelope(envelope);
         _cacheOutbox.TryEnqueueRabitMQEnvelope(envelope);

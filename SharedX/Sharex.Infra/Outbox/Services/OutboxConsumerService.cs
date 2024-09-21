@@ -70,6 +70,7 @@ public class OutboxConsumerService<T> :
 
                         if (deleted.IsSuccess)
                         {
+
                             _receiverEngine.ReceiveEngine(envelope.Body, stoppingToken);
                         }
                     }
@@ -93,7 +94,10 @@ public class OutboxConsumerService<T> :
         var deleted = await _cacheOutbox.DeleteOutboxAsync(envelope);
 
         if (deleted.IsSuccess)
-            _receiverEngine.ReceiveEngine(envelope.Body, default(CancellationToken));
+        {
+            //await _cacheOutbox.TryEnqueueRabitMQEnvelope(envelope);
+            //_receiverEngine.ReceiveEngine(envelope.Body, default(CancellationToken));
+        }
     }
 
 

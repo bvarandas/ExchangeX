@@ -2,6 +2,7 @@
 using MassTransit;
 using MediatR;
 using MongoDB.Driver;
+using OrderEngineX.API.Publisher;
 using OrderEngineX.API.Receiver;
 using OrderEngineX.Application.Commands;
 using OrderEngineX.Application.Commands.Order;
@@ -37,16 +38,18 @@ internal class NativeInjectorBoostrapper
             x.AddConsumer<OutboxConsumerService<OrderEngine>>();
             x.UsingRabbitMq((context, cfg) =>
             {
-
                 string hostname = config["QueueSettings:Hostname"]!;
                 string port = config["QueueSettings:port"]!;
 
-                cfg.Host(hostname, port, "/", h =>
+                //cfg.Host(hostname, port, "/", h =>
+                cfg.Host(new Uri("rabbitmq://" + hostname + ":" + port), h =>
                 {
                     h.Username("guest");
                     h.Password("guest");
                 });
+
                 cfg.ConfigureEndpoints(context);
+
             });
         });
 
@@ -80,6 +83,9 @@ internal class NativeInjectorBoostrapper
         //services.AddSingleton(typeof(IOutboxPublisherService<OrderEngine>), typeof(OutboxPublisherService<OrderEngine>));
         //services.AddSingleton(typeof(IOutboxConsumerService<EnvelopeOutbox<OrderEngine>>),
         //    typeof(OutboxConsumerService<EnvelopeOutbox<OrderEngine>>));
+
+        // Services
+        services.AddSingleton(typeof(IPublisherEngine<OrderEngine>), typeof(PublisherOrder));
 
         // Domain - Events
         services.AddSingleton<INotificationHandler<DomainNotification>, DomainNotificationHandler>();

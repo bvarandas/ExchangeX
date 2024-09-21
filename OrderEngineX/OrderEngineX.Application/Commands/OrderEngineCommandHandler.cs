@@ -1,13 +1,13 @@
-﻿using MediatR;
+﻿using FluentResults;
+using MediatR;
+using Microsoft.Extensions.Logging;
+using OrderEngineX.Application.Commands.Order;
+using OrderEngineX.Application.Events;
+using OrderEngineX.Core.Interfaces;
+using OrderEngineX.Core.Notifications;
 using SharedX.Core.Bus;
 using SharedX.Core.Interfaces;
-using OrderEngineX.Application.Events;
-using OrderEngineX.Core.Notifications;
-using OrderEngineX.Application.Commands.Order;
 using SharedX.Core.Matching.OrderEngine;
-using Microsoft.Extensions.Logging;
-using FluentResults;
-using OrderEngineX.Core.Interfaces;
 
 namespace OrderEngineX.Application.Commands;
 public class OrderEngineCommandHandler : CommandHandler,
@@ -18,18 +18,21 @@ public class OrderEngineCommandHandler : CommandHandler,
     private readonly ILogger<OrderEngineCommandHandler> _logger;
     private readonly IOrderEngineRepository _repository;
     private readonly IMediatorHandler _bus;
+    private readonly IPublisherEngine<OrderEngine> _publisherEngine;
     public OrderEngineCommandHandler(
         ILogger<OrderEngineCommandHandler> logger,
-        IOrderEngineRepository repository, 
-        IMediatorHandler bus, 
-        INotificationHandler<DomainNotification> notifications) 
-        : base(bus,notifications)  
+        IOrderEngineRepository repository,
+        IMediatorHandler bus,
+        INotificationHandler<DomainNotification> notifications,
+        IPublisherEngine<OrderEngine> publisherEngine)
+        : base(bus, notifications)
     {
         _logger = logger;
         _repository = repository;
         _bus = bus;
+        _publisherEngine = publisherEngine;
     }
-    
+
     public async Task<Result> Handle(OrderCancelCommand command, CancellationToken cancellationToken)
     {
         if (!command.IsValid())
@@ -44,6 +47,7 @@ public class OrderEngineCommandHandler : CommandHandler,
 
         if (status.IsSuccess)
         {
+            _publisherEngine.PublishEngine(command.Order);
             await _bus.Publish(new OrderEngineCancelEvent(command.Order));
             return Result.Ok();
         }
@@ -65,24 +69,28 @@ public class OrderEngineCommandHandler : CommandHandler,
                 orderOld.Value.OrderStatus = SharedX.Core.Enums.OrderStatus.Cancelled;
                 orderOld.Value.TransactTime = DateTime.UtcNow;
                 var statusUpdate = await _repository.UpsertOrdersAsync(orderOld.Value, cancellationToken);
-            
-                if(statusUpdate.IsSuccess)
+
+                if (statusUpdate.IsSuccess)
                     await _bus.Publish(new OrderEngineCancelEvent(orderOld.Value));
 
                 var idOrder = _repository.GetOrderIdAsync(cancellationToken).Result;
                 command.Order.OrderID = idOrder.Value;
                 command.Order.LeavesQuantity = command.Order.Quantity;
                 var statusCreate = await _repository.CreateOrdersAsync(command.Order, cancellationToken);
-            
+
                 if (statusCreate.IsSuccess)
+                {
+                    _publisherEngine.PublishEngine(command.Order);
                     await _bus.Publish(new OrderEngineNewEvent(command.Order));
+                }
             }
             else
             {
                 var status = await _repository.UpsertOrdersAsync(command.Order, cancellationToken);
+                _publisherEngine.PublishEngine(command.Order);
                 await _bus.Publish(new OrderTradeModifyEvent(command.Order));
             }
-                
+
         return Result.Ok();
     }
 
@@ -98,13 +106,18 @@ public class OrderEngineCommandHandler : CommandHandler,
         command.Order.OrderID = idOrder.Value;
         command.Order.LeavesQuantity = command.Order.Quantity;
 
-        await _repository.CreateOrdersAsync(command.Order, cancellationToken);
-        await _bus.Publish(new OrderEngineNewEvent(command.Order));
+        var result = await _repository.CreateOrdersAsync(command.Order, cancellationToken);
+        if (result.IsSuccess)
+        {
+            _publisherEngine.PublishEngine(command.Order);
+            await _bus.Publish(new OrderEngineNewEvent(command.Order));
+        }
+
 
         return Result.Ok();
     }
 
-    private bool IsOrderToReplace(OrderEngine orderOld, OrderEngine orderNew  )
+    private bool IsOrderToReplace(OrderEngine orderOld, OrderEngine orderNew)
     {
         return (orderOld.OrderType != orderNew.OrderType ||
             orderOld.Side != orderNew.Side ||

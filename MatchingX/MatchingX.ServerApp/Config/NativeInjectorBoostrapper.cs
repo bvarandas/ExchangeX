@@ -57,7 +57,8 @@ internal class NativeInjectorBoostrapper
                 string hostname = config["QueueSettings:Hostname"]!;
                 string port = config["QueueSettings:port"]!;
 
-                cfg.Host(hostname, port, "/", h =>
+                //cfg.Host(hostname, port, "/", h =>
+                cfg.Host(new Uri("rabbitmq://" + hostname + ":" + port), h =>
                 {
                     h.Username("guest");
                     h.Password("guest");
@@ -166,6 +167,7 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IExecutedTradeContext, ExecutedTradeContext>();
         services.AddSingleton<IMatchingRepository, MatchingRepository>();
         services.AddSingleton<IMatchingContext, MatchingContext>();
+        //services.AddSingleton<ISecurityCache, SecurityCache>();
 
         services.AddHostedService<OutboxConsumerService<OrderEngine>>();
         //services.AddHostedService<OutboxPublisherService<OrderEngine>>();
