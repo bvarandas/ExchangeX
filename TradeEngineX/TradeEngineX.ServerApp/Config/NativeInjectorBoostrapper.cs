@@ -8,6 +8,7 @@ using Sharedx.Infra.Outbox.Cache;
 using Sharedx.Infra.Outbox.Services;
 using SharedX.Core.Bus;
 using SharedX.Core.Interfaces;
+using SharedX.Core.Matching.DropCopy;
 using SharedX.Core.Specs;
 using System.Reflection;
 using TradeEngineX.Application.Commands;
@@ -25,16 +26,16 @@ internal class NativeInjectorBoostrapper
 
         services.Configure<QueueSettings>(config.GetSection(nameof(QueueSettings)));
         services.Configure<ConnectionZmq>(config.GetSection(nameof(ConnectionZmq)));
+        services.Configure<ConnectionRmq>(config.GetSection(nameof(ConnectionRmq)));
 
         services.AddMassTransit(x =>
         {
-            x.AddConsumer(typeof(IOutboxConsumerService<>), typeof(OutboxConsumerService<>));
+            x.AddConsumer<OutboxConsumerService<TradeReport>>();
             x.UsingRabbitMq((context, cfg) =>
             {
                 string hostname = config["QueueSettings:Hostname"]!;
                 string port = config["QueueSettings:port"]!;
 
-                //cfg.Host(hostname, port, "/", h =>
                 cfg.Host(new Uri("rabbitmq://" + hostname + ":" + port), h =>
                 {
                     h.Username("guest");
@@ -42,6 +43,13 @@ internal class NativeInjectorBoostrapper
                 });
 
                 cfg.ConfigureEndpoints(context);
+
+                cfg.ReceiveEndpoint(config.GetSection("QueueSettings:QueueNameTradeNegine").Value, e =>
+                {
+                    e.PrefetchCount = 10;
+                    e.UseMessageRetry(r => r.Interval(2, 100));
+                    e.ConfigureConsumer<OutboxConsumerService<TradeReport>>(context);
+                });
             });
         });
 

@@ -1,4 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
+using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -6,6 +7,7 @@ using Sharedx.Infra.Outbox.Cache;
 using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
+using SharedX.Core.ValueObjects;
 using System.Reflection;
 using TestEngineX;
 internal class Program
@@ -59,6 +61,34 @@ internal class Program
                     services.AddSingleton(typeof(IOutboxCache<OrderEngine>), typeof(OutboxCache<OrderEngine>));
                     //services.AddSingleton<IOrderBookContext, OrderBookContext>();
                     services.AddHostedService<ProducerOrderApp>();
+
+                    services.AddMassTransit(x =>
+                    {
+                        x.UsingRabbitMq((context, cfg) =>
+                        {
+                            string hostname = config["QueueSettings:Hostname"]!;
+                            string port = config["QueueSettings:port"]!;
+
+
+                            //cfg.Host(hostname, port, "/", h =>
+                            cfg.Host(new Uri("rabbitmq://" + hostname + ":" + port), h =>
+                            {
+                                h.Username("guest");
+                                h.Password("guest");
+                            });
+
+                            cfg.ConfigureEndpoints(context);
+
+                            cfg.Message<EnvelopeOutbox<OrderEngine>>(x =>
+                            {
+                                x.SetEntityName("outbox-order-engine");
+                            });
+
+
+
+                        });
+                    });
+
                 }).Build();
 
         await host

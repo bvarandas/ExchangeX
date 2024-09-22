@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using MassTransit;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetMQ;
@@ -17,29 +18,39 @@ public class ProducerOrderApp : BackgroundService
     private readonly ILogger<ProducerOrderApp> _logger;
     private PushSocket _sender;
     private readonly ConnectionZmq _config;
-    private static Thread ThreadSenderOrder = null!;
+    private static Thread ThreadSenderOrderZeroMQ = null!;
+    private static Thread ThreadSenderOrderRabbitMQ = null!;
+
     private static Thread ThreadSendBuyQueueOrder = null!;
     private static Thread ThreadSendSellQueueOrder = null!;
     private readonly IOutboxCache<OrderEngine> _cache;
+    private readonly IBus _bus;
+    private static ISendEndpoint _sendEndpoint;
 
     private readonly ConcurrentQueue<OrderEngine> OrderQueue;
 
     public ProducerOrderApp(ILogger<ProducerOrderApp> logger,
         IOptions<ConnectionZmq> options,
-        IOutboxCache<OrderEngine> cache)
+        IOutboxCache<OrderEngine> cache,
+        IBus bus)
     {
         _logger = logger;
         _config = options.Value;
         _cache = cache;
         OrderQueue = new ConcurrentQueue<OrderEngine>();
+        _bus = bus;
     }
     public override Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Iniciando o Sender Order ZeroMQ...");
 
-        ThreadSenderOrder = new Thread(() => SenderOrder(cancellationToken));
-        ThreadSenderOrder.Name = nameof(ThreadSenderOrder);
-        ThreadSenderOrder.Start();
+        //ThreadSenderOrderZeroMQ = new Thread(() => SenderOrderZeroMq(cancellationToken));
+        //ThreadSenderOrderZeroMQ.Name = nameof(ThreadSenderOrderZeroMQ);
+        //ThreadSenderOrderZeroMQ.Start();
+
+        ThreadSenderOrderRabbitMQ = new Thread(() => SenderOrderRabbitMQ(cancellationToken));
+        ThreadSenderOrderRabbitMQ.Name = nameof(ThreadSenderOrderRabbitMQ);
+        ThreadSenderOrderRabbitMQ.Start();
 
         //ThreadSendBuyQueueOrder = new Thread(() => SendBuyOrder(cancellationToken));
         //ThreadSendBuyQueueOrder.Name = nameof(ThreadSendBuyQueueOrder);
@@ -57,8 +68,51 @@ public class ProducerOrderApp : BackgroundService
         return Task.CompletedTask;
     }
 
+    private void SenderOrderRabbitMQ(CancellationToken stoppingToken)
+    {
+        bool isConnected = false;
+        do
+        {
+            try
+            {
+                _logger.LogInformation("Sender de ordens Conectado!!!");
+                isConnected = true;
 
-    private void SenderOrder(CancellationToken stoppingToken)
+                _sendEndpoint = _bus.GetSendEndpoint(new Uri("exchange:order-engine-queue")).Result;
+
+                while (!stoppingToken.IsCancellationRequested)
+                {
+                    while (OrderQueue.TryDequeue(out OrderEngine order))
+                    {
+                        var envelopeOrder = new EnvelopeOutbox<OrderEngine>();
+                        envelopeOrder.Body = order;
+                        envelopeOrder.Id = order.OrderID;
+                        envelopeOrder.LastTransaction = DateTime.UtcNow;
+                        envelopeOrder.ActivityOutbox = new ActivityOutbox() { Activity = "OrderEntry" };
+
+                        _cache.TryEnqueueZeroMQEnvelope(envelopeOrder);
+                        _cache.TryEnqueueRabitMQEnvelope(envelopeOrder);
+                        _cache.UpsertOutboxAsync(envelopeOrder);
+
+                        _sendEndpoint.Send(envelopeOrder);
+
+                    }
+                    Thread.Sleep(1000);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                isConnected = false;
+                _logger.LogError(ex.Message, ex);
+            }
+
+            Thread.Sleep(100);
+        } while (!isConnected);
+    }
+
+
+    private void SenderOrderZeroMq(CancellationToken stoppingToken)
     {
         bool isConnected = false;
         do

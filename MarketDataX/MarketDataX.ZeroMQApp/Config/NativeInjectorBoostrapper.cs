@@ -29,6 +29,7 @@ internal class NativeInjectorBoostrapper
 
         services.Configure<QueueSettings>(config.GetSection(nameof(QueueSettings)));
         services.Configure<ConnectionZmq>(config.GetSection(nameof(ConnectionZmq)));
+        services.Configure<ConnectionRmq>(config.GetSection(nameof(ConnectionRmq)));
 
         services.AddMassTransit(x =>
         {

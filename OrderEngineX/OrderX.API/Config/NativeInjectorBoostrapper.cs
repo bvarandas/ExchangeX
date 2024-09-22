@@ -19,6 +19,7 @@ using SharedX.Core.Bus;
 using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
+using SharedX.Core.ValueObjects;
 using SharedX.Infra.Cache;
 using System.Reflection;
 
@@ -31,11 +32,13 @@ internal class NativeInjectorBoostrapper
 
         services.Configure<QueueSettings>(config.GetSection(nameof(QueueSettings)));
         services.Configure<ConnectionZmq>(config.GetSection(nameof(ConnectionZmq)));
+        services.Configure<ConnectionRmq>(config.GetSection(nameof(ConnectionRmq)));
         services.Configure<ConnectionRedis>(config.GetSection(nameof(ConnectionRedis)));
 
         services.AddMassTransit(x =>
         {
             x.AddConsumer<OutboxConsumerService<OrderEngine>>();
+
             x.UsingRabbitMq((context, cfg) =>
             {
                 string hostname = config["QueueSettings:Hostname"]!;
@@ -49,6 +52,18 @@ internal class NativeInjectorBoostrapper
                 });
 
                 cfg.ConfigureEndpoints(context);
+
+                cfg.Message<EnvelopeOutbox<OrderEngine>>(x =>
+                {
+                    x.SetEntityName("outbox-order-engine");
+                });
+
+                cfg.ReceiveEndpoint(config.GetSection("QueueSettings:QueueName").Value, e =>
+                {
+                    e.PrefetchCount = 10;
+                    e.UseMessageRetry(r => r.Interval(2, 100));
+                    e.ConfigureConsumer<OutboxConsumerService<OrderEngine>>(context);
+                });
 
             });
         });

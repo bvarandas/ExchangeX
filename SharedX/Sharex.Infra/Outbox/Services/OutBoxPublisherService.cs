@@ -18,20 +18,25 @@ public class OutboxPublisherService<T> :
     private readonly ILogger<OutboxPublisherService<T>> _logger;
     private readonly IBus _bus;
     private PushSocket _sender;
-    private readonly ConnectionZmq _config;
+    private readonly ConnectionZmq _configZmq;
+    private readonly ConnectionRmq _configRmq;
     private static Thread ThreadSenderRabbitMQEnvelope = null!;
     private static Thread ThreadSenderZeroMQEnvelope = null!;
+    private static ISendEndpoint _sendEndpoint;
     public OutboxPublisherService(
         ILogger<OutboxPublisherService<T>> logger,
         IOutboxCache<T> cacheOutbox,
-        IOptions<ConnectionZmq> options,
+        IOptions<ConnectionZmq> optionsZmq,
+        IOptions<ConnectionRmq> optionsRmq,
         IBus bus)
     {
-        _config = options.Value;
+        _configZmq = optionsZmq.Value;
+        _configRmq = optionsRmq.Value;
         _cacheOutbox = cacheOutbox;
         _logger = logger;
         _bus = bus;
     }
+
     public override Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Iniciando o Sender Report ZeroMQ...");
@@ -51,6 +56,8 @@ public class OutboxPublisherService<T> :
     {
         _logger.LogInformation("Iniciando o Publisher RabbitMQ...");
 
+        _sendEndpoint = await _bus.GetSendEndpoint(new Uri(_configRmq.PublisherEngine.Uri));
+
         while (!cancellationToken.IsCancellationRequested)
         {
             while (_cacheOutbox.TryDequeueRabbitMQEnvelope(out EnvelopeOutbox<T> envelope).Result.IsSuccess)
@@ -58,7 +65,7 @@ public class OutboxPublisherService<T> :
                 var inserted = await _cacheOutbox.UpsertOutboxAsync(envelope);
 
                 if (inserted.IsSuccess)
-                    await _bus.Publish(envelope);
+                    await _sendEndpoint.Send(envelope);
 
             }
 
@@ -70,7 +77,7 @@ public class OutboxPublisherService<T> :
     {
         _logger.LogInformation("Iniciando o Publisher ZeroMQ...");
 
-        using (_sender = new PushSocket("@" + _config.PublisherEngine.Uri))
+        using (_sender = new PushSocket("@" + _configZmq.PublisherEngine.Uri))
         {
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -84,7 +91,7 @@ public class OutboxPublisherService<T> :
                     }
                 }
 
-                Thread.Sleep(10);
+
             }
         }
     }

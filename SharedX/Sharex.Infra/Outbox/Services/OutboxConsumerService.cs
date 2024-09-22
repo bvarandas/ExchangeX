@@ -70,7 +70,7 @@ public class OutboxConsumerService<T> :
 
                         if (deleted.IsSuccess)
                         {
-
+                            _logger.LogInformation($"ZeroMQ : {envelope.Id}");
                             _receiverEngine.ReceiveEngine(envelope.Body, stoppingToken);
                         }
                     }
@@ -95,10 +95,9 @@ public class OutboxConsumerService<T> :
 
         if (deleted.IsSuccess)
         {
+            _logger.LogInformation($"RabbitMQ : {envelope.Id}");
             //await _cacheOutbox.TryEnqueueRabitMQEnvelope(envelope);
-            //_receiverEngine.ReceiveEngine(envelope.Body, default(CancellationToken));
+            _receiverEngine.ReceiveEngine(envelope.Body, default(CancellationToken));
         }
     }
-
-
 }

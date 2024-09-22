@@ -45,6 +45,7 @@ internal class NativeInjectorBoostrapper
         services.Configure<QueueSettings>(config.GetSection(nameof(QueueSettings)));
         services.Configure<ConnectionRedis>(config.GetSection(nameof(ConnectionRedis)));
         services.Configure<ConnectionZmq>(config.GetSection(nameof(ConnectionZmq)));
+        services.Configure<ConnectionRmq>(config.GetSection(nameof(ConnectionRmq)));
         services.Configure<ConnectionZooKeeper>(config.GetSection(nameof(ConnectionZooKeeper)));
 
         services.AddMassTransit(x =>
@@ -65,6 +66,30 @@ internal class NativeInjectorBoostrapper
                 });
 
                 cfg.ConfigureEndpoints(context);
+
+                cfg.Message<EnvelopeOutbox<OrderEngine>>(x =>
+                {
+                    x.SetEntityName("outbox-order-engine");
+                });
+
+                cfg.Message<EnvelopeOutbox<Security>>(x =>
+                {
+                    x.SetEntityName("outbox-security-engine");
+                });
+
+                cfg.ReceiveEndpoint(config.GetSection("QueueSettings:QueueNameMatching").Value, e =>
+                {
+                    e.PrefetchCount = 10;
+                    e.UseMessageRetry(r => r.Interval(2, 100));
+                    e.ConfigureConsumer<OutboxConsumerService<MarketData>>(context);
+                });
+
+                cfg.ReceiveEndpoint(config.GetSection("QueueSettings:QueueNameSecurity").Value, e =>
+                {
+                    e.PrefetchCount = 10;
+                    e.UseMessageRetry(r => r.Interval(2, 100));
+                    e.ConfigureConsumer<OutboxConsumerService<Security>>(context);
+                });
             });
         });
 

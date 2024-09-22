@@ -25,6 +25,7 @@ internal class NativeInjectorBoostrapper
         services.AddSwaggerGen();
 
         services.Configure<ConnectionZmq>(config.GetSection(nameof(ConnectionZmq)));
+        services.Configure<ConnectionRmq>(config.GetSection(nameof(ConnectionRmq)));
         services.Configure<ConnectionRedis>(config.GetSection(nameof(ConnectionRedis)));
         services.Configure<QueueSettings>(config.GetSection(nameof(QueueSettings)));
 
