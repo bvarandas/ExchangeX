@@ -1,13 +1,12 @@
 ﻿using FluentResults;
 using MacthingX.Application.Commands.Match.OrderStatus;
-using MatchingX.Application.Commands;
 using MatchingX.Core.Interfaces;
 using MatchingX.Core.Notifications;
 using MatchingX.Core.Repositories;
 using MediatR;
 using SharedX.Core.Bus;
-namespace MacthingX.Application.Commands;
-public class MatchingStatusCommandHandler : 
+namespace MacthingX.Application.Handlers;
+public class MatchingStatusCommandHandler :
     CommandHandler,
     IRequestHandler<MatchingOpenedCommand, Result>,
     IRequestHandler<MatchingFilledCommand, Result>,
@@ -21,7 +20,7 @@ public class MatchingStatusCommandHandler :
         IMatchingRepository matchRepository,
         IExecutedTradeRepository tradeRepository,
         IMediatorHandler bus,
-        INotificationHandler<DomainNotification> notifications) :base(bus, notifications)
+        INotificationHandler<DomainNotification> notifications) : base(bus, notifications)
     {
         _bus = bus;
         _tradeRepository = tradeRepository;

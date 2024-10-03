@@ -1,13 +1,13 @@
 version: '3.4'
 
 services:
-  # matchingx:
-  #   environment:
-  #     - ASPNETCORE_ENVIRONMENT=Development
-  #   ports:
-  #     - "80"
-  #   networks:
-  #     - exchange
+  matchingx:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "80"
+    networks:
+      - exchange
   
   zookeeper:
     container_name: zookeeper
@@ -15,7 +15,9 @@ services:
     ports:
       - "8080:8080"
       - "2181:2181"
-  
+    networks:
+      - exchange
+
   zoonavigator:
     container_name: zoonavigator 
     restart: unless-stopped

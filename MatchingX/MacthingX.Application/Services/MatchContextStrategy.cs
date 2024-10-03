@@ -46,9 +46,10 @@ public class MatchContextStrategy : IMatchContextStrategy
         //    await _matchingCache.UpsertBuyOrder(order);
     }
 
-    public void ReceivedOrder(OrderEngine order)
+    public async void ReceivedOrder(OrderEngine order)
     {
         this._actualMatch.ReceiveOrder(order);
+        await this.MatchOrderAsync(order);
     }
     public async Task<bool> MatchOrderAsync(OrderEngine order)
     {

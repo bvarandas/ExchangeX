@@ -52,9 +52,9 @@ public class ProducerOrderApp : BackgroundService
         ThreadSenderOrderRabbitMQ.Name = nameof(ThreadSenderOrderRabbitMQ);
         ThreadSenderOrderRabbitMQ.Start();
 
-        //ThreadSendBuyQueueOrder = new Thread(() => SendBuyOrder(cancellationToken));
-        //ThreadSendBuyQueueOrder.Name = nameof(ThreadSendBuyQueueOrder);
-        //ThreadSendBuyQueueOrder.Start();
+        ThreadSendBuyQueueOrder = new Thread(() => SendBuyOrder(cancellationToken));
+        ThreadSendBuyQueueOrder.Name = nameof(ThreadSendBuyQueueOrder);
+        ThreadSendBuyQueueOrder.Start();
 
         ThreadSendSellQueueOrder = new Thread(() => SendSellOrder(cancellationToken));
         ThreadSendSellQueueOrder.Name = nameof(ThreadSendSellQueueOrder);
@@ -62,12 +62,10 @@ public class ProducerOrderApp : BackgroundService
 
         return Task.CompletedTask;
     }
-
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         return Task.CompletedTask;
     }
-
     private void SenderOrderRabbitMQ(CancellationToken stoppingToken)
     {
         bool isConnected = false;
@@ -110,8 +108,6 @@ public class ProducerOrderApp : BackgroundService
             Thread.Sleep(100);
         } while (!isConnected);
     }
-
-
     private void SenderOrderZeroMq(CancellationToken stoppingToken)
     {
         bool isConnected = false;
@@ -156,7 +152,6 @@ public class ProducerOrderApp : BackgroundService
             Thread.Sleep(100);
         } while (!isConnected);
     }
-
     private void SendBuyOrder(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
@@ -185,8 +180,6 @@ public class ProducerOrderApp : BackgroundService
             Thread.Sleep(1000);
         }
     }
-
-
     private void SendSellOrder(CancellationToken stoppingToken)
     {
 

@@ -7,7 +7,7 @@ using SharedX.Core.Commands;
 using SharedX.Core.Entities;
 using SharedX.Core.Extensions;
 
-namespace MatchingX.Application.Commands;
+namespace MacthingX.Application.Handlers;
 public class CommandHandler
 {
     private readonly IMediatorHandler _bus;
@@ -21,7 +21,7 @@ public class CommandHandler
     }
     protected void NotifyValidationErrors(Command message)
     {
-        
+
         foreach (var error in message.ValidationResult.Errors)
         {
             _bus.Publish(new DomainNotification(message.MessageType, error.ErrorMessage));
@@ -31,7 +31,7 @@ public class CommandHandler
 
         //_bus.RaiseEvent(new OrderTradeRejectEvent(report));
     }
-    
+
     //private void MakeReportWithErrors(Command message, List<ValidationFailure> failures)
     //{
     //    var report = new ReportFix();
@@ -68,7 +68,7 @@ public class CommandHandler
     //                        _bus.RaiseEvent(new OrderRejectEvent(report));
     //                    }
     //                }
-                    
+
     //            }
     //            break;
     //        case OrderOpenedCommand:
@@ -80,11 +80,11 @@ public class CommandHandler
     //                        .Order.ReportBusinessMessageRejectFix(BusinessRejectReason, "1", failure.ErrorMessage);
     //                    _bus.RaiseEvent(new OrderRejectEvent(report));
     //                }
-                    
+
     //            }
     //            break;
     //    }
     //}
 
-    
+
 }

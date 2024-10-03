@@ -74,6 +74,7 @@ internal class NativeInjectorBoostrapper
             .SetIsOriginAllowed((host) => true)
             .AllowCredentials();
         }));
+
         // Outbox 
         services.AddSingleton(typeof(IOutboxPublisherService<>), typeof(OutboxPublisherService<>));
         services.AddSingleton(typeof(IOutboxConsumerService<>), typeof(OutboxConsumerService<>));

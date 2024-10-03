@@ -34,7 +34,7 @@ internal class NativeInjectorBoostrapper
 
         services.AddMassTransit(x =>
         {
-            x.AddConsumer<OutboxConsumerService<EnvelopeOutbox<ExecutionReport>>>();
+            x.AddConsumer<OutboxConsumerService<ExecutionReport>>();
 
             x.UsingRabbitMq((context, cfg) =>
             {
@@ -49,6 +49,19 @@ internal class NativeInjectorBoostrapper
                 });
 
                 cfg.ConfigureEndpoints(context);
+
+                cfg.Message<EnvelopeOutbox<ExecutionReport>>(x =>
+                {
+                    x.SetEntityName("outbox-execution-report-engine");
+                });
+
+                cfg.ReceiveEndpoint(config.GetSection("QueueSettings:QueueNameDropCopy").Value, e =>
+                {
+                    e.PrefetchCount = 10;
+                    e.UseMessageRetry(r => r.Interval(2, 100));
+                    e.ConfigureConsumer<OutboxConsumerService<ExecutionReport>>(context);
+                });
+
             });
         });
 

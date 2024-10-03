@@ -54,7 +54,7 @@ public class OutboxPublisherService<T> :
 
     private async void SenderRabbitMqEnvelope(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Iniciando o Publisher RabbitMQ...");
+        _logger.LogInformation($"Iniciando o Publisher RabbitMQ para o engine de {typeof(T)} ...");
 
         _sendEndpoint = await _bus.GetSendEndpoint(new Uri(_configRmq.PublisherEngine.Uri));
 

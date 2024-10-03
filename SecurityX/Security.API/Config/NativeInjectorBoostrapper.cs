@@ -1,4 +1,5 @@
 ﻿using FluentResults;
+using MassTransit;
 using MediatR;
 using MongoDB.Driver;
 using Security.Application.Commands;
@@ -12,8 +13,10 @@ using SecurityX.Infra.Cache;
 using Sharedx.Infra.Outbox.Cache;
 using Sharedx.Infra.Outbox.Services;
 using SharedX.Core.Bus;
+using SharedX.Core.Entities;
 using SharedX.Core.Interfaces;
 using SharedX.Core.Specs;
+using SharedX.Core.ValueObjects;
 using System.Reflection;
 namespace SecurityX.ServerApp;
 internal class NativeInjectorBoostrapper
@@ -26,6 +29,36 @@ internal class NativeInjectorBoostrapper
         services.Configure<ConnectionZmq>(config.GetSection(nameof(ConnectionZmq)));
         services.Configure<ConnectionRmq>(config.GetSection(nameof(ConnectionRmq)));
         services.Configure<ConnectionRedis>(config.GetSection(nameof(ConnectionRedis)));
+
+        /// Masstransit
+        services.AddMassTransit(x =>
+        {
+            x.UsingRabbitMq((context, cfg) =>
+            {
+                string hostname = config["QueueSettings:Hostname"]!;
+                string port = config["QueueSettings:port"]!;
+
+                //cfg.Host(hostname, port, "/", h =>
+                cfg.Host(new Uri("rabbitmq://" + hostname + ":" + port), h =>
+                {
+                    h.Username("guest");
+                    h.Password("guest");
+                });
+
+                cfg.ConfigureEndpoints(context);
+
+                cfg.Message<EnvelopeOutbox<SecurityEngine>>(x =>
+                {
+                    x.SetEntityName("outbox-security-engine");
+                });
+
+            });
+        });
+
+        // Outbox 
+        services.AddSingleton(typeof(IOutboxPublisherService<EnvelopeOutbox<SecurityEngine>>),
+                               typeof(OutboxPublisherService<EnvelopeOutbox<SecurityEngine>>));
+
 
         // FIX - Application
 

@@ -1,5 +1,4 @@
 ﻿using MacthingX.Application.Commands.Match.OrderType;
-using MatchingX.Application.Commands;
 using MatchingX.Core.Interfaces;
 using MatchingX.Core.Notifications;
 using MatchingX.Core.Repositories;
@@ -9,7 +8,7 @@ using SharedX.Core.Bus;
 using SharedX.Core.Enums;
 using SharedX.Core.Matching.OrderEngine;
 
-namespace MacthingX.Application.Commands;
+namespace MacthingX.Application.Handlers;
 public class MatchingCommandHandler :
     CommandHandler,
     IRequestHandler<MatchingLimitCommand, (OrderStatus, Dictionary<long, OrderEngine>)>,
@@ -29,7 +28,7 @@ public class MatchingCommandHandler :
         IDistributedLockProvider distributedLockProvider)
         : base(bus, notifications)
     {
-        _tradeRepository = tradeRepository; 
+        _tradeRepository = tradeRepository;
         _matchRepository = repository;
         _bus = bus;
         _distributedLockProvider = distributedLockProvider;
@@ -37,8 +36,8 @@ public class MatchingCommandHandler :
 
     public async Task<(OrderStatus, Dictionary<long, OrderEngine>)> Handle(MatchingLimitCommand command, CancellationToken cancellationToken)
     {
-        string nameLock = string.Concat(command.Order.Symbol, "_", command.Order.Side.ToString());
-        await using (await _distributedLockProvider.TryAcquireLockAsync(nameLock,TimeSpan.FromSeconds(3) ,cancellationToken))
+        string nameLock = string.Concat(command.Order.Symbol, "_", command.Order.Side.ToString().ToLower());
+        await using (await _distributedLockProvider.TryAcquireLockAsync(nameLock, TimeSpan.FromSeconds(3), cancellationToken))
         {
             var resultMatch = await _matchRepository.MatchingLimitAsync(command.Order, cancellationToken);
             return resultMatch;
@@ -47,7 +46,7 @@ public class MatchingCommandHandler :
 
     public async Task<(OrderStatus, Dictionary<long, OrderEngine>)> Handle(MatchingMarketCommand command, CancellationToken cancellationToken)
     {
-        string nameLock = string.Concat(command.Order.Symbol, "_", command.Order.Side.ToString());
+        string nameLock = string.Concat(command.Order.Symbol, "_", command.Order.Side.ToString().ToLower());
         await using (await _distributedLockProvider.TryAcquireLockAsync(nameLock, TimeSpan.FromSeconds(3), cancellationToken))
         {
             var resultMatch = await _matchRepository.MatchingMarketAsync(command.Order, cancellationToken);
@@ -57,7 +56,7 @@ public class MatchingCommandHandler :
 
     public async Task<(OrderStatus, Dictionary<long, OrderEngine>)> Handle(MatchingStopLimitCommand command, CancellationToken cancellationToken)
     {
-        string nameLock = string.Concat(command.Order.Symbol, "_", command.Order.Side.ToString());
+        string nameLock = string.Concat(command.Order.Symbol, "_", command.Order.Side.ToString().ToLower());
         await using (await _distributedLockProvider.TryAcquireLockAsync(nameLock, TimeSpan.FromSeconds(3), cancellationToken))
         {
             var resultMatch = await _matchRepository.MatchingLimitAsync(command.Order, cancellationToken);
@@ -67,7 +66,7 @@ public class MatchingCommandHandler :
 
     public async Task<(OrderStatus, Dictionary<long, OrderEngine>)> Handle(MatchingStopCommand command, CancellationToken cancellationToken)
     {
-        string nameLock = string.Concat(command.Order.Symbol, "_", command.Order.Side.ToString());
+        string nameLock = string.Concat(command.Order.Symbol, "_", command.Order.Side.ToString().ToLower());
         await using (await _distributedLockProvider.TryAcquireLockAsync(nameLock, TimeSpan.FromSeconds(3), cancellationToken))
         {
             var resultMatch = await _matchRepository.MatchingMarketAsync(command.Order, cancellationToken);

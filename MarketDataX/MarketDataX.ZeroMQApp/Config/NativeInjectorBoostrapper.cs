@@ -49,6 +49,21 @@ internal class NativeInjectorBoostrapper
                 });
 
                 cfg.ConfigureEndpoints(context);
+
+                cfg.ReceiveEndpoint(config.GetSection("QueueSettings:QueueNameMarketData").Value, e =>
+                {
+                    e.PrefetchCount = 10;
+                    e.UseMessageRetry(r => r.Interval(2, 100));
+                    e.ConfigureConsumer<OutboxConsumerService<MarketData>>(context);
+                });
+
+                cfg.ReceiveEndpoint(config.GetSection("QueueSettings:QueueNameSecurity").Value, e =>
+                {
+                    e.PrefetchCount = 10;
+                    e.UseMessageRetry(r => r.Interval(2, 100));
+                    e.ConfigureConsumer<OutboxConsumerService<Security>>(context);
+                });
+
             });
         });
 

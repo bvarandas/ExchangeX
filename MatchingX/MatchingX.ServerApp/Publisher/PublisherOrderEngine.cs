@@ -3,6 +3,10 @@ using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.DropCopy;
 using SharedX.Core.ValueObjects;
 namespace MatchingX.ServerApp.Publisher;
+/// <summary>
+/// Esse publisher está retornando o resultado da ordem para o order engine
+/// por isso ele envia o execution report 
+/// </summary>
 public class PublisherOrderEngine : IPublisherEngine<ExecutionReport>
 {
     private readonly ILogger<PublisherOrderEngine> _logger;

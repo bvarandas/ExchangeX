@@ -1,11 +1,11 @@
-﻿using MatchingX.Core.Interfaces;
+﻿using FluentResults;
+using MatchingX.Core.Interfaces;
 using MatchingX.Infra.Data;
 using Microsoft.Extensions.Logging;
-using MongoDB.Driver;
-using SharedX.Core.Matching.OrderEngine;
-using SharedX.Core.Enums;
 using MongoDB.Bson;
-using FluentResults;
+using MongoDB.Driver;
+using SharedX.Core.Enums;
+using SharedX.Core.Matching.OrderEngine;
 namespace MatchingX.Infra.Repositories;
 public class MatchingRepository : IMatchingRepository
 {
@@ -26,11 +26,11 @@ public class MatchingRepository : IMatchingRepository
             session.StartTransaction();
             try
             {
-                if ( string.IsNullOrEmpty( orderEngine.Id) )
-                    orderEngine.Id =  ObjectId.GenerateNewId().ToString();
+                if (string.IsNullOrEmpty(orderEngine.Id))
+                    orderEngine.Id = ObjectId.GenerateNewId().ToString();
 
                 var builder = Builders<OrderEngine>.Filter;
-                var filter = builder.Eq(o=>o.OrderID, orderEngine.OrderID);
+                var filter = builder.Eq(o => o.OrderID, orderEngine.OrderID);
 
                 var resultReplace = await _context.Matching.ReplaceOneAsync(session,
                 filter,
@@ -57,7 +57,7 @@ public class MatchingRepository : IMatchingRepository
             }
         }
         return Result.Ok();
-    } 
+    }
 
     public async Task<Result> RemoveOrdersMatchingAsync(List<long> IdOrders, CancellationToken cancellation)
     {
@@ -92,7 +92,7 @@ public class MatchingRepository : IMatchingRepository
         return Result.Ok();
     }
 
-    public async Task<(OrderStatus, Dictionary<long, OrderEngine>)> MatchingLimitAsync(OrderEngine orderEngine,  CancellationToken cancellation)
+    public async Task<(OrderStatus, Dictionary<long, OrderEngine>)> MatchingLimitAsync(OrderEngine orderEngine, CancellationToken cancellation)
     {
         var result = default((OrderStatus, Dictionary<long, OrderEngine>))!;
         try
@@ -103,11 +103,11 @@ public class MatchingRepository : IMatchingRepository
 
             var orderToExecute = new Dictionary<long, OrderEngine>();
             var clientSessionOptions = new ClientSessionOptions();
-            
+
             using (var session = await _context.MongoClient.StartSessionAsync(clientSessionOptions, cancellation))
             {
                 session.StartTransaction();
-                
+
                 try
                 {
 
@@ -129,9 +129,10 @@ public class MatchingRepository : IMatchingRepository
                         else if (orderEngine.Side == SideTrade.Sell)
                             filter = filter & builder.Gte(o => o.Price, orderEngine.Price);
 
-                        filter = filter & builder.Gte(o=>o.LeavesQuantity ,orderEngine.Quantity);
+                        filter = filter & builder.Gte(o => o.LeavesQuantity, orderEngine.Quantity);
 
-                    }else if(orderEngine.TimeInForce == TimeInForce.FOK)
+                    }
+                    else if (orderEngine.TimeInForce == TimeInForce.FOK)
                     {
                         if (orderEngine.Side == SideTrade.Buy)
                             filter = filter & builder.Lte(o => o.Price, orderEngine.Price);
@@ -141,15 +142,15 @@ public class MatchingRepository : IMatchingRepository
                         filter = filter & builder.Gte(o => o.LeavesQuantity, orderEngine.Quantity);
                     }
 
-                    var orders = await _context.Matching.FindAsync(session, filter,
+                    var orders = await (await _context.Matching.FindAsync(session, filter,
                         new FindOptions<OrderEngine, OrderEngine>
                         {
                             Sort = sort,
-                        });
+                        })).ToListAsync();
 
                     var ordersToRemove = new List<long>();
 
-                    if (!await orders.AnyAsync() && orderEngine.TimeInForce == TimeInForce.FOK)
+                    if (!orders.Any() && orderEngine.TimeInForce == TimeInForce.FOK)
                     {
                         result.Item1 = OrderStatus.Cancelled;
                         ordersToRemove.Add(orderEngine.OrderID);
@@ -157,7 +158,7 @@ public class MatchingRepository : IMatchingRepository
 
                     DateTime now = DateTime.Now;
                     decimal quantityCollected = 0.0M;
-                    await orders.ForEachAsync(order => 
+                    orders.ForEach(order =>
                     {
                         if (orderEngine.Quantity > quantityCollected && (quantityCollected + order.LeavesQuantity) < orderEngine.Quantity)
                         {
@@ -174,15 +175,15 @@ public class MatchingRepository : IMatchingRepository
                             orderToExecute.Add(order.OrderID, order);
                         }
                     });
-                                                            
+
                     if (quantityCollected > 0 && quantityCollected != orderEngine.Quantity)
                     {
-                        result.Item1 = orderEngine.OrderStatus =OrderStatus.PartiallyFilled;
+                        result.Item1 = orderEngine.OrderStatus = OrderStatus.PartiallyFilled;
                         result.Item2 = orderToExecute;
 
                         ordersToRemove.Add(orderEngine.OrderID);
                     }
-                    else if(quantityCollected > 0 && quantityCollected == orderEngine.Quantity)
+                    else if (quantityCollected > 0 && quantityCollected == orderEngine.Quantity)
                     {
                         result.Item1 = orderEngine.OrderStatus = OrderStatus.Filled;
                         result.Item2 = orderToExecute;
@@ -195,7 +196,7 @@ public class MatchingRepository : IMatchingRepository
                         var filterDelete = Builders<OrderEngine>.Filter
                             .In(o => o.OrderID, ordersToRemove);
 
-                        var resultDelete = await _context.Matching.DeleteManyAsync(session, filterDelete);
+                        var resultDelete = (await _context.Matching.DeleteManyAsync(session, filterDelete));
 
                         if (resultDelete.IsAcknowledged && resultDelete.DeletedCount > 0)
                         {
@@ -230,7 +231,7 @@ public class MatchingRepository : IMatchingRepository
 
             var orderToExecute = new Dictionary<long, OrderEngine>();
             var clientSessionOptions = new ClientSessionOptions();
-            
+
             using (var session = await _context.MongoClient.StartSessionAsync(clientSessionOptions, cancellation))
             {
                 var transactionOptions = new MongoDB.Driver.TransactionOptions();
@@ -247,9 +248,9 @@ public class MatchingRepository : IMatchingRepository
                         filter = filter & builder.Eq(o => o.Side, SideTrade.Buy);
                         sort = Builders<OrderEngine>.Sort.Ascending("Price");
                     }
-                    
+
                     filter = filter & builder.Gte(o => o.LeavesQuantity, orderEngine.LeavesQuantity);
-                    
+
                     var orders = await _context.Matching.FindAsync(session, filter,
                         new FindOptions<OrderEngine, OrderEngine>
                         {
@@ -265,7 +266,8 @@ public class MatchingRepository : IMatchingRepository
                     }
                     DateTime now = DateTime.Now;
                     decimal quantityCollected = 0.0M;
-                    await orders.ForEachAsync(order => {
+                    await orders.ForEachAsync(order =>
+                    {
 
                         if (orderEngine.Quantity > quantityCollected && (quantityCollected + order.LeavesQuantity) < orderEngine.Quantity)
                         {

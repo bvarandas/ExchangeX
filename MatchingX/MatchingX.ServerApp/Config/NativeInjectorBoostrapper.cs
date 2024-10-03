@@ -1,8 +1,8 @@
 ﻿using FluentResults;
-using MacthingX.Application.Commands;
 using MacthingX.Application.Commands.Match.OrderStatus;
 using MacthingX.Application.Commands.Match.OrderType;
 using MacthingX.Application.Events;
+using MacthingX.Application.Handlers;
 using MacthingX.Application.Interfaces;
 using MacthingX.Application.Services;
 using MassTransit;
@@ -139,6 +139,9 @@ internal class NativeInjectorBoostrapper
                                typeof(OutboxConsumerService<EnvelopeOutbox<Security>>));
 
         services.AddSingleton(typeof(IOutboxCache<OrderEngine>), typeof(OutboxCache<OrderEngine>));
+        services.AddSingleton(typeof(IOutboxCache<TradeReport>), typeof(OutboxCache<TradeReport>));
+        services.AddSingleton(typeof(IOutboxCache<ExecutionReport>), typeof(OutboxCache<ExecutionReport>));
+        services.AddSingleton(typeof(IOutboxCache<MarketData>), typeof(OutboxCache<MarketData>));
 
         // Domain - Events
         services.AddSingleton<INotificationHandler<DomainNotification>, DomainNotificationHandler>();

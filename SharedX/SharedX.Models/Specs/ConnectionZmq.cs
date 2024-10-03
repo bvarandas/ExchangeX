@@ -1,5 +1,5 @@
 ﻿namespace SharedX.Core.Specs;
-public  class ConnectionZmq
+public class ConnectionZmq
 {
     //public PushPull MatchingToDropCopy { get; set; } = null!;
     //public PushPull MatchingToMarketData { get; set; } = null!;
@@ -17,7 +17,8 @@ public  class ConnectionZmq
 }
 public class PushPull
 {
-    public string Uri { get; set; }=string.Empty;
+    public string Uri { get; set; } = string.Empty;
+    public string[] Uris { get; set; } = new string[0];
 }
 
 public class ConnectionZeroMq

@@ -1,11 +1,11 @@
 version: '3.4'
 
 services:
-  # matchingx:
-  #   image: ${DOCKER_REGISTRY-}matching
-  #   build:
-  #     context: .
-  #     dockerfile: MatchingX/MatchingX.ServerApp/Dockerfile
+  matchingx:
+    image: ${DOCKER_REGISTRY-}matching
+    build:
+      context: .
+      dockerfile: MatchingX/MatchingX.ServerApp/Dockerfile
  
   # orderentryx:
   #   image: ${DOCKER_REGISTRY-}orderentry
