@@ -23,7 +23,7 @@
     <ProjectReference Include="..\..\Infrastructure\Common.logging\Common.logging.csproj" />
     <ProjectReference Include="..\..\SharedX\SharedX.Models\SharedX.Core.csproj" />
     <ProjectReference Include="..\..\SharedX\Sharex.Infra\Sharedx.Infra.csproj" />
-    <ProjectReference Include="..\MacthingX.Application\MacthingX.Application.csproj" />
+    <ProjectReference Include="..\MacthingX.Application\MatchingX.Application.csproj" />
   </ItemGroup>
 
 </Project>
