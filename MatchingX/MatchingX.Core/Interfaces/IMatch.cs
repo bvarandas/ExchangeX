@@ -1,10 +1,12 @@
-﻿using SharedX.Core.Matching.OrderEngine;
+﻿using MatchingX.Core.Entities;
+
 namespace MatchingX.Core.Interfaces;
-public  interface IMatch
+public interface IMatch
 {
     string Name { get; }
-    void ReceiveOrder(OrderEngine order);
-    bool ModifyOrder(OrderEngine order);
-    bool CancelOrder(OrderEngine orderToCancel);
-    Task<bool> MatchOrderAsync(OrderEngine order);
+    Task<bool> ReceiveOrderAsync(MatchOrder order, CancellationToken cancellationToken);
+    Task<bool> ModifyOrderAsync(MatchOrder order, CancellationToken cancellationToken);
+    Task<bool> CancelOrderAsync(MatchOrder orderToCancel, CancellationToken cancellationToken);
+    Task<bool> MatchOrderAsync(MatchOrder order, CancellationToken cancellationToken);
+    Task<bool> AddOrderAsync(MatchOrder order, CancellationToken cancellationToken);
 }

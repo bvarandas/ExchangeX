@@ -116,8 +116,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TradeEngineX.ServerApp", "T
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestAPI", "TestEngineX\TestAPI\TestAPI.csproj", "{AD409888-A2DB-4BD2-B183-0ACFFF3313B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MatchingX.Test", "MatchingX\MatchingX.Test\MatchingX.Test.csproj", "{53105C55-79D9-4D46-BA89-35E17DF7BFC9}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -284,10 +282,6 @@ Global
 		{AD409888-A2DB-4BD2-B183-0ACFFF3313B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD409888-A2DB-4BD2-B183-0ACFFF3313B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD409888-A2DB-4BD2-B183-0ACFFF3313B2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{53105C55-79D9-4D46-BA89-35E17DF7BFC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{53105C55-79D9-4D46-BA89-35E17DF7BFC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{53105C55-79D9-4D46-BA89-35E17DF7BFC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{53105C55-79D9-4D46-BA89-35E17DF7BFC9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -342,7 +336,6 @@ Global
 		{B78050B4-CB83-4CBE-9A70-004C23E76191} = {4D842A32-AFD9-4D07-A6D9-249116C7A13D}
 		{82C28967-F58B-4BCD-A471-702015FC5C25} = {4D842A32-AFD9-4D07-A6D9-249116C7A13D}
 		{AD409888-A2DB-4BD2-B183-0ACFFF3313B2} = {29661D31-B283-4BE2-89A6-ACEA7E622A15}
-		{53105C55-79D9-4D46-BA89-35E17DF7BFC9} = {B49EF215-04DA-4AB7-BA1E-C3CCF766A0E4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8A7B5B6E-83FE-4591-A58F-528F40DBD09C}

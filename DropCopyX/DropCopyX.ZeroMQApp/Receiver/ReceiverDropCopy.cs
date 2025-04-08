@@ -13,19 +13,19 @@ public class ReceiverDropCopy : IReceiverEngine<ExecutionReport>
     public ReceiverDropCopy(ILogger<ReceiverDropCopy> logger,
         IExecutionReportChache cache,
         IMediatorHandler mediator,
-        IOutboxCache<ExecutionReport> outboxCache) 
+        IOutboxCache<ExecutionReport> outboxCache)
     {
         _logger = logger;
         _cache = cache;
         _mediator = mediator;
     }
-    
-    public void ReceiveEngine(ExecutionReport message, CancellationToken cancellationToken)
+
+    public async Task ReceiveEngine(ExecutionReport message, CancellationToken cancellationToken)
     {
         var listExecutions = new List<ExecutionReport>();
 
         _cache.AddExecutionReport(message);
         listExecutions.Add(message);
-        _mediator.Send(new ExecutionReportCommand(listExecutions));
+        await _mediator.Send(new ExecutionReportCommand(listExecutions));
     }
 }

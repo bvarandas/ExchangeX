@@ -1,8 +1,7 @@
-﻿using SharedX.Core.Entities;
-using SharedX.Core.Matching.OrderEngine;
+﻿using MatchingX.Core.Entities;
 namespace MatchingX.Core.Interfaces;
 public interface IMatchContextStrategy
 {
-    void SetStrategy(string strategyName);
-    void ReceivedOrder(OrderEngine order);
+    bool SetStrategy(string strategyName);
+    void ReceivedOrder(MatchingEngine order, CancellationToken cancellationToken);
 }

@@ -14,8 +14,10 @@ public class ReceiverTradeEngine : IReceiverEngine<TradeReport>
         _logger = logger;
     }
 
-    public void ReceiveEngine(TradeReport message, CancellationToken cancellationToken)
+    public async Task ReceiveEngine(TradeReport message, CancellationToken cancellationToken)
     {
-        _tradeCache.UpsertTradeEngineAsync(message);
+        await _tradeCache.UpsertTradeEngineAsync(message);
     }
+
+
 }

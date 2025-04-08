@@ -1,4 +1,4 @@
-﻿using SharedX.Core.Interfaces;
+﻿using MatchingX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
 namespace OrderEngineX.Application.Commands.Order;
 public class OrderPartiallyFilledCommand : OrderEngineCommand

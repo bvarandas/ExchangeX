@@ -54,8 +54,8 @@ public class ExecutionReport : TradeReport
     [ProtoMember(24)]
     public string ExpireTime { get; set; }
     [ProtoMember(25)]
-    public char AccoutType {  get; set; }
+    public char AccountType { get; set; }
     [ProtoMember(26)]
-    public decimal MinQty{ get; set; }
+    public decimal MinQty { get; set; }
     public ExecutionReport() { }
 }

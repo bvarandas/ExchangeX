@@ -1,5 +1,9 @@
-﻿using MediatR;
-namespace SharedX.Core.Bus;
+﻿using MacthingX.Application.Commands.Match;
+using MatchingX.Core.Entities;
+using MediatR;
+
+namespace MatchingX.Application.Handlers;
+
 public class InMemmoryBus : IMediatorHandler
 {
     private readonly IMediator _mediator;
@@ -8,26 +12,18 @@ public class InMemmoryBus : IMediatorHandler
         _mediator = mediator;
     }
 
-
-    public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
+    public Task<MatchingEngine> SendMatchCommand<T>(T command)
+        where T : MatchCommand
+        //where R : (OrderStatus, Dictionary<long, OrderEngine>)
     {
-        return _mediator.Send(request, cancellationToken);
-    }
+        var result = _mediator.Send(command).Result;
+        return Task.FromResult(result);
 
-    public Task Send<TRequest>(TRequest request, CancellationToken cancellationToken = default) where TRequest : IRequest
-    {
-        return _mediator.Send(request, cancellationToken);
-    }
-
-    public Task<object?> Send(object request, CancellationToken cancellationToken = default)
-    {
-        return _mediator.Send(request, cancellationToken);
     }
 
     public IAsyncEnumerable<TResponse> CreateStream<TResponse>(IStreamRequest<TResponse> request, CancellationToken cancellationToken = default)
     {
         return _mediator.CreateStream(request, cancellationToken);
-
     }
 
     public IAsyncEnumerable<object?> CreateStream(object request, CancellationToken cancellationToken = default)
@@ -44,4 +40,20 @@ public class InMemmoryBus : IMediatorHandler
     {
         return _mediator.Publish(notification, cancellationToken);
     }
+
+    public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
+    {
+        return _mediator.Send(request, cancellationToken);
+    }
+
+    public Task Send<TRequest>(TRequest request, CancellationToken cancellationToken = default) where TRequest : IRequest
+    {
+        return _mediator.Send(request, cancellationToken);
+    }
+
+    public Task<object?> Send(object request, CancellationToken cancellationToken = default)
+    {
+        return _mediator.Send(request, cancellationToken);
+    }
+
 }

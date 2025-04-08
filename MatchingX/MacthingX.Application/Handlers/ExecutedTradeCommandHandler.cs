@@ -25,6 +25,7 @@ public class ExecutedTradeCommandHandler : IRequestHandler<ExecutedTradeCommand,
     {
         _logger.LogInformation($"Registrando execução de {command.ExecutedTrades.Count} ordens");
         var result = await _repository.CreateExecutedTradeAsync(command.ExecutedTrades, cancellationToken);
+
         if (result.IsSuccess)
             await _bus.Publish(new ExecutedTradeEvent(command.ExecutedTrades));
 

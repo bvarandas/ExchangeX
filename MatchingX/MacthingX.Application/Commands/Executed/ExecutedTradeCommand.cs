@@ -4,7 +4,8 @@ using SharedX.Core.Matching.DropCopy;
 namespace MacthingX.Application.Commands;
 public class ExecutedTradeCommand : Command
 {
-    public readonly Dictionary<long,TradeReport> ExecutedTrades;
+    public readonly Dictionary<long, TradeReport> ExecutedTrades;
+    //public readonly Dictionary<long, MatchingEngine> ExecutedTrades;
     public DateTime Timestamp { get; private set; }
     public ExecutedTradeCommand(Dictionary<long, TradeReport> executedTrade)
     {

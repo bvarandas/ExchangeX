@@ -14,9 +14,9 @@ public class ReceiverMarketData : IReceiverEngine<MarketData>
         _logger = logger;
         _cache = cache;
     }
-    public void ReceiveEngine(MarketData message, CancellationToken cancellationToken)
+    public async Task ReceiveEngine(MarketData message, CancellationToken cancellationToken)
     {
         _cache.AddMarketDataIncremental(message);
-        _cache.AddMarketDataBook(message);
+        await _cache.AddMarketDataBook(message);
     }
 }

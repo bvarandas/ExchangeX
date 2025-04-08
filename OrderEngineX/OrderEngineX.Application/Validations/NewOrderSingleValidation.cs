@@ -1,9 +1,9 @@
-﻿using OrderEngineX.Application.Commands.Order;
-using SharedX.Core.Interfaces;
+﻿using MatchingX.Core.Interfaces;
+using OrderEngineX.Application.Commands.Order;
 namespace OrderEngineX.Application.Validations;
 public class NewOrderSingleValidation : OrderEngineValidation<OrderOpenedCommand>
 {
-    public NewOrderSingleValidation(IBookOfferCache matchingCache) : base(matchingCache)
+    public NewOrderSingleValidation(IBookOfferCache bookCache) : base(bookCache)
     {
         ValidateNewOrderSingle();
     }

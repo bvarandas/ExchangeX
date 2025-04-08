@@ -1,12 +1,11 @@
-﻿using OrderEngineX.Application.Commands;
+﻿using MatchingX.Core.Interfaces;
+using OrderEngineX.Application.Commands;
 using OrderEngineX.Application.Commands.Order;
 using SharedX.Core.Bus;
 using SharedX.Core.Enums;
 using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
-
 namespace OrderEngineX.API.Receiver;
-
 public class ReceiverOrder : IReceiverEngine<OrderEngine>
 {
     private readonly ILogger<ReceiverOrder> _logger;
@@ -20,28 +19,16 @@ public class ReceiverOrder : IReceiverEngine<OrderEngine>
         _mediator = mediator;
     }
 
-    public void ReceiveEngine(OrderEngine message, CancellationToken cancellationToken)
+    public async Task ReceiveEngine(OrderEngine message, CancellationToken cancellationToken)
     {
-        SendOrderCommand(message);
+        var command = GetCommand(message);
+        await _mediator.Send(command);
     }
 
-    private bool SendOrderCommand(OrderEngine order)
+    private OrderEngineCommand GetCommand(OrderEngine order) => order.Execution switch
     {
-        OrderEngineCommand command = null!;
-        switch (order.Execution)
-        {
-            case Execution.ToCancel:
-                command = new OrderCancelCommand(order, _cache);
-                break;
-            case Execution.ToCancelReplace:
-                command = new OrderCancelReplaceCommand(order, _cache);
-                break;
-            case Execution.ToOpen:
-                command = new OrderOpenedCommand(order, _cache);
-                break;
-        }
-
-        var result = _mediator.Send(command);
-        return result.Result.IsSuccess;
-    }
+        Execution.ToCancel => new OrderCancelCommand(order, _cache),
+        Execution.ToCancelReplace => new OrderCancelReplaceCommand(order, _cache),
+        Execution.ToOpen => new OrderOpenedCommand(order, _cache),
+    };
 }

@@ -14,8 +14,8 @@ public class ReceiverOrder : IReceiverEngine<OrderEngine>
         _logger = logger;
     }
 
-    public void ReceiveEngine(OrderEngine message, CancellationToken cancellationToken)
+    public async Task ReceiveEngine(OrderEngine message, CancellationToken cancellationToken)
     {
-        _matchReceiver.ReceiveOrder(message);
+        await _matchReceiver.ReceiveOrder(message, cancellationToken);
     }
 }

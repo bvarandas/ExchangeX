@@ -1,20 +1,12 @@
-﻿using SharedX.Core.Matching.DropCopy;
-using SharedX.Core.Matching.MarketData;
+﻿using FluentResults;
+using MatchingX.Core.Entities;
 namespace MatchingX.Core.Interfaces;
 public interface IMatchingCache
 {
-    #region MarketData
-    void AddIncremental(MarketData marketData);
-    bool TryDequeueMarketData(out MarketData order);
-    Task<decimal> GetPrice(string symbol);
-    Task<MarketData> GetMarketDataBySymbol(string symbol);
-    #endregion
+    Task<Result> UpsertBuyOrderMatchingAsync(MatchingEngine matchEngine, CancellationToken cancellation);
+    Task<Result> UpsertSellOrderMatchingAsync(MatchingEngine matchEngine, CancellationToken cancellation);
+    Task<Result<Dictionary<long, MatchOrder>>> GetBuyOrderBySymbol(string symbol);
+    Task<Result<Dictionary<long, MatchOrder>>> GetSellOrderBySymbol(string symbol);
+    Task<Result<bool>> RemoveOrderMatchingAsync(string symbol, long orderId);
 
-    #region DropCopy
-    void AddExecutionReport(ExecutionReport execution);
-    void AddTradeCaptureReport(TradeCaptureReport trade);
-    bool TryDequeueTradeCaptureReport(out TradeCaptureReport trade);
-    bool TryDequeueExecuteReport(out ExecutionReport execution);
-    bool TryDequeueExecuteToOrderReport(out ExecutionReport execution);
-    #endregion
 }

@@ -1,8 +1,7 @@
-﻿using SharedX.Core.Entities;
-using SharedX.Core.Matching.OrderEngine;
+﻿using SharedX.Core.Matching.OrderEngine;
 namespace MatchingX.Core.Interfaces;
 public interface IMatchingReceiver
 {
-    void ReceiveOrder(OrderEngine order);
+    Task ReceiveOrder(OrderEngine order, CancellationToken cancellationToken);
     //void ReceiveSecurity(SecurityEngine security);
 }

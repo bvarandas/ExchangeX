@@ -1,16 +1,15 @@
-﻿using MatchingX.Core;
-using MediatR;
+﻿using MatchingX.Core.Entities;
 using SharedX.Core.Events;
-using SharedX.Core.Matching.DropCopy;
 
 namespace MacthingX.Application.Events;
 public class ExecutedTradeEvent : Event
 {
-    public Dictionary<long, TradeReport> ExecutedTrades {  get; private set; }
+    public MatchingEngine ExecutedOrders { get; set; }
+    //public Dictionary<long, TradeReport> ExecutedTrades {  get; private set; }
     public DateTime Timestamp { get; private set; }
-    public ExecutedTradeEvent(Dictionary<long, TradeReport> executedTrade)
+    public ExecutedTradeEvent(MatchingEngine executedOrders)
     {
-        ExecutedTrades = executedTrade;
+        ExecutedOrders = executedOrders;
         Timestamp = DateTime.Now;
     }
 }

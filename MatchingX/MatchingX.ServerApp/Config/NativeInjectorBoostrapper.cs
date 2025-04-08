@@ -1,11 +1,9 @@
-﻿using FluentResults;
-using MacthingX.Application.Commands.Match.OrderStatus;
-using MacthingX.Application.Commands.Match.OrderType;
+﻿using MacthingX.Application.Commands.Match.OrderType;
 using MacthingX.Application.Events;
 using MacthingX.Application.Handlers;
-using MacthingX.Application.Interfaces;
 using MacthingX.Application.Services;
 using MassTransit;
+using MatchingX.Core.Entities;
 using MatchingX.Core.Interfaces;
 using MatchingX.Core.Notifications;
 using MatchingX.Core.Repositories;
@@ -21,18 +19,14 @@ using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
-using Sharedx.Infra.Order.Cache;
 using Sharedx.Infra.Outbox.Cache;
 using Sharedx.Infra.Outbox.Services;
-using SharedX.Core.Bus;
-using SharedX.Core.Enums;
 using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.DropCopy;
 using SharedX.Core.Matching.MarketData;
 using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
 using SharedX.Core.ValueObjects;
-using SharedX.Infra.Cache;
 using System.Reflection;
 
 namespace MatchinX.API.Config;
@@ -52,6 +46,7 @@ internal class NativeInjectorBoostrapper
         {
             x.AddConsumer<OutboxConsumerService<MarketData>>();
             x.AddConsumer<OutboxConsumerService<Security>>();
+
 
             x.UsingRabbitMq((context, cfg) =>
             {
@@ -98,7 +93,7 @@ internal class NativeInjectorBoostrapper
         //services.AddSingleton<IApplication, FixServerApp>();
 
         // Domain Bus (Mediator)
-        services.AddScoped<IMediatorHandler, InMemmoryBus>();
+        services.AddScoped<MatchingX.Application.Handlers.IMediatorHandler, MatchingX.Application.Handlers.InMemmoryBus>();
         //services.AddScoped<IOrderBook, OrderBook>();
 
         //SignalR
@@ -152,19 +147,13 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<INotificationHandler<OrderOpenedEvent>, OrderEventHandler>();
 
         // Domain - Commands
-        services.AddSingleton<IRequestHandler<MatchingLimitCommand, (OrderStatus, Dictionary<long, OrderEngine>)>, MatchingCommandHandler>();
-        services.AddSingleton<IRequestHandler<MatchingMarketCommand, (OrderStatus, Dictionary<long, OrderEngine>)>, MatchingCommandHandler>();
-        services.AddSingleton<IRequestHandler<MatchingStopLimitCommand, (OrderStatus, Dictionary<long, OrderEngine>)>, MatchingCommandHandler>();
-        services.AddSingleton<IRequestHandler<MatchingStopCommand, (OrderStatus, Dictionary<long, OrderEngine>)>, MatchingCommandHandler>();
-
-        services.AddSingleton<IRequestHandler<MatchingOpenedCommand, Result>, MatchingStatusCommandHandler>();
-        services.AddSingleton<IRequestHandler<MatchingFilledCommand, Result>, MatchingStatusCommandHandler>();
-        services.AddSingleton<IRequestHandler<MatchingPartiallyFilledCommand, Result>, MatchingStatusCommandHandler>();
-        services.AddSingleton<IRequestHandler<MatchingCancelCommand, Result>, MatchingStatusCommandHandler>();
+        services.AddSingleton<IRequestHandler<MatchingLimitCommand, MatchingEngine>, MatchingCommandHandler>();
+        services.AddSingleton<IRequestHandler<MatchingMarketCommand, MatchingEngine>, MatchingCommandHandler>();
+        services.AddSingleton<IRequestHandler<MatchingStopLimitCommand, MatchingEngine>, MatchingCommandHandler>();
+        services.AddSingleton<IRequestHandler<MatchingStopCommand, MatchingEngine>, MatchingCommandHandler>();
 
         // Domain - Services
         services.AddSingleton<IMatchingReceiver, MatchingReceiver>();
-        services.AddSingleton<ITradeOrderService, TradeOrderService>();
 
         var strategies = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(assembly => assembly.GetTypes())

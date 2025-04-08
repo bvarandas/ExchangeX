@@ -1,8 +1,8 @@
-﻿using SharedX.Core.Matching.OrderEngine;
+﻿using MatchingX.Core.Entities;
 namespace MacthingX.Application.Commands.Match.OrderType;
 public class MatchingMarketCommand : MatchingEngineCommand
 {
-    public MatchingMarketCommand(OrderEngine order)
+    public MatchingMarketCommand(MatchOrder order)
     {
         Timestamp = DateTime.Now;
         Order = order;

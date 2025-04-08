@@ -1,8 +1,8 @@
-﻿using MatchingX.Core.Interfaces;
-using SharedX.Core.Matching.OrderEngine;
+﻿using MatchingX.Core.Entities;
+using MatchingX.Core.Interfaces;
 
 namespace MacthingX.Application.Services;
-public class MatchContextStrategy : IMatchContextStrategy
+public sealed class MatchContextStrategy : IMatchContextStrategy
 {
     private readonly IEnumerable<IMatch> _matchList;
     private IMatchingCache _matchingCache;
@@ -18,12 +18,14 @@ public class MatchContextStrategy : IMatchContextStrategy
         LoadOrdersOnRestart();
     }
 
-    public void SetStrategy(string strategyName)
+    public bool SetStrategy(string strategyName)
     {
         var instance = _matchList.FirstOrDefault(x =>
             x.Name.Equals(strategyName, StringComparison.InvariantCultureIgnoreCase));
 
         _actualMatch = instance!;
+
+        return true;
     }
 
     private async void LoadOrdersOnRestart()
@@ -46,22 +48,16 @@ public class MatchContextStrategy : IMatchContextStrategy
         //    await _matchingCache.UpsertBuyOrder(order);
     }
 
-    public async void ReceivedOrder(OrderEngine order)
+    public async void ReceivedOrder(MatchingEngine order, CancellationToken cancellationToken)
     {
-        this._actualMatch.ReceiveOrder(order);
-        await this.MatchOrderAsync(order);
+        await this._actualMatch.ReceiveOrderAsync(order.PrincipalOrder, cancellationToken);
+        await this.MatchOrderAsync(order, cancellationToken);
     }
-    public async Task<bool> MatchOrderAsync(OrderEngine order)
-    {
-        bool result = false;
-        result = await this._actualMatch.MatchOrderAsync(order);
-        return result;
-    }
+    public async Task<bool> MatchOrderAsync(MatchingEngine order, CancellationToken cancellationToken)
+        => await this._actualMatch.MatchOrderAsync(order.PrincipalOrder, cancellationToken);
 
-    public async Task<bool> CancelOrderAsync(OrderEngine order)
-    {
-        bool result = false;
-        result = this._actualMatch.CancelOrder(order);
-        return result;
-    }
+
+    public async Task<bool> CancelOrderAsync(MatchingEngine order, CancellationToken cancellationToken)
+        => await this._actualMatch.CancelOrderAsync(order.PrincipalOrder, cancellationToken);
+
 }

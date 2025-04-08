@@ -1,11 +1,11 @@
-﻿using MongoDB.Driver;
-using SharedX.Core.Matching.OrderEngine;
+﻿using MatchingX.Core.Entities;
+using MongoDB.Driver;
 namespace MatchingX.Infra.Data;
 public class MatchingContext : IMatchingContext
 {
     private const string MatchingCollectionName = "Matching";
     private readonly IMongoDatabase _database;
-    public IMongoCollection<OrderEngine> _matching;
+    public IMongoCollection<MatchOrder> _matching;
     public MongoClient MongoClient { get; }
 
     public MatchingContext(IMongoDatabase database)
@@ -14,12 +14,12 @@ public class MatchingContext : IMatchingContext
         MongoClient = (MongoClient)database.Client;
     }
 
-    public IMongoCollection<OrderEngine> Matching
+    public IMongoCollection<MatchOrder> Matching
     {
         get
         {
             if (_matching is null)
-                _matching = _database.GetCollection<OrderEngine>(MatchingCollectionName);
+                _matching = _database.GetCollection<MatchOrder>(MatchingCollectionName);
 
             return _matching!;
         }

@@ -1,65 +1,14 @@
-﻿using MacthingX.Application.Commands.Match.OrderType;
-using MacthingX.Application.Interfaces;
+﻿using MatchingX.Application.Handlers;
+using MatchingX.Application.Services;
 using MatchingX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
-using SharedX.Core.Bus;
-using SharedX.Core.Enums;
-using SharedX.Core.Matching.OrderEngine;
 namespace MacthingX.Application.Services;
-public class MatchLimit : IMatch
+public sealed class MatchLimit : MatchBase
 {
-    protected readonly ITradeOrderService _tradeOrder;
-    protected readonly IMediatorHandler Bus;
-
+    private readonly IMediatorHandler Bus;
     public string Name => nameof(MatchLimit);
-
-    public MatchLimit(ILogger<MatchLimit> logger, IMediatorHandler bus, ITradeOrderService tradeOrder) 
+    public MatchLimit(ILogger<MatchLimit> logger, IMediatorHandler bus, IMatchingRepository repository) : base(bus, repository)
     {
-        _tradeOrder = tradeOrder;
         Bus = bus;
-    }
-    public  void ReceiveOrder(OrderEngine order)
-    {
-        switch (order.Execution)
-        {
-            case Execution.ToCancel:
-                this.CancelOrder(order);
-                break;
-            case Execution.ToModify:
-                this.ModifyOrder(order);
-                break;
-            case Execution.ToOpen:
-                _tradeOrder.AddOrder(order);
-                break;
-        }
-    }
-    public  bool CancelOrder(OrderEngine orderToCancel)
-    {
-        _tradeOrder.CancelOrder(orderToCancel);
-        return true;
-    }
-    public  bool ModifyOrder(OrderEngine order)
-    {
-        return _tradeOrder.ModifyOrder(order).Result;
-    }
-
-    public  async Task<bool> MatchOrderAsync(OrderEngine order)
-    {
-        bool cancelled = false;
-
-        var result = Bus.SendMatchCommand(new MatchingLimitCommand(order)).Result;
-        
-        if (result.Item1 is OrderStatus.Filled or OrderStatus.PartiallyFilled)
-        {
-            _tradeOrder.CreateReports(order, result.Item2);
-            await _tradeOrder.RemoveTradedOrdersAsync(result.Item2);
-        }
-        else if (result.Item1 is OrderStatus.Cancelled)
-        {
-            if (order.TimeInForce == TimeInForce.FOK)
-                cancelled = _tradeOrder.RemoveCancelledOrdersAsync(order).Result;
-        }
-
-        return true;
     }
 }

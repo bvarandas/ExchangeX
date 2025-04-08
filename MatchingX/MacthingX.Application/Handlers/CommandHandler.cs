@@ -1,23 +1,24 @@
-﻿using FluentValidation.Results;
-using MacthingX.Application.Events;
+﻿using MatchingX.Core.Interfaces;
 using MatchingX.Core.Notifications;
 using MediatR;
 using SharedX.Core.Bus;
 using SharedX.Core.Commands;
-using SharedX.Core.Entities;
-using SharedX.Core.Extensions;
 
 namespace MacthingX.Application.Handlers;
 public class CommandHandler
 {
+    private readonly IMatchingCache _matchingCache;
     private readonly IMediatorHandler _bus;
 
     private readonly DomainNotificationHandler _notifications;
 
-    public CommandHandler(IMediatorHandler bus, INotificationHandler<DomainNotification> notifications)
+    public CommandHandler(IMediatorHandler bus,
+        INotificationHandler<DomainNotification> notifications,
+        IMatchingCache matchingCache)
     {
         _bus = bus;
         _notifications = (DomainNotificationHandler)notifications;
+        _matchingCache = matchingCache;
     }
     protected void NotifyValidationErrors(Command message)
     {
@@ -85,6 +86,9 @@ public class CommandHandler
     //            break;
     //    }
     //}
+
+
+
 
 
 }

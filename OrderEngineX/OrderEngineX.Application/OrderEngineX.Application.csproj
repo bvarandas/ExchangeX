@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\MatchingX\MatchingX.Core\MatchingX.Core.csproj" />
     <ProjectReference Include="..\..\OrderEntryX\OrderEntryX.Infra\OrderEntryX.Infra.csproj" />
     <ProjectReference Include="..\..\SharedX\SharedX.Models\SharedX.Core.csproj" />
     <ProjectReference Include="..\OrderEngineX.Core\OrderEngineX.Core.csproj" />

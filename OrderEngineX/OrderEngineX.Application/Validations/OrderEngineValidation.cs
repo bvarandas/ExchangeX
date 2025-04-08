@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
+using MatchingX.Core.Interfaces;
 using OrderEngineX.Application.Commands;
 using SharedX.Core.Enums;
-using SharedX.Core.Interfaces;
 
 namespace OrderEngineX.Application.Validations;
 public abstract class OrderEngineValidation<T> :
@@ -77,7 +77,7 @@ public abstract class OrderEngineValidation<T> :
         ValidateSide();
         ValidateTimeInForceIOC();
     }
-    
+
     private void ValidateSymbol()
     {
         RuleFor(o => o.Order.Symbol)
@@ -96,7 +96,7 @@ public abstract class OrderEngineValidation<T> :
             .NotNull()
             .WithMessage("5-Inválid side order");
     }
-    
+
     private void ValidateAccountId()
     {
         RuleFor(o => o.Order.AccountId)

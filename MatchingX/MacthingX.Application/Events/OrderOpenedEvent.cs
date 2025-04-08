@@ -1,11 +1,11 @@
-﻿using SharedX.Core.Events;
-using SharedX.Core.Matching.OrderEngine;
+﻿using MatchingX.Core.Entities;
+using SharedX.Core.Events;
 
 namespace MacthingX.Application.Events;
-public class OrderOpenedEvent: Event
+public class OrderOpenedEvent : Event
 {
-    public readonly OrderEngine Order;
-    public OrderOpenedEvent(OrderEngine order )
+    public readonly MatchOrder Order;
+    public OrderOpenedEvent(MatchOrder order)
     {
         Order = order;
         Timestamp = DateTime.Now;

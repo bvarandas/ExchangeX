@@ -1,8 +1,8 @@
-﻿using SharedX.Core.Matching.OrderEngine;
+﻿using MatchingX.Core.Entities;
 namespace MacthingX.Application.Commands.Match.OrderType;
 public class MatchingStopLimitCommand : MatchingEngineCommand
 {
-    public MatchingStopLimitCommand(OrderEngine order)
+    public MatchingStopLimitCommand(MatchOrder order)
     {
         Timestamp = DateTime.Now;
         Order = order;

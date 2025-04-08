@@ -13,8 +13,8 @@ public class ReceiverSecurity : IReceiverEngine<Security>
         _logger = logger;
         _cache = cache;
     }
-    public void ReceiveEngine(Security message, CancellationToken cancellationToken)
+    public async Task ReceiveEngine(Security message, CancellationToken cancellationToken)
     {
-        _cache.UpsertSecurity(message);
+        await _cache.UpsertSecurity(message);
     }
 }

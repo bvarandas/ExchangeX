@@ -19,4 +19,8 @@
     <ProjectReference Include="..\MatchingX.Core\MatchingX.Core.csproj" />
     <ProjectReference Include="..\MatchingX.Infra\MatchingX.Infra.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Interfaces\" />
+  </ItemGroup>
 </Project>

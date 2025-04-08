@@ -1,8 +1,10 @@
 ﻿using MacthingX.Application.Events;
+using MacthingX.Application.Extensions;
+using MatchingX.Application.Services;
+using MatchingX.Core.Entities;
 using MatchingX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using SharedX.Core.Bus;
-using SharedX.Core.Entities;
 using SharedX.Core.Enums;
 using SharedX.Core.Matching.OrderEngine;
 namespace MacthingX.Application.Services;
@@ -24,49 +26,38 @@ public class MatchingReceiver : IMatchingReceiver
         _matchingCache = matchingCache;
         _contextStrategy = contextoStrategy;
     }
-    public void ReceiveOrder(OrderEngine order) 
+    public async Task ReceiveOrder(OrderEngine order, CancellationToken cancellationToken)
     {
         _logger.LogInformation($"Chegou Order do tipo {order.OrderType.ToString()}");
-        switch(order.Execution)
+
+        var matchOrder = order.ToMatching();
+
+        switch (order.Execution)
         {
             case Execution.ToOpen:
-                this.SetStrategy(ref order);
-                _contextStrategy.ReceivedOrder(order);
-                _mediator.Publish(new OrderOpenedEvent(order));
+                this.SetStrategy(matchOrder.PrincipalOrder);
+                _contextStrategy.ReceivedOrder(matchOrder, cancellationToken);
+                await _mediator.Publish(new OrderOpenedEvent(matchOrder.PrincipalOrder));
                 break;
             case Execution.ToCancel:
-                this.SetStrategy(ref order);
-                _contextStrategy.ReceivedOrder(order);
-                _mediator.Publish(new OrderCanceledEvent(order));
+                this.SetStrategy(matchOrder.PrincipalOrder);
+                _contextStrategy.ReceivedOrder(matchOrder, cancellationToken);
+                await _mediator.Publish(new OrderCanceledEvent(matchOrder.PrincipalOrder));
                 break;
             case Execution.ToModify:
-                this.SetStrategy(ref order);
-                _contextStrategy.ReceivedOrder(order);
-                _mediator.Publish(new OrderModifiedEvent(order));
+                this.SetStrategy(matchOrder.PrincipalOrder);
+                _contextStrategy.ReceivedOrder(matchOrder, cancellationToken);
+                await _mediator.Publish(new OrderModifiedEvent(matchOrder.PrincipalOrder));
                 break;
         }
     }
-    
-    private void SetStrategy(ref OrderEngine order)
+
+    private bool SetStrategy(MatchOrder order) => order.OrderType switch
     {
-        switch (order.OrderType)
-        {
-            case OrderType.Limit:
-                _contextStrategy.SetStrategy(nameof(MatchLimit));
-                break;
-            case OrderType.Market:
-                _contextStrategy.SetStrategy(nameof(MatchMarket));
-                break;
-            case OrderType.StopLimit:
-                _contextStrategy.SetStrategy(nameof(MatchStopLimit));
-                break;
-            case OrderType.Stop:
-                _contextStrategy.SetStrategy(nameof(MatchStop));
-                break;
-        }
-    }
-    //public void ReceiveSecurity(SecurityEngine security)
-    //{
-    //    _contextStrategy.ReceivedSecurity(security);
-    //}
+        OrderType.Limit => _contextStrategy.SetStrategy(nameof(MatchLimit)),
+        OrderType.Market => _contextStrategy.SetStrategy(nameof(MatchMarket)),
+        OrderType.StopLimit => _contextStrategy.SetStrategy(nameof(MatchStopLimit)),
+        OrderType.Stop => _contextStrategy.SetStrategy(nameof(MatchStop)),
+        _ => false
+    };
 }

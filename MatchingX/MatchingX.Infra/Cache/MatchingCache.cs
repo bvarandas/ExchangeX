@@ -1,8 +1,9 @@
-﻿using MatchingX.Core.Interfaces;
+﻿using FluentResults;
+using MatchingX.Core.Entities;
+using MatchingX.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SharedX.Core.Enums;
-using SharedX.Core.Matching.DropCopy;
 using SharedX.Core.Matching.MarketData;
 using SharedX.Core.Specs;
 using StackExchange.Redis;
@@ -10,11 +11,8 @@ using System.Collections.Concurrent;
 using System.Text.Json;
 
 namespace MatchingX.Infra.Cache;
-public class MatchingCache :IMatchingCache
+public class MatchingCache : IMatchingCache
 {
-    private readonly ConcurrentQueue<TradeCaptureReport> TradeCaptureQueue;
-    private readonly ConcurrentQueue<ExecutionReport> ExecutionReportQueue;
-    private readonly ConcurrentQueue<ExecutionReport> ExecutionReportToOrderQueue;
     private readonly ConcurrentQueue<MarketData> IncrementalQueue = null!;
     private readonly ConcurrentDictionary<string, decimal> _LastPrice;
 
@@ -22,12 +20,11 @@ public class MatchingCache :IMatchingCache
     private readonly ConnectionMultiplexer _redis;
     private readonly IDatabase _dbMatching;
     private readonly ILogger<MatchingCache> _logger;
-    
+
     private static long MarketID = 0;
 
-    private RedisKey keyMarketData = new RedisKey("Marketdata");
-    private RedisKey keyTradeCapture = new RedisKey("TradeCapture");
-    private RedisKey keyExecuteReport = new RedisKey("ExecuteReport");
+    private RedisKey keyBuy = new RedisKey("order_to_match_buy");
+    private RedisKey keySell = new RedisKey("order_to_match_sell");
 
     public MatchingCache(ILogger<MatchingCache> logger, IOptions<ConnectionRedis> config)
     {
@@ -35,12 +32,9 @@ public class MatchingCache :IMatchingCache
 
         IncrementalQueue = new ConcurrentQueue<MarketData>();
         _LastPrice = new ConcurrentDictionary<string, decimal>();
-        TradeCaptureQueue = new ConcurrentQueue<TradeCaptureReport>();
-        ExecutionReportQueue = new ConcurrentQueue<ExecutionReport>();
-        ExecutionReportToOrderQueue = new ConcurrentQueue<ExecutionReport>();
 
-
-        _redis = ConnectionMultiplexer.Connect(_config.ConnectionString, options => {
+        _redis = ConnectionMultiplexer.Connect(_config.ConnectionString, options =>
+        {
             options.ReconnectRetryPolicy = new ExponentialRetry(5000, 1000 * 60);
         });
 
@@ -48,117 +42,73 @@ public class MatchingCache :IMatchingCache
         _logger = logger;
     }
 
-    #region DropCopy
-
-    public async void AddExecutionReport(ExecutionReport execution)
+    public async Task<Result> UpsertBuyOrderMatchingAsync(MatchingEngine matchEngine, CancellationToken cancellation)
     {
-        ExecutionReportQueue.Enqueue(execution);
-        ExecutionReportToOrderQueue.Enqueue(execution);
-        await SetValueExecutionReportRedisAsync(execution);
+        RedisValue value = new RedisValue(JsonSerializer.Serialize<MatchingEngine>(matchEngine));
+        var key = string.Concat(keyBuy, ":", matchEngine.PrincipalOrder.Symbol);
+
+        await _dbMatching.HashSetAsync(key,
+            new HashEntry[]{
+                new HashEntry(matchEngine.PrincipalOrder.OrderID, value)
+            });
+
+        return Result.Ok();
     }
-
-    public async void AddTradeCaptureReport(TradeCaptureReport trade)
+    public async Task<Result> UpsertSellOrderMatchingAsync(MatchingEngine matchEngine, CancellationToken cancellation)
     {
-        TradeCaptureQueue.Enqueue(trade);
-        await SetValueTradeCaptureReportRedisAsync(trade);
+        RedisValue value = new RedisValue(JsonSerializer.Serialize<MatchingEngine>(matchEngine));
+        var key = string.Concat(keySell, ":", matchEngine.PrincipalOrder.Symbol);
+
+        await _dbMatching.HashSetAsync(key,
+            new HashEntry[]{
+                new HashEntry(matchEngine.PrincipalOrder.OrderID, value)
+            });
+
+        return Result.Ok();
     }
-
-    private async Task SetValueTradeCaptureReportRedisAsync(TradeCaptureReport report)
+    public async Task<Result<Dictionary<long, MatchOrder>>> GetBuyOrderBySymbol(string symbol)
     {
-        RedisValue value = new RedisValue(JsonSerializer.Serialize<TradeCaptureReport>(report));
-        _dbMatching.HashIncrement(keyTradeCapture, value);
-    }
+        var result = new Dictionary<long, MatchOrder>();
+        var key = string.Concat(keyBuy, ":", symbol);
+        var hashEntry = await _dbMatching.HashGetAllAsync(key);
 
-    private async Task SetValueExecutionReportRedisAsync(ExecutionReport report)
-    {
-        RedisValue value = new RedisValue(JsonSerializer.Serialize<ExecutionReport>(report));
-        _dbMatching.HashIncrement(keyExecuteReport, value);
-    }
-
-    public bool TryDequeueExecuteReport(out ExecutionReport execution)
-    {
-        execution = default(ExecutionReport)!;
-        if (ExecutionReportQueue.TryDequeue(out ExecutionReport executionFound))
+        //hashEntry.MaxBy(c=>c.Value.)
+        foreach (var item in hashEntry)
         {
-            execution = executionFound;
-            return true;
+            var value = JsonSerializer.Deserialize<MatchOrder>(item.Value);
+            result.Add(long.Parse(item.Name), value);
         }
-        return false;
-    }
+        var ordered = result.OrderByDescending(o => o.Value.Price);
 
-    public bool TryDequeueExecuteToOrderReport(out ExecutionReport execution)
+        result = ordered.ToDictionary<KeyValuePair<long, MatchOrder>, long, MatchOrder>
+            (pair => pair.Key, pair => pair.Value);
+
+        return Result.Ok(result);
+    }
+    public async Task<Result<Dictionary<long, MatchOrder>>> GetSellOrderBySymbol(string symbol)
     {
-        execution = default(ExecutionReport)!;
-        if (ExecutionReportToOrderQueue.TryDequeue(out ExecutionReport executionFound))
+        var result = new Dictionary<long, MatchOrder>();
+        var key = string.Concat(keySell, ":", symbol);
+        var hashEntry = await _dbMatching.HashGetAllAsync(key);
+        foreach (var item in hashEntry)
         {
-            execution = executionFound;
-            return true;
+            var value = JsonSerializer.Deserialize<MatchOrder>(item.Value);
+            result.Add(long.Parse(item.Name), value);
         }
-        return false;
+        var ordered = result.OrderBy(o => o.Value.Price);
+
+        result = ordered.ToDictionary<KeyValuePair<long, MatchOrder>, long, MatchOrder>
+            (pair => pair.Key, pair => pair.Value);
+
+        return Result.Ok(result);
     }
 
-    public bool TryDequeueTradeCaptureReport(out TradeCaptureReport trade)
+    public async Task<Result<bool>> RemoveOrderMatchingAsync(string symbol, long orderId)
     {
-        trade = default(TradeCaptureReport)!;
-        if (TradeCaptureQueue.TryDequeue(out TradeCaptureReport tradeFound))
-        {
-            trade = tradeFound;
-            return true;
-        }
-        return false;
-    }
-    #endregion
+        var key = string.Concat(keySell, ":", symbol);
+        RedisValue value = new RedisValue(orderId.ToString());
+        var hashResult = await _dbMatching.HashDeleteAsync(key, value);
 
-    #region Marketdata
-    public async Task<decimal> GetPrice(string symbol)
-    {
-        RedisValue value = new RedisValue(symbol);
-        var marketHash = await _dbMatching.HashGetAsync(keyMarketData, value);
-        if (marketHash.HasValue)
-        {
-            var marketData = JsonSerializer.Deserialize<MarketData>(marketHash);
-            return marketData!.EntryPx;
-        }
-        return 0;
+        return Result.Ok(hashResult);
     }
-    public async Task<MarketData> GetMarketDataBySymbol(string symbol)
-    {
-        var marketData = new MarketData();
-        RedisValue value = new RedisValue(symbol);
-        var marketHash = await _dbMatching.HashGetAsync(keyMarketData, value);
-        if (marketHash.HasValue)
-        {
-            marketData = JsonSerializer.Deserialize<MarketData>(marketHash);
-
-        }
-        return default(MarketData)!;
-    }
-    private async Task SetValueRedis(MarketData marketData)
-    {
-        RedisValue value = new RedisValue(JsonSerializer.Serialize<MarketData>(marketData));
-
-        await _dbMatching.HashSetAsync(keyMarketData, new HashEntry[]
-        {
-            new HashEntry(marketData.Symbol, value)
-        });
-    }
-
-    public bool TryDequeueMarketData(out MarketData marketData)
-    {
-        marketData = default(MarketData);
-        if (IncrementalQueue.TryDequeue(out MarketData marketDataFound))
-        {
-            marketData = marketDataFound;
-            return true;
-        }
-        return false;
-    }
-
-    public async void AddIncremental(MarketData marketData)
-    {
-        marketData.Id = ++MarketID;
-        IncrementalQueue.Enqueue(marketData);
-        await SetValueRedis(marketData);
-    }
-    #endregion
 }

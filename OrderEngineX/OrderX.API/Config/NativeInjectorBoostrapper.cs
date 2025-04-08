@@ -12,7 +12,6 @@ using OrderEngineX.Core.Notifications;
 using OrderEngineX.Infra.Cache;
 using OrderEngineX.Infra.Data;
 using OrderEngineX.Infra.Repositories;
-using Sharedx.Infra.Order.Cache;
 using Sharedx.Infra.Outbox.Cache;
 using Sharedx.Infra.Outbox.Services;
 using SharedX.Core.Bus;
@@ -20,7 +19,6 @@ using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
 using SharedX.Core.ValueObjects;
-using SharedX.Infra.Cache;
 using System.Reflection;
 
 namespace OrderEngineX.API.Config;
@@ -124,8 +122,6 @@ internal class NativeInjectorBoostrapper
         services.AddSingleton<IExecutionReportCache, ExecutionReportCache>();
         services.AddSingleton<IOrderEngineCache, OrderEngineCache>();
         services.AddSingleton<IOrderReportCache, OrderReportCache>();
-        services.AddSingleton<IOrderStopCache, OrderStopCache>();
-        services.AddSingleton<IBookOfferCache, BookOfferCache>();
 
         services.AddSingleton<ISecurityEngineCache, SecurityEngineCache>();
 

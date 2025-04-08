@@ -1,16 +1,14 @@
 ﻿using FluentValidation;
+using MatchingX.Core.Interfaces;
 using OrderEngineX.Application.Commands;
 using OrderEngineX.Core.Interfaces;
 using SharedX.Core.Entities;
 using SharedX.Core.Enums;
-using SharedX.Core.Interfaces;
 using SharedX.Core.Matching.OrderEngine;
-using System.Diagnostics.SymbolStore;
-using static StackExchange.Redis.Role;
 
 namespace MacthingX.Application.Validations;
-public abstract class OrderValidation<T> : 
-    AbstractValidator<T> where T: 
+public abstract class OrderValidation<T> :
+    AbstractValidator<T> where T :
     OrderEngineCommand
 {
     private readonly ISecurityEngineCache _securityEngineCache;
@@ -178,7 +176,7 @@ public abstract class OrderValidation<T> :
             .NotEqual(0)
             .WithName("neworder")
             .WithMessage("5-Invalid OrderID order")
-            .WithErrorCode("5"); 
+            .WithErrorCode("5");
     }
     private void ValidateReplaceOrderId()
     {
@@ -194,7 +192,7 @@ public abstract class OrderValidation<T> :
             .NotEqual(0)
             .WithName("replace")
             .WithMessage("5-Invalid accountId order")
-            .WithErrorCode("5"); 
+            .WithErrorCode("5");
     }
     private void ValidateAccountId()
     {
@@ -222,10 +220,10 @@ public abstract class OrderValidation<T> :
     private void ValidatePriceLimit()
     {
         RuleFor(o => o.Order.Price)
-            .Must(p=>p>0)
-            .When(o=>o.Order.OrderType == OrderType.Limit || o.Order.OrderType== OrderType.StopLimit)
+            .Must(p => p > 0)
+            .When(o => o.Order.OrderType == OrderType.Limit || o.Order.OrderType == OrderType.StopLimit)
             .WithMessage("5-Invalid Price for limit or stopLimit order")
-            .WithErrorCode("5"); 
+            .WithErrorCode("5");
     }
     private void ValidatePriceMarket()
     {
@@ -241,13 +239,13 @@ public abstract class OrderValidation<T> :
             .Must(p => p > 0)
             .When(p => p.Order.OrderType == OrderType.Stop || p.Order.OrderType == OrderType.StopLimit)
             .WithMessage("5-Invalid StopPx to order stop or stoplimit")
-            .WithErrorCode("5"); 
+            .WithErrorCode("5");
     }
     private void ValidateTimeInForceFOK()
     {
         RuleFor(o => o.Order.TimeInForce)
-            .Must(p => p== TimeInForce.FOK)
-            .When(p => p.Order.OrderType == OrderType.Market|| p.Order.OrderType == OrderType.Stop)
+            .Must(p => p == TimeInForce.FOK)
+            .When(p => p.Order.OrderType == OrderType.Market || p.Order.OrderType == OrderType.Stop)
             .WithMessage("5-Invalid TimeInForce FOK to order market or stop")
             .WithErrorCode("5");
     }
@@ -291,15 +289,15 @@ public abstract class OrderValidation<T> :
         RuleFor(o => o.Order)
             .Must(IsValidOrderToCancel)
             .WithMessage("0-To Late to cancel")
-            
-            .WithErrorCode("0") ;
+
+            .WithErrorCode("0");
     }
     private void ValidateOrderDuplicateClOrdID()
     {
         RuleFor(o => o.Order)
             .Must(IsNotDuplicatedClOrdID)
             .WithMessage("6-Duplicate ClOrdID <11> received")
-            .WithErrorCode("6"); 
+            .WithErrorCode("6");
     }
 
     private void ValidateSecurityOrder()
@@ -341,19 +339,19 @@ public abstract class OrderValidation<T> :
     }
     private bool IsSecurityExists(OrderEngine order) =>
         _securityEngineCache.TryGetSecurity(order.Symbol, out SecurityEngine security);
-        
-    
+
+
     private bool IsNotPriceLessThanLowLimitPrice(OrderEngine order)
     {
         if (_securityEngineCache.TryGetSecurity(order.Symbol, out SecurityEngine security))
-        { 
+        {
             if (security.LowLimitPrice > order.Price)
                 return false;
         }
         return true;
     }
 
-    private bool IsNotPriceGreaterThanHighLimitPrice( OrderEngine order)
+    private bool IsNotPriceGreaterThanHighLimitPrice(OrderEngine order)
     {
         if (_securityEngineCache.TryGetSecurity(order.Symbol, out SecurityEngine security))
         {
@@ -363,7 +361,7 @@ public abstract class OrderValidation<T> :
         return true;
     }
 
-    private bool IsNotQuantitySecurityGreaterThanMaxTradeVol( OrderEngine order)
+    private bool IsNotQuantitySecurityGreaterThanMaxTradeVol(OrderEngine order)
     {
         if (_securityEngineCache.TryGetSecurity(order.Symbol, out SecurityEngine security))
         {
@@ -373,9 +371,9 @@ public abstract class OrderValidation<T> :
         return true;
     }
 
-    private bool IsNotQuantitySecurityLessThanMinTradeVol( OrderEngine order)
+    private bool IsNotQuantitySecurityLessThanMinTradeVol(OrderEngine order)
     {
-        if ( _securityEngineCache.TryGetSecurity(order.Symbol, out SecurityEngine security))
+        if (_securityEngineCache.TryGetSecurity(order.Symbol, out SecurityEngine security))
         {
             if (security.MinTradeVol > order.Quantity)
                 return false;
@@ -399,7 +397,7 @@ public abstract class OrderValidation<T> :
 
         if (orderFound.IsSuccess)
         {
-            switch( orderFound.Value.OrderStatus)
+            switch (orderFound.Value.OrderStatus)
             {
                 case OrderStatus.Rejected:
                     return false;
@@ -407,7 +405,7 @@ public abstract class OrderValidation<T> :
                     return true;
                 case OrderStatus.Cancelled:
                     return false;
-                case OrderStatus.Filled: 
+                case OrderStatus.Filled:
                     return false;
                 case OrderStatus.PartiallyFilled:
                     return true;
@@ -424,11 +422,11 @@ public abstract class OrderValidation<T> :
 
     private bool IsNotDuplicatedClOrdID(OrderEngine order)
     {
-        var orders= _matchingCache.GetBuyOrderBySymbol(order.Symbol).Result;
+        var orders = _matchingCache.GetBuyOrderBySymbol(order.Symbol).Result;
 
         if (orders.IsSuccess)
         {
-            var found = orders.Value.FirstOrDefault(o=>o.Value.ClOrdID==order.ClOrdID);
+            var found = orders.Value.FirstOrDefault(o => o.Value.ClOrdID == order.ClOrdID);
             if (found.Value is not null)
                 return false;
         }
