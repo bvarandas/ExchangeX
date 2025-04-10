@@ -1,13 +1,13 @@
-﻿using SharedX.Core.Commands;
-using SharedX.Core.Matching.DropCopy;
+﻿using MatchingX.Core.Entities;
+using SharedX.Core.Commands;
 
 namespace MacthingX.Application.Commands;
 public class ExecutedTradeCommand : Command
 {
-    public readonly Dictionary<long, TradeReport> ExecutedTrades;
-    //public readonly Dictionary<long, MatchingEngine> ExecutedTrades;
+
+    public readonly MatchingEngine ExecutedTrades;
     public DateTime Timestamp { get; private set; }
-    public ExecutedTradeCommand(Dictionary<long, TradeReport> executedTrade)
+    public ExecutedTradeCommand(MatchingEngine executedTrade)
     {
         Timestamp = DateTime.Now;
         ExecutedTrades = executedTrade;

@@ -5,7 +5,7 @@ using MatchingX.Infra.Data;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 namespace MatchingX.Infra.Repositories;
-public class MatchingRepository : IMatchingRepository
+public sealed class MatchingRepository : IMatchingRepository
 {
     private readonly IMatchingContext _context;
     private readonly ILogger<MatchingRepository> _logger;
@@ -86,9 +86,13 @@ public class MatchingRepository : IMatchingRepository
         }
         return Result.Ok();
     }
+    public async Task<Result<IEnumerable<MatchOrder>>> GetOrdersMatchingAsync(CancellationToken cancellation)
+    {
+        var builder = Builders<MatchOrder>.Filter;
+        var filter = builder.Empty;
 
+        var result = await _context.Matching.FindAsync(filter);
 
-
-
-
+        return Result.Ok(result.ToEnumerable());
+    }
 }

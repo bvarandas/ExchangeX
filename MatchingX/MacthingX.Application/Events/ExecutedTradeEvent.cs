@@ -5,7 +5,6 @@ namespace MacthingX.Application.Events;
 public class ExecutedTradeEvent : Event
 {
     public MatchingEngine ExecutedOrders { get; set; }
-    //public Dictionary<long, TradeReport> ExecutedTrades {  get; private set; }
     public DateTime Timestamp { get; private set; }
     public ExecutedTradeEvent(MatchingEngine executedOrders)
     {

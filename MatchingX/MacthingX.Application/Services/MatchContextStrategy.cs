@@ -13,9 +13,6 @@ public sealed class MatchContextStrategy : IMatchContextStrategy
     {
         this._matchList = matchList;
         this._matchingCache = matchingCache;
-
-
-        LoadOrdersOnRestart();
     }
 
     public bool SetStrategy(string strategyName)
@@ -27,27 +24,6 @@ public sealed class MatchContextStrategy : IMatchContextStrategy
 
         return true;
     }
-
-    private async void LoadOrdersOnRestart()
-    {
-        //var ordersDb = await _orderRepository.GetOrdersOnRestartAsync(default(CancellationToken));
-
-        //if (ordersDb is not null)
-        //foreach (var order in ordersDb)
-        //{
-
-        //}
-
-        //var buyOrders = ordersDb.Where(o => o.Side == SideTrade.Buy);
-        //var sellOrders = ordersDb.Where(o => o.Side == SideTrade.Sell);
-
-        //foreach (var order in sellOrders.ToList())
-        //    await _matchingCache.UpsertSellOrder(order);
-
-        //foreach (var order in buyOrders.ToList())
-        //    await _matchingCache.UpsertBuyOrder(order);
-    }
-
     public async void ReceivedOrder(MatchingEngine order, CancellationToken cancellationToken)
     {
         await this._actualMatch.ReceiveOrderAsync(order.PrincipalOrder, cancellationToken);
@@ -59,5 +35,4 @@ public sealed class MatchContextStrategy : IMatchContextStrategy
 
     public async Task<bool> CancelOrderAsync(MatchingEngine order, CancellationToken cancellationToken)
         => await this._actualMatch.CancelOrderAsync(order.PrincipalOrder, cancellationToken);
-
 }

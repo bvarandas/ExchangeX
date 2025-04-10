@@ -5,7 +5,7 @@ using SharedX.Core.ValueObjects;
 
 namespace MatchingX.ServerApp.Publisher;
 
-public class PublisherTradeEngine : IPublisherEngine<TradeReport>
+public sealed class PublisherTradeEngine : IPublisherEngine<TradeReport>
 {
     private readonly ILogger<PublisherTradeEngine> _logger;
     private readonly IOutboxCache<TradeReport> _cacheOutbox;

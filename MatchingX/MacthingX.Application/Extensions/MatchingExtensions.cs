@@ -49,7 +49,6 @@ public static class MatchingExtensions
 
         return ep;
     }
-
     public static Book ToBookItem(this OrderEngine order)
         => new Book()
         {
@@ -60,7 +59,6 @@ public static class MatchingExtensions
             Amount = order.Quantity,
             Timestamp = order.TransactTime
         };
-
     public static MatchingEngine ToMatching(this OrderEngine order)
     {
         var matchingEngine = new MatchingEngine();
@@ -104,4 +102,100 @@ public static class MatchingExtensions
             QuoteType = "",
             AggressorSide = (char)order.Side
         };
+    public static Dictionary<long, TradeReport> ToExecutionReport(this MatchingEngine matchingEngine)
+    {
+        var result = new Dictionary<long, TradeReport>();
+
+        var order = matchingEngine.PrincipalOrder;
+
+        var report = new ExecutionReport();
+        report.AccountType = order.AccountType; //1= Client and 3 = House
+        report.TimeInForce = order.TimeInForce;
+        report.StopPrice = order.StopPrice;
+        report.Symbol = order.Symbol;
+        report.Quantity = order.Quantity;
+        report.Side = order.Side;
+        report.OrigCLOrdID = order.ClOrdID;
+        report.OrderID = order.OrderID;
+        report.TradeId = order.OrderID;
+        report.ExecID = order.OrderID;
+        report.Price = order.Price;
+        report.ExecType = 'F';      // Fully or partially 
+
+        result.Add(report.TradeId, report);
+
+        foreach (var orderPart in matchingEngine.PartOrders.Values)
+        {
+            var reportPart = new ExecutionReport();
+            reportPart.AccountType = order.AccountType; //1= Client and 3 = House
+            reportPart.TimeInForce = orderPart.TimeInForce;
+            reportPart.StopPrice = orderPart.StopPrice;
+            reportPart.Symbol = orderPart.Symbol;
+            reportPart.Quantity = orderPart.Quantity;
+            reportPart.Side = orderPart.Side;
+            reportPart.OrigCLOrdID = orderPart.ClOrdID;
+            reportPart.OrderID = orderPart.OrderID;
+            reportPart.TradeId = order.OrderID;
+            reportPart.ExecID = order.OrderID;
+            reportPart.Price = orderPart.Price;
+            reportPart.ExecType = 'F';      // Fully or partially 
+
+            result.Add(reportPart.TradeId, reportPart);
+        }
+
+        return result;
+    }
+    public static Dictionary<long, TradeReport> ToCaptureReport(this MatchingEngine matchingEngine)
+    {
+        var result = new Dictionary<long, TradeReport>();
+
+        var order = matchingEngine.PrincipalOrder;
+
+        var report = new TradeCaptureReport()
+        {
+            TradeReportTransType = 0,
+            TrdType = 0,
+            CopyMsgIndicator = 'Y',
+            PreviouslyReported = 'N',
+            TradeId = order.OrderID,
+            NoSides = 1,
+            OrderId = order.OrderID.ToString(),
+            ClOrderId = order.ClOrdID.ToString(),
+            LastQty = order.LastQuantity,
+            LastPx = order.LastPrice,
+            Symbol = order.Symbol,
+            Side = (char)order.Side,
+            Price = order.Price,
+            TransactTime = order.TransactTime,
+            TradeDate = DateTime.Now.ToString("yyyyMMdd"),
+        };
+
+        result.Add(report.TradeId, report);
+
+        foreach (var orderPart in matchingEngine.PartOrders.Values)
+        {
+            var reportPart = new TradeCaptureReport()
+            {
+                TradeReportTransType = 0,
+                TrdType = 0,
+                CopyMsgIndicator = 'Y',
+                PreviouslyReported = 'N',
+                TradeId = order.OrderID,
+                NoSides = 1,
+                OrderId = orderPart.OrderID.ToString(),
+                ClOrderId = orderPart.ClOrdID.ToString(),
+                LastQty = orderPart.LastQuantity,
+                LastPx = orderPart.LastPrice,
+                Symbol = orderPart.Symbol,
+                Side = (char)orderPart.Side,
+                Price = orderPart.Price,
+                TransactTime = orderPart.TransactTime,
+                TradeDate = DateTime.Now.ToString("yyyyMMdd"),
+            };
+
+            result.Add(reportPart.TradeId, reportPart);
+        }
+
+        return result;
+    }
 }

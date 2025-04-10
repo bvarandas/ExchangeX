@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using SharedX.Core.Enums;
 
 namespace MacthingX.Application.Events;
-public class OrderEventHandler :
+public sealed class OrderEventHandler :
     INotificationHandler<OrderCanceledEvent>,
     INotificationHandler<OrderTradedEvent>,
     INotificationHandler<OrderOpenedEvent>,
