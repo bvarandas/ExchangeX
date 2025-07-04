@@ -1,6 +1,7 @@
 Projeto White Label para Matching de Ordens de operações para Ativos, derivativos e cripto moedas.
 
 A arquitetura foi planejada para casar um número alto de ordens e gerar mensagens de negociação em tempo real.
+MensageBroker e 
 
 Temos duas partes. 
 
@@ -9,7 +10,7 @@ A parte da exchange é a parte onde temos:
  - Front end White Label com o Sistema de homebroker - Clientes podem enviar as ordens
  - Front end White Label com o Sistema de Risk manager - Os Contratantes tem acesso ao patrimonio em tempo real dos cliente
  - Backend com Engine de Inconsistencias - mensagens de negócios com erro, erros sistemicos e 
- - Backend com Engine de BFF para usar como Gateway, Orquestração das mensagens de input e output.
+ - Backend com Engine de BFF para usar como Gateway, Identity Provider, Orquestração das mensagens de input e output.
  - Backend com Engine de Audit - Infrmações que de logs para auditoria
  - Backend com Engine de Limite - Onde é verificado em tempo real o Limite necessário para o cliente poder efetuar a operação de compra
  - Backend com Engine de Posição - Onde é calculado a posição do cliente em tempo real para enviar para o homebroker
@@ -33,8 +34,11 @@ A Parte de Matching é parte onde temos:
 ![_Matching](https://github.com/user-attachments/assets/a3636932-1095-4d0e-88c3-3dcff0de76d2)
 Modelo da arquitetura C4
 
-Patterns Usado
- - CQRS - com Coreografia, Mensageria
+Arquiteturas e Patterns 
+ - Event Driven Architecture/ Message Driven Architecture
+ - Outbox para garantia de entrega de mensagens
+ - 
+ - CQRS - com Coreografia
  - Singleton
  - Flyweight (OU algo parecido)
  - Command
