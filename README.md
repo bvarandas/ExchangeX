@@ -1,9 +1,11 @@
 Projeto White Label para Matching de Ordens de operações para Ativos, derivativos e cripto moedas.
 
-A arquitetura foi planejada para casar um número alto de ordens a cada segundo e gerar mensagens de negociação em tempo real para parceiros em tempo real.
-MensageBroker e 
+A arquitetura foi projetada para efetuar um número alto de ordens (dependendo do tamanho do Pod) o mais rápido possível, gerando mensagens de cotação/negociação em tempo real para nosos futuros parceiros em tempo real.
+A idéia é termos vários parceiros conectados em nosso sistema de matching, consumindo nossas informações de cotação/negociação, e ao mesmo tempo, fornecermos o serviço de homebroker para clientes diretos.
 
-Temos duas partes. 
+Para isso, temos duas partes: 
+ - O Módulo Exchange, onde fornecemos o homebroker e o Risk trader
+ - O módulo Matching, onde as ordens serão casadas e as mensagens serão criadas.
 
 A parte da exchange é a parte onde temos:
 
@@ -28,7 +30,8 @@ A Parte de Matching é parte onde temos:
  - Backend Matching - Serviço onde o casamento de ordens é executado. Depois do matching executado, o serviço cria três Objetos:
    - TradeEngine: trade Executado que vai para o serviço de Trade Engine
    - MarketDdataEngine: Quando um trade é executado o objeto de marketData é criado para enviar para serviço de marketData para o mesmo criar o objeto FIX para envio para parceiros externos
-   - OrderEntryEngine: Quando um trande é executado o objeto de OrderEngine é criado para enviar para o serviço OrderEngine para o mesmo alterar o status da ordem. 
+   - OrderEntryEngine: Quando um trande é executado o objeto de OrderEngine é criado para enviar para o serviço OrderEngine para o mesmo alterar o status da ordem.
+- Dentro da Matcing Engine, temos ainda um Book  de ordens, que é o  book  de ordens abertas aguardando para serem executadas.
      
 
 ![_Matching](https://github.com/user-attachments/assets/a3636932-1095-4d0e-88c3-3dcff0de76d2)
