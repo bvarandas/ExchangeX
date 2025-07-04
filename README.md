@@ -37,7 +37,7 @@ Modelo da arquitetura C4
 Arquiteturas e Patterns 
  - Event Driven Architecture/ Message Driven Architecture
  - Outbox para garantia de entrega de mensagens
- - 
+ - Acid - Atomicidade, Consistencia, Isolamento e durabilidade.
  - CQRS - com Coreografia
  - Singleton
  - Flyweight (OU algo parecido)
