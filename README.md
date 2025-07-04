@@ -1,6 +1,6 @@
 Projeto White Label para Matching de Ordens de operações para Ativos, derivativos e cripto moedas.
 
-A arquitetura foi planejada para casar um número alto de ordens e gerar mensagens de negociação em tempo real.
+A arquitetura foi planejada para casar um número alto de ordens a cada segundo e gerar mensagens de negociação em tempo real para parceiros em tempo real.
 MensageBroker e 
 
 Temos duas partes. 
@@ -37,28 +37,25 @@ Modelo da arquitetura C4
 Arquiteturas e Patterns 
  - Event Driven Architecture/ Message Driven Architecture
  - Outbox para garantia de entrega de mensagens
- - Acid - Atomicidade, Consistencia, Isolamento e durabilidade.
- - CQRS - com Coreografia
+ - Tratamento Acid de mensagens entre microserviços - Atomicidade, Consistencia, Isolamento e durabilidade.
+ - Paralelismo e alta disponibilidade de serviços.
+ - CQRS - separando conexão de gravação e seleção...ainda mais pq seleção consulta mais memória do que banco de dados. Pois os dados são atualiados via eventos.
  - Singleton
  - Flyweight (OU algo parecido)
  - Command
  - Mediator
  - Observer
  - Ioc - Inversão de controle (Removido)
+ - Injeção de depedencia
+ - Unit of Work (Removido)
+ - Event Sourcing (removido)
+ - Alguns conceitos de S.O.L.I.D. tbm foram usados.
 
-Injeção de depedencia
 
-Unit of Work (Removido)
 
-Event Sourcing (removido)
 
-Alguns conceitos de S.O.L.I.D. tbm foram usados.
 
-kind create cluster
 
-kubectl apply -f .
-
-![image](https://github.com/bvarandas/ChallengeDigitas/assets/13907905/852bac3a-0493-45b5-87ff-6e1c03d6c84d)
 
 
 
