@@ -16,7 +16,7 @@ A parte da exchange é a parte onde temos:
  - Backend com Engine de OrderRouter - Onde é feita a orquestração das  ordens que chegam do matching e que chegam do homebroker.
 
 
-![exchange_gif](https://github.com/user-attachments/assets/98e31cf7-7d1e-4029-bc2d-4af33a814a5d)
+
 
 
 ![exchange_gif](https://github.com/user-attachments/assets/47c2019c-c03c-4856-8daa-20fd69874f92)
