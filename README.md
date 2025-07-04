@@ -9,7 +9,7 @@ Para isso, temos duas partes:
  - O Módulo Exchange, onde fornecemos o homebroker e o Risk trader
  - O módulo Matching, onde as ordens serão casadas e as mensagens serão criadas.
 
-A parte da exchange é a parte onde temos:
+## A parte da exchange é a parte onde temos:
 
  - Front end White Label com o Sistema de homebroker - Clientes podem enviar as ordens
  - Front end White Label com o Sistema de Risk manager - Os Contratantes tem acesso ao patrimonio em tempo real dos cliente
@@ -23,7 +23,7 @@ A parte da exchange é a parte onde temos:
 ![_exchange_gif](https://github.com/user-attachments/assets/ec3d8a2b-8414-402b-b46b-3644c46ff43c)
 Modelo da arquitetura C4
 
-A Parte de Matching é parte onde temos:
+## A parte de Matching é parte onde temos:
  - Backend com Engine Order - monitoramento de Ordens Stop e gerenciamento de status de ordens
  - Backend Order Entry Engine - entrada externa de ordens via FIX - Usado para receber ordens de homebrokers e plataformas de negociação externos.
  - Backend MarketData Engine - Saída de sinal FIX Cotação para parceiros externos est]ao nesse serviço
