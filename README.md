@@ -18,23 +18,28 @@ A parte da exchange é a parte onde temos:
 ![_exchange_gif](https://github.com/user-attachments/assets/ec3d8a2b-8414-402b-b46b-3644c46ff43c)
 
 
+A Parte de Matching é parte onde temos:
+ - Backend com Engine Order - monitoramento de Ordens Stop e gerenciamento de status de ordens
+ - Backend Order Entry Engine - entrada externa de ordens via FIX - Usado para receber ordens de homebrokers e plataformas de negociação externos.
+ - Backend MarketData Engine - Saída de sinal FIX Cotação para parceiros externos est]ao nesse serviço
+ - Backend DropCopy Engine - Saída de sinal FIX Negocios para parceiros externos estõa nesse serviço
+ - Backend Trade Engine - As negociações efetuadas são salvas nesse microserviço intermediário
+ - Backend Matching - Serviço onde o casamento de ordens é executado. Depois do matching executado, o serviço cria três Objetos:
+   - TradeEngine: trade Executado que vai para o serviço de Trade Engine
+   - MarketDdataEngine: Quando um trade é executado o objeto de marketData é criado para enviar para serviço de marketData para o mesmo criar o objeto FIX para envio para parceiros externos
+   - OrderEntryEngine: Quando um trande é executado o objeto de OrderEngine é criado para enviar para o serviço OrderEngine para o mesmo alterar o status da ordem. 
+     
 
+![_Matching](https://github.com/user-attachments/assets/a3636932-1095-4d0e-88c3-3dcff0de76d2)
 
-CQRS - com Coreografia, Mensageria
-
-Singleton
-
-Flyweight (OU algo parecido)
-
-
-
-Command
-
-Mediator
-
-Observer
-
-Ioc - Inversão de controle (Removido)
+Patterns Usado
+ - CQRS - com Coreografia, Mensageria
+ - Singleton
+ - Flyweight (OU algo parecido)
+ - Command
+ - Mediator
+ - Observer
+ - Ioc - Inversão de controle (Removido)
 
 Injeção de depedencia
 
