@@ -15,11 +15,8 @@ A parte da exchange é a parte onde temos:
  - Backend com Engine de Posição - Onde é calculado a posição do cliente em tempo real para enviar para o homebroker
  - Backend com Engine de OrderRouter - Onde é feita a orquestração das  ordens que chegam do matching e que chegam do homebroker.
 
+![_exchange_gif](https://github.com/user-attachments/assets/ec3d8a2b-8414-402b-b46b-3644c46ff43c)
 
-
-
-
-![exchange_gif](https://github.com/user-attachments/assets/47c2019c-c03c-4856-8daa-20fd69874f92)
 
 
 
