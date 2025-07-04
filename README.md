@@ -39,7 +39,7 @@ Modelo da arquitetura C4
 ![_Matching](https://github.com/user-attachments/assets/a3636932-1095-4d0e-88c3-3dcff0de76d2)
 Modelo da arquitetura C4
 
-Arquiteturas e Patterns 
+## Arquiteturas e Patterns 
  - Event Driven Architecture/ Message Driven Architecture
  - Outbox para garantia de entrega de mensagens
  - Tratamento Acid de mensagens entre microserviços - Atomicidade, Consistencia, Isolamento e durabilidade.
