@@ -16,7 +16,7 @@ A parte da exchange é a parte onde temos:
  - Backend com Engine de OrderRouter - Onde é feita a orquestração das  ordens que chegam do matching e que chegam do homebroker.
 
 ![_exchange_gif](https://github.com/user-attachments/assets/ec3d8a2b-8414-402b-b46b-3644c46ff43c)
-
+Modelo da arquitetura C4
 
 A Parte de Matching é parte onde temos:
  - Backend com Engine Order - monitoramento de Ordens Stop e gerenciamento de status de ordens
@@ -31,6 +31,7 @@ A Parte de Matching é parte onde temos:
      
 
 ![_Matching](https://github.com/user-attachments/assets/a3636932-1095-4d0e-88c3-3dcff0de76d2)
+Modelo da arquitetura C4
 
 Patterns Usado
  - CQRS - com Coreografia, Mensageria
@@ -55,10 +56,6 @@ kubectl apply -f .
 
 ![image](https://github.com/bvarandas/ChallengeDigitas/assets/13907905/852bac3a-0493-45b5-87ff-6e1c03d6c84d)
 
-Tela Angular
-
-![image](https://github.com/bvarandas/ChallengeDigitas/assets/13907905/97426a53-90f9-47c0-bfdd-0a3028c03033)
 
 
 
-Modelo da arquitetura C4
