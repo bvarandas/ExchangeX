@@ -15,7 +15,7 @@ Para isso, temos duas partes:
  - Front end White Label com o Sistema de Risk manager - Os Contratantes tem acesso ao patrimonio em tempo real dos cliente
  - Backend com Engine de Inconsistencias - mensagens de negócios com erro, erros sistemicos e 
  - Backend com Engine de BFF para usar como Gateway, Identity Provider, Orquestração das mensagens de input e output.
- - Backend com Engine de Audit - Infrmações que de logs para auditoria
+ - Backend com Engine de Audit - Informações que de logs para auditoria e histórico de operações 
  - Backend com Engine de Limite - Onde é verificado em tempo real o Limite necessário para o cliente poder efetuar a operação de compra
  - Backend com Engine de Posição - Onde é calculado a posição do cliente em tempo real para enviar para o homebroker
  - Backend com Engine de OrderRouter - Onde é feita a orquestração das  ordens que chegam do matching e que chegam do homebroker.
@@ -44,7 +44,7 @@ Modelo da arquitetura C4
  - Outbox para garantia de entrega de mensagens
  - Tratamento Acid de mensagens entre microserviços - Atomicidade, Consistencia, Isolamento e durabilidade.
  - Paralelismo e alta disponibilidade de serviços.
- - CQRS - separando conexão de gravação e seleção...ainda mais pq seleção consulta mais memória do que banco de dados. Pois os dados são atualiados via eventos.
+ - CQRS - separando conexão de gravação e seleção...ainda mais pq seleção consulta mais memória do que banco de dados. Pois os dados são atualizados via eventos.
  - Singleton
  - Flyweight (OU algo parecido)
  - Command
@@ -52,8 +52,8 @@ Modelo da arquitetura C4
  - Observer
  - Ioc - Inversão de controle (Removido)
  - Injeção de depedencia
- - Unit of Work (Removido)
- - Event Sourcing (removido)
+ - Unit of Work (Removido) - pretendo implementar novamente
+ - Event Sourcing (removido) - pretendo implementar novamente
  - Alguns conceitos de S.O.L.I.D. tbm foram usados.
 
 
