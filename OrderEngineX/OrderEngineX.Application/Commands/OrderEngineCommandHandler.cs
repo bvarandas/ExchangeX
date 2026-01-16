@@ -73,7 +73,8 @@ public class OrderEngineCommandHandler : CommandHandler,
                 if (statusUpdate.IsSuccess)
                     await _bus.Publish(new OrderEngineCancelEvent(orderOld.Value));
 
-                var idOrder = _repository.GetOrderIdAsync(cancellationToken).Result;
+                var idOrder = await _repository.GetOrderIdAsync(cancellationToken);
+
                 command.Order.OrderID = idOrder.Value;
                 command.Order.LeavesQuantity = command.Order.Quantity;
                 var statusCreate = await _repository.CreateOrdersAsync(command.Order, cancellationToken);
@@ -102,9 +103,10 @@ public class OrderEngineCommandHandler : CommandHandler,
             return Result.Fail(new Error(""));
         }
 
-        var idOrder = _repository.GetOrderIdAsync(cancellationToken).Result;
+        var idOrder = await _repository.GetOrderIdAsync(cancellationToken);
         command.Order.OrderID = idOrder.Value;
         command.Order.LeavesQuantity = command.Order.Quantity;
+        command.Order.TransactTime = DateTime.UtcNow;
 
         var result = await _repository.CreateOrdersAsync(command.Order, cancellationToken);
         if (result.IsSuccess)

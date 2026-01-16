@@ -1,7 +1,11 @@
-﻿using MatchingX.Core.Interfaces;
+﻿using MacthingX.Application.Extensions;
+using MatchingX.Core.Entities;
+using MatchingX.Core.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using SharedX.Core.Enums;
+using SharedX.Core.Interfaces;
+using SharedX.Core.Matching.DropCopy;
 
 namespace MacthingX.Application.Events;
 public sealed class OrderEventHandler :
@@ -13,79 +17,52 @@ public sealed class OrderEventHandler :
     private readonly ILogger<OrderEventHandler> _logger;
     private readonly IBookOfferCache _bookOfferCache;
     private readonly IOrderStopCache _orderStopCache;
-
-    public OrderEventHandler(IBookOfferCache orderCache, IOrderStopCache orderStopCache, ILogger<OrderEventHandler> logger)
+    private readonly IPublisherEngine<TradeReport> _publisher;
+    public OrderEventHandler(IBookOfferCache orderCache, IOrderStopCache orderStopCache, ILogger<OrderEventHandler> logger, IPublisherEngine<TradeReport> publisher)
     {
         _logger = logger;
         _bookOfferCache = orderCache;
         _orderStopCache = orderStopCache;
+        _publisher = publisher;
     }
-
 
     public async Task Handle(OrderCanceledEvent @event, CancellationToken cancellationToken)
     {
-        if (@event is { Order.Side: SideTrade.Sell })
-            await _bookOfferCache.DeleteSellOrderAsync(@event.Order.Symbol, @event.Order.OrderID);
-        else
-            await _bookOfferCache.DeleteBuyOrderAsync(@event.Order.Symbol, @event.Order.OrderID);
-
-        if (@event is { Order.OrderType: OrderType.StopLimit | OrderType.Stop })
-        {
-            if (@event is { Order.Side: SideTrade.Sell })
-                await _orderStopCache.DeleteSellOrderAsync(@event.Order.Symbol, @event.Order.OrderID);
-            else
-                await _orderStopCache.DeleteBuyOrderAsync(@event.Order.Symbol, @event.Order.OrderID);
-        }
+        await UpdateBookAndStop(@event.Order);
+        _publisher.PublishEngine(@event.Order.ToExecutionReport(), cancellationToken);
     }
 
     public async Task Handle(OrderTradedEvent @event, CancellationToken cancellationToken)
     {
-        if (@event is { Order.Side: SideTrade.Sell })
-            await _bookOfferCache.DeleteSellOrderAsync(@event.Order.Symbol, @event.Order.OrderID);
-        else
-            await _bookOfferCache.DeleteBuyOrderAsync(@event.Order.Symbol, @event.Order.OrderID);
-
-        if (@event is { Order.OrderType: OrderType.StopLimit | OrderType.Stop })
-        {
-            if (@event is { Order.Side: SideTrade.Sell })
-                await _orderStopCache.DeleteSellOrderAsync(@event.Order.Symbol, @event.Order.OrderID);
-            else
-                await _orderStopCache.DeleteBuyOrderAsync(@event.Order.Symbol, @event.Order.OrderID);
-        }
+        await UpdateBookAndStop(@event.Order);
+        _publisher.PublishEngine(@event.Order.ToExecutionReport(), cancellationToken);
     }
 
     public async Task Handle(OrderOpenedEvent @event, CancellationToken cancellationToken)
     {
-        if (@event.Order.Side == SideTrade.Buy)
-        {
-            await _bookOfferCache.UpsertBuyOrder(@event.Order);
-
-            if (@event is { Order.OrderType: OrderType.Stop | OrderType.StopLimit })
-                await _orderStopCache.UpsertBuyOrderAsync(@event.Order);
-        }
-        else if (@event.Order.Side == SideTrade.Sell)
-        {
-            await _bookOfferCache.UpsertSellOrder(@event.Order);
-
-            if (@event is { Order.OrderType: OrderType.Stop | OrderType.StopLimit })
-                await _orderStopCache.UpsertBuyOrderAsync(@event.Order);
-        }
+        await UpdateBookAndStop(@event.Order);
+        _publisher.PublishEngine(@event.Order.ToExecutionReport(), cancellationToken);
     }
 
     public async Task Handle(OrderModifiedEvent @event, CancellationToken cancellationToken)
     {
-        if (@event is { Order.Side: SideTrade.Buy })
-            await _bookOfferCache.UpsertBuyOrder(@event.Order);
+        await UpdateBookAndStop(@event.Order);
+        _publisher.PublishEngine(@event.Order.ToExecutionReport(), cancellationToken);
+    }
+
+    private async Task UpdateBookAndStop(MatchOrder order)
+    {
+        if (order is { Side: SideTrade.Buy })
+            await _bookOfferCache.UpsertBuyOrder(order);
         else
-            await _bookOfferCache.UpsertSellOrder(@event.Order);
+            await _bookOfferCache.UpsertSellOrder(order);
 
-        if (@event is { Order.OrderType: OrderType.StopLimit | OrderType.Stop })
+        if (order is { OrderType: OrderType.StopLimit | OrderType.Stop })
         {
-            if (@event is { Order.Side: SideTrade.Sell })
-                await _orderStopCache.UpsertSellOrderAsync(@event.Order);
+            if (order is { Side: SideTrade.Sell })
+                await _orderStopCache.UpsertSellOrderAsync(order);
             else
-                await _orderStopCache.UpsertBuyOrderAsync(@event.Order);
+                await _orderStopCache.UpsertBuyOrderAsync(order);
         }
-
     }
 }

@@ -2,24 +2,24 @@
 
 public enum SideTrade
 {
-    Buy ='1',
-    Sell='2'
+    Buy = '1',
+    Sell = '2'
 }
 public enum OrderType
 {
-    Market='1',
-    Limit='2',
-    Stop ='3',
+    Market = '1',
+    Limit = '2',
+    Stop = '3',
     StopLimit = '4'
 }
 public enum OrderStatus
 {
     New = '0',
-    PartiallyFilled ='1',
-    Filled='2',
-    Cancelled ='4',
-    PendingCancel='6',
-    Rejected='8',
+    PartiallyFilled = '1',
+    Filled = '2',
+    Cancelled = '4',
+    PendingCancel = '6',
+    Rejected = '8',
     PendindReplace = 'E',
 
 }
@@ -34,19 +34,20 @@ public enum TimeInForce
 public enum RedisDataBases
 {
     Matching = 0,
-    OrderEngine=1,
-    OrderReport=2,
-    Security=3,
+    OrderEngine = 1,
+    OrderReport = 2,
+    Security = 3,
     Fix = 4,    // DropCopy e MarketData
     Outbox = 5,
-    Trade = 6
-    
+    Trade = 6,
+    OfferBook = 7
+
 }
 //public enum Redis
 public enum TradeReportTransType
 {
     Trade = 0,
-    Cancellation =1
+    Cancellation = 1
 }
 
 public enum Execution

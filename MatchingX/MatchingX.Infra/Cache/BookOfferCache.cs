@@ -14,7 +14,7 @@ namespace MatchingX.Infra.Cache;
 public class BookOfferCache : IBookOfferCache
 {
     private readonly ConnectionRedis _config;
-    private readonly IDatabase _dbMatching;
+    private readonly IDatabase _dbBook;
     private readonly ILogger<BookOfferCache> _logger;
 
     private RedisKey keyBuy = new RedisKey("book_offer_buy");
@@ -31,15 +31,16 @@ public class BookOfferCache : IBookOfferCache
         {
             options.ReconnectRetryPolicy = new ExponentialRetry(5000, 1000 * 60);
         });
-        _dbMatching = _redis.GetDatabase((int)RedisDataBases.Matching);
+        _dbBook = _redis.GetDatabase((int)RedisDataBases.Matching);
         _logger = logger;
     }
     public async Task<Result<MatchOrder>> GetBuyOrderByIdandSymbolAsync(long orderId, string symbol)
     {
         var result = new MatchOrder();
-        var key = string.Concat(keyBuy, ":", symbol);
+        var key = $"{keyBuy}:{symbol}";
+
         RedisValue value = new RedisValue(orderId.ToString());
-        var hashEntry = await _dbMatching.HashGetAsync(key, value);
+        var hashEntry = await _dbBook.HashGetAsync(key, value);
 
         if (hashEntry.HasValue)
             return Result.Fail(new Error($"Order {orderId} with symbol {symbol} not found"));
@@ -50,8 +51,9 @@ public class BookOfferCache : IBookOfferCache
     public async Task<Result<MatchOrder>> GetSellOrderByIdandSymbolAsync(long orderId, string symbol)
     {
         var result = new MatchOrder();
-        var key = string.Concat(keySell, ":", symbol);
-        var hashEntry = await _dbMatching.HashGetAllAsync(key);
+        var key = $"{keySell}:{symbol}";
+
+        var hashEntry = await _dbBook.HashGetAllAsync(key);
 
         var order = hashEntry.GetValue(orderId);
 
@@ -65,10 +67,10 @@ public class BookOfferCache : IBookOfferCache
     public async Task<Result<Dictionary<long, MatchOrder>>> GetBuyOrderBySymbol(string symbol)
     {
         var result = new Dictionary<long, MatchOrder>();
-        var key = string.Concat(keyBuy, ":", symbol);
-        var hashEntry = await _dbMatching.HashGetAllAsync(key);
+        var key = $"{keyBuy}:{symbol}";
 
-        //hashEntry.MaxBy(c=>c.Value.)
+        var hashEntry = await _dbBook.HashGetAllAsync(key);
+
         foreach (var item in hashEntry)
         {
             var value = JsonSerializer.Deserialize<MatchOrder>(item.Value);
@@ -79,8 +81,9 @@ public class BookOfferCache : IBookOfferCache
     public async Task<Result<Dictionary<long, MatchOrder>>> GetSellOrderBySymbol(string symbol)
     {
         var result = new Dictionary<long, MatchOrder>();
-        var key = string.Concat(keySell, ":", symbol);
-        var hashEntry = await _dbMatching.HashGetAllAsync(key);
+        var key = $"{keySell}:{symbol}";
+
+        var hashEntry = await _dbBook.HashGetAllAsync(key);
         foreach (var item in hashEntry)
         {
             var value = JsonSerializer.Deserialize<MatchOrder>(item.Value);
@@ -91,8 +94,9 @@ public class BookOfferCache : IBookOfferCache
     public async Task<bool> UpsertBuyOrder(MatchOrder order)
     {
         RedisValue value = new RedisValue(JsonSerializer.Serialize<MatchOrder>(order));
-        var key = string.Concat(keyBuy, ":", order.Symbol);
-        await _dbMatching.HashSetAsync(key,
+        var key = $"{keyBuy}:{order.Symbol}";
+
+        await _dbBook.HashSetAsync(key,
             new HashEntry[]
             {
                 new HashEntry(order.OrderID, value)
@@ -102,8 +106,9 @@ public class BookOfferCache : IBookOfferCache
     public async Task<bool> UpsertSellOrder(MatchOrder order)
     {
         RedisValue value = new RedisValue(JsonSerializer.Serialize<MatchOrder>(order));
-        var key = string.Concat(keySell, ":", order.Symbol);
-        await _dbMatching.HashSetAsync(key,
+        var key = $"{keySell}:{order.Symbol}";
+
+        await _dbBook.HashSetAsync(key,
             new HashEntry[]
             {
                 new HashEntry(order.OrderID, value)
@@ -115,14 +120,15 @@ public class BookOfferCache : IBookOfferCache
         RedisValue value = new RedisValue(orderId.ToString());
 
         var key = string.Concat(keyBuy, ":", symbol);
-        var result = await _dbMatching.HashDeleteAsync(key, value);
+
+        var result = await _dbBook.HashDeleteAsync(key, value);
         return result;
     }
     public async Task<bool> DeleteSellOrderAsync(string symbol, long orderId)
     {
         RedisValue value = new RedisValue(orderId.ToString());
         var key = string.Concat(keySell, ":", symbol);
-        var result = await _dbMatching.HashDeleteAsync(key, value);
+        var result = await _dbBook.HashDeleteAsync(key, value);
         return result;
     }
     public async Task<bool> DeleteAllOrderAsync(Dictionary<long, MatchOrder> dicOrders)
@@ -134,12 +140,12 @@ public class BookOfferCache : IBookOfferCache
             if (order.Side.Equals(SideTrade.Sell))
             {
                 var key = string.Concat(keySell, ":", order.Symbol);
-                result = await _dbMatching.HashDeleteAsync(key, value);
+                result = await _dbBook.HashDeleteAsync(key, value);
             }
             else if (order.Side.Equals(SideTrade.Buy))
             {
                 var key = string.Concat(keyBuy, ":", order.Symbol);
-                result = await _dbMatching.HashDeleteAsync(key, value);
+                result = await _dbBook.HashDeleteAsync(key, value);
             }
         }
         return result;
@@ -147,7 +153,7 @@ public class BookOfferCache : IBookOfferCache
     public async Task<decimal> GetPrice(string symbol)
     {
         RedisValue value = new RedisValue(symbol);
-        var marketHash = await _dbMatching.HashGetAsync(keyPrice, value);
+        var marketHash = await _dbBook.HashGetAsync(keyPrice, value);
 
         if (marketHash.HasValue)
         {
@@ -161,7 +167,7 @@ public class BookOfferCache : IBookOfferCache
         RedisValue value = new RedisValue(JsonSerializer.Serialize<MarketData>(marketData));
         var key = marketData.Symbol;
 
-        await _dbMatching.HashSetAsync(keyPrice,
+        await _dbBook.HashSetAsync(keyPrice,
             new HashEntry[]{
                 new HashEntry(key, value)
             });

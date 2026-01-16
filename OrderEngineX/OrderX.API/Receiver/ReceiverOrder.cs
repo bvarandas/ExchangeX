@@ -1,5 +1,4 @@
-﻿using MatchingX.Core.Interfaces;
-using OrderEngineX.Application.Commands;
+﻿using OrderEngineX.Application.Commands;
 using OrderEngineX.Application.Commands.Order;
 using SharedX.Core.Bus;
 using SharedX.Core.Enums;
@@ -9,13 +8,10 @@ namespace OrderEngineX.API.Receiver;
 public class ReceiverOrder : IReceiverEngine<OrderEngine>
 {
     private readonly ILogger<ReceiverOrder> _logger;
-    private readonly IBookOfferCache _cache;
     private readonly IMediatorHandler _mediator;
-
-    public ReceiverOrder(ILogger<ReceiverOrder> logger, IBookOfferCache cache, IMediatorHandler mediator)
+    public ReceiverOrder(ILogger<ReceiverOrder> logger, IMediatorHandler mediator)
     {
         _logger = logger;
-        _cache = cache;
         _mediator = mediator;
     }
 
@@ -27,8 +23,8 @@ public class ReceiverOrder : IReceiverEngine<OrderEngine>
 
     private OrderEngineCommand GetCommand(OrderEngine order) => order.Execution switch
     {
-        Execution.ToCancel => new OrderCancelCommand(order, _cache),
-        Execution.ToCancelReplace => new OrderCancelReplaceCommand(order, _cache),
-        Execution.ToOpen => new OrderOpenedCommand(order, _cache),
+        Execution.ToCancel => new OrderCancelCommand(order),
+        Execution.ToCancelReplace => new OrderCancelReplaceCommand(order),
+        Execution.ToOpen => new OrderOpenedCommand(order),
     };
 }

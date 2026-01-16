@@ -1,5 +1,4 @@
 ﻿using FluentValidation;
-using MatchingX.Core.Interfaces;
 using OrderEngineX.Application.Commands;
 using SharedX.Core.Enums;
 
@@ -8,10 +7,9 @@ public abstract class OrderEngineValidation<T> :
     AbstractValidator<T> where T :
     OrderEngineCommand
 {
-    private readonly IBookOfferCache _matchingCache;
-    public OrderEngineValidation(IBookOfferCache matchingCache)
+    public OrderEngineValidation()
     {
-        _matchingCache = matchingCache;
+
     }
     protected void ValidateNewOrderSingle()
     {

@@ -22,8 +22,8 @@ services:
   postgres:
     image: postgres
 
-  redis:
-    image: redis
+  dragonflydb:
+    image: docker.dragonflydb.io/dragonflydb/dragonfly
   
   # adminer:
   #   image: adminer

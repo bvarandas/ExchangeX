@@ -1,9 +1,14 @@
-<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36" version="26.2.9">
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36" version="27.2.0">
   <diagram name="Page-1" id="eHdw0tpZWdH3q21nabZm">
-    <mxGraphModel dx="3841" dy="3411" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="3774" dy="3350" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
+        <object placeholders="1" c4Name="Outbox Engine" c4Type="ContainerScopeBoundary" c4Application="Exchange Container" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;&lt;div style=&quot;&quot;&gt;%c4Name%&lt;/div&gt;&lt;/b&gt;&lt;/font&gt;&lt;div style=&quot;&quot;&gt;[%c4Application%]&lt;/div&gt;" id="Rq0TGhrO2O1hoqYybTN3-4">
+          <mxCell style="rounded=1;fontSize=11;whiteSpace=wrap;html=1;arcSize=20;fillColor=#DBDBDB;strokeColor=#d4d3d3;fontColor=#333333;labelBackgroundColor=none;align=left;verticalAlign=bottom;labelBorderColor=none;spacingTop=0;spacing=10;metaEdit=1;rotatable=1;perimeter=rectanglePerimeter;noLabel=0;labelPadding=0;allowArrows=0;connectable=1;expand=0;recursiveResize=0;editable=1;pointerEvents=0;absoluteArcSize=1;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];shadow=1;gradientColor=none;sketch=1;curveFitting=1;jiggle=2;glass=0;movable=1;resizable=1;deletable=1;locked=0;" parent="1" vertex="1">
+            <mxGeometry x="-2540" y="-1213" width="1680" height="1083" as="geometry" />
+          </mxCell>
+        </object>
         <object placeholders="1" c4Name="Matching Engine" c4Type="ContainerScopeBoundary" c4Application="Exchange Container" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;&lt;div style=&quot;&quot;&gt;%c4Name%&lt;/div&gt;&lt;/b&gt;&lt;/font&gt;&lt;div style=&quot;&quot;&gt;[%c4Application%]&lt;/div&gt;" id="_R4T8RqZduUkPNaFtUaS-1">
           <mxCell style="rounded=1;fontSize=11;whiteSpace=wrap;html=1;arcSize=20;fillColor=#DBDBDB;strokeColor=#d4d3d3;fontColor=#333333;labelBackgroundColor=none;align=left;verticalAlign=bottom;labelBorderColor=none;spacingTop=0;spacing=10;metaEdit=1;rotatable=0;perimeter=rectanglePerimeter;noLabel=0;labelPadding=0;allowArrows=0;connectable=0;expand=0;recursiveResize=0;editable=0;pointerEvents=0;absoluteArcSize=1;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];shadow=1;gradientColor=none;sketch=1;curveFitting=1;jiggle=2;glass=0;movable=0;resizable=0;deletable=0;locked=1;" parent="1" vertex="1">
             <mxGeometry x="-2540" y="-2160" width="1680" height="940" as="geometry" />
@@ -15,17 +20,12 @@
           </mxCell>
         </object>
         <object placeholders="1" c4Name="Area de OrderBook e Orderns Stop" c4Type="SystemScopeBoundary" c4Application="Mensageria" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;&lt;div style=&quot;text-align: left&quot;&gt;%c4Name%&lt;/div&gt;&lt;/b&gt;&lt;/font&gt;&lt;div style=&quot;text-align: left&quot;&gt;[%c4Application%]&lt;/div&gt;" id="RgCYCLEb-EpCQ7h4Fdm--5">
-          <mxCell style="rounded=1;fontSize=11;whiteSpace=wrap;html=1;arcSize=20;fillColor=#666666;strokeColor=#666666;fontColor=#333333;labelBackgroundColor=none;align=left;verticalAlign=bottom;labelBorderColor=none;spacingTop=0;spacing=10;metaEdit=1;rotatable=0;perimeter=rectanglePerimeter;noLabel=0;labelPadding=0;allowArrows=0;connectable=0;expand=0;recursiveResize=0;editable=1;pointerEvents=0;absoluteArcSize=1;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];sketch=1;curveFitting=1;jiggle=2;" vertex="1" parent="1">
+          <mxCell style="rounded=1;fontSize=11;whiteSpace=wrap;html=1;arcSize=20;fillColor=#666666;strokeColor=#666666;fontColor=#333333;labelBackgroundColor=none;align=left;verticalAlign=bottom;labelBorderColor=none;spacingTop=0;spacing=10;metaEdit=1;rotatable=0;perimeter=rectanglePerimeter;noLabel=0;labelPadding=0;allowArrows=0;connectable=0;expand=0;recursiveResize=0;editable=1;pointerEvents=0;absoluteArcSize=1;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];sketch=1;curveFitting=1;jiggle=2;" parent="1" vertex="1">
             <mxGeometry x="-1244.5" y="-1825" width="350" height="295" as="geometry" />
           </mxCell>
         </object>
-        <object placeholders="1" c4Name="Matching Engine" c4Type="ContainerScopeBoundary" c4Application="Exchange Container" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;&lt;div style=&quot;&quot;&gt;%c4Name%&lt;/div&gt;&lt;/b&gt;&lt;/font&gt;&lt;div style=&quot;&quot;&gt;[%c4Application%]&lt;/div&gt;" id="Rq0TGhrO2O1hoqYybTN3-4">
-          <mxCell style="rounded=1;fontSize=11;whiteSpace=wrap;html=1;arcSize=20;fillColor=#DBDBDB;strokeColor=#d4d3d3;fontColor=#333333;labelBackgroundColor=none;align=left;verticalAlign=bottom;labelBorderColor=none;spacingTop=0;spacing=10;metaEdit=1;rotatable=0;perimeter=rectanglePerimeter;noLabel=0;labelPadding=0;allowArrows=0;connectable=0;expand=0;recursiveResize=0;editable=1;pointerEvents=0;absoluteArcSize=1;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];shadow=1;gradientColor=none;sketch=1;curveFitting=1;jiggle=2;glass=0;" parent="1" vertex="1">
-            <mxGeometry x="-2540" y="-1213" width="1680" height="683" as="geometry" />
-          </mxCell>
-        </object>
         <mxCell id="Rq0TGhrO2O1hoqYybTN3-25" value="MatchContextStrategy" style="html=1;whiteSpace=wrap;verticalAlign=top;sketch=1;curveFitting=1;jiggle=2;" parent="1" vertex="1">
-          <mxGeometry x="-2014" y="-997" width="124" height="230" as="geometry" />
+          <mxGeometry x="-1834" y="282" width="124" height="230" as="geometry" />
         </mxCell>
         <object placeholders="1" c4Name="DistributedLock" c4Type="SystemScopeBoundary" c4Application="ZooKeeper" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;&lt;div style=&quot;text-align: left&quot;&gt;%c4Name%&lt;/div&gt;&lt;/b&gt;&lt;/font&gt;&lt;div style=&quot;text-align: left&quot;&gt;[%c4Application%]&lt;/div&gt;" id="_R4T8RqZduUkPNaFtUaS-3">
           <mxCell style="rounded=1;fontSize=11;whiteSpace=wrap;html=1;arcSize=20;fillColor=#666666;strokeColor=#666666;fontColor=#333333;labelBackgroundColor=none;align=left;verticalAlign=bottom;labelBorderColor=none;spacingTop=0;spacing=10;metaEdit=1;rotatable=0;perimeter=rectanglePerimeter;noLabel=0;labelPadding=0;allowArrows=0;connectable=0;expand=0;recursiveResize=0;editable=1;pointerEvents=0;absoluteArcSize=1;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];sketch=1;curveFitting=1;jiggle=2;" parent="1" vertex="1">
@@ -83,7 +83,7 @@
           </mxCell>
         </object>
         <object placeholders="1" c4Type="Relationship" c4Technology="ZeroMQ&#xa;Protobuf" c4Description="Envio de ordem &#xa;ExecutionReport" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;text-align: center&quot;&gt;[%c4Technology%]&lt;/div&gt;&lt;/div&gt;" id="_R4T8RqZduUkPNaFtUaS-19">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=5;endFill=1;strokeColor=#be211a;elbow=vertical;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=1;edgeStyle=orthogonalEdgeStyle;curved=0;flowAnimation=1;shadow=1;entryX=0.76;entryY=0.996;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.001;exitY=0.237;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" target="_R4T8RqZduUkPNaFtUaS-12" edge="1" source="_R4T8RqZduUkPNaFtUaS-2">
+          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=5;endFill=1;strokeColor=#be211a;elbow=vertical;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=1;edgeStyle=orthogonalEdgeStyle;curved=0;flowAnimation=1;shadow=1;entryX=0.76;entryY=0.996;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.001;exitY=0.237;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="_R4T8RqZduUkPNaFtUaS-2" target="_R4T8RqZduUkPNaFtUaS-12" edge="1">
             <mxGeometry x="-0.3598" y="-50" width="240" relative="1" as="geometry">
               <mxPoint x="-1870" y="-1861" as="sourcePoint" />
               <mxPoint x="-2070" y="-2001" as="targetPoint" />
@@ -267,11 +267,11 @@
           </mxCell>
         </object>
         <mxCell id="Rq0TGhrO2O1hoqYybTN3-1" value="" style="ellipse;html=1;shape=startState;fillColor=#000000;strokeColor=light-dark(#000000, #ff9090);sketch=1;curveFitting=1;jiggle=2;" parent="1" vertex="1">
-          <mxGeometry x="-2400" y="-1000" width="30" height="30" as="geometry" />
+          <mxGeometry x="-2220" y="279" width="30" height="30" as="geometry" />
         </mxCell>
         <mxCell id="Rq0TGhrO2O1hoqYybTN3-2" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;verticalAlign=bottom;endArrow=open;endSize=8;strokeColor=light-dark(#000000, #ff9090);rounded=0;sketch=1;curveFitting=1;jiggle=2;" parent="1" source="Rq0TGhrO2O1hoqYybTN3-1" edge="1">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="-2385" y="-910" as="targetPoint" />
+            <mxPoint x="-2205" y="369" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="Rq0TGhrO2O1hoqYybTN3-7" value="Recebimento do&amp;nbsp;&lt;div&gt;OrderEngine&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="Rq0TGhrO2O1hoqYybTN3-2" vertex="1" connectable="0">
@@ -281,18 +281,18 @@
         </mxCell>
         <mxCell id="Rq0TGhrO2O1hoqYybTN3-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;sketch=1;curveFitting=1;jiggle=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="Rq0TGhrO2O1hoqYybTN3-3" target="Rq0TGhrO2O1hoqYybTN3-10" edge="1">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="-2385" y="-800" as="targetPoint" />
+            <mxPoint x="-2205" y="479" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="Rq0TGhrO2O1hoqYybTN3-3" value="MatchingReceiver" style="html=1;whiteSpace=wrap;sketch=1;curveFitting=1;jiggle=2;strokeColor=light-dark(#000000, #ff9090);" parent="1" vertex="1">
-          <mxGeometry x="-2440" y="-910" width="110" height="50" as="geometry" />
+          <mxGeometry x="-2260" y="369" width="110" height="50" as="geometry" />
         </mxCell>
         <mxCell id="Rq0TGhrO2O1hoqYybTN3-6" value="" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#ff0000;" parent="1" vertex="1">
-          <mxGeometry x="-1517" y="-910" width="30" height="30" as="geometry" />
+          <mxGeometry x="-1337" y="369" width="30" height="30" as="geometry" />
         </mxCell>
         <mxCell id="Rq0TGhrO2O1hoqYybTN3-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;curved=0;sketch=1;curveFitting=1;jiggle=2;entryX=-0.018;entryY=0.493;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="Rq0TGhrO2O1hoqYybTN3-10" target="Rq0TGhrO2O1hoqYybTN3-19" edge="1">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="-2206" y="-885" as="targetPoint" />
+            <mxPoint x="-2026" y="394" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="Rq0TGhrO2O1hoqYybTN3-16" value="ToCancel" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="Rq0TGhrO2O1hoqYybTN3-12" vertex="1" connectable="0">
@@ -302,7 +302,7 @@
         </mxCell>
         <mxCell id="Rq0TGhrO2O1hoqYybTN3-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;curved=0;exitX=1;exitY=1;exitDx=0;exitDy=-5;exitPerimeter=0;sketch=1;curveFitting=1;jiggle=2;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="Rq0TGhrO2O1hoqYybTN3-10" target="Rq0TGhrO2O1hoqYybTN3-20" edge="1">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="-2206" y="-825" as="targetPoint" />
+            <mxPoint x="-2026" y="454" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="Rq0TGhrO2O1hoqYybTN3-17" value="ToModify" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="Rq0TGhrO2O1hoqYybTN3-13" vertex="1" connectable="0">
@@ -312,7 +312,7 @@
         </mxCell>
         <mxCell id="Rq0TGhrO2O1hoqYybTN3-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;curved=0;exitX=1;exitY=0;exitDx=0;exitDy=5;exitPerimeter=0;sketch=1;curveFitting=1;jiggle=2;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="Rq0TGhrO2O1hoqYybTN3-10" target="Rq0TGhrO2O1hoqYybTN3-18" edge="1">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="-2206" y="-945" as="targetPoint" />
+            <mxPoint x="-2026" y="334" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="Rq0TGhrO2O1hoqYybTN3-15" value="ToOpen" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="Rq0TGhrO2O1hoqYybTN3-14" vertex="1" connectable="0">
@@ -321,27 +321,27 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="Rq0TGhrO2O1hoqYybTN3-10" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};sketch=1;curveFitting=1;jiggle=2;" parent="1" vertex="1">
-          <mxGeometry x="-2276" y="-950" width="10" height="130" as="geometry" />
+          <mxGeometry x="-2096" y="329" width="10" height="130" as="geometry" />
         </mxCell>
         <mxCell id="Rq0TGhrO2O1hoqYybTN3-18" value="OrderEventHandler&lt;div&gt;Open&lt;/div&gt;" style="html=1;whiteSpace=wrap;sketch=1;curveFitting=1;jiggle=2;strokeColor=light-dark(#000000, #ff9090);" parent="1" vertex="1">
-          <mxGeometry x="-2177" y="-970" width="110" height="50" as="geometry" />
+          <mxGeometry x="-1997" y="309" width="110" height="50" as="geometry" />
         </mxCell>
         <mxCell id="Rq0TGhrO2O1hoqYybTN3-23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;sketch=1;curveFitting=1;jiggle=2;" parent="1" source="Rq0TGhrO2O1hoqYybTN3-19" target="Rq0TGhrO2O1hoqYybTN3-21" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="Rq0TGhrO2O1hoqYybTN3-19" value="OrderEventHandler&lt;div&gt;Cancel&lt;/div&gt;" style="html=1;whiteSpace=wrap;sketch=1;curveFitting=1;jiggle=2;strokeColor=light-dark(#000000, #ff9090);" parent="1" vertex="1">
-          <mxGeometry x="-2176" y="-909" width="110" height="50" as="geometry" />
+          <mxGeometry x="-1996" y="370" width="110" height="50" as="geometry" />
         </mxCell>
         <mxCell id="Rq0TGhrO2O1hoqYybTN3-20" value="OrderEventHandler&lt;div&gt;Modify&lt;/div&gt;" style="html=1;whiteSpace=wrap;sketch=1;curveFitting=1;jiggle=2;strokeColor=light-dark(#000000, #ff9090);" parent="1" vertex="1">
-          <mxGeometry x="-2176" y="-849" width="110" height="50" as="geometry" />
+          <mxGeometry x="-1996" y="430" width="110" height="50" as="geometry" />
         </mxCell>
         <mxCell id="ahfKM7zUQYzvdyyaW4t6-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;curved=0;sketch=1;curveFitting=1;jiggle=2;" parent="1" source="Rq0TGhrO2O1hoqYybTN3-21" edge="1">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="-1930" y="-884" as="targetPoint" />
+            <mxPoint x="-1750" y="395" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="Rq0TGhrO2O1hoqYybTN3-21" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};sketch=1;curveFitting=1;jiggle=2;" parent="1" vertex="1">
-          <mxGeometry x="-1987" y="-950" width="10" height="131" as="geometry" />
+          <mxGeometry x="-1807" y="329" width="10" height="131" as="geometry" />
         </mxCell>
         <mxCell id="Rq0TGhrO2O1hoqYybTN3-22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=1;entryDx=0;entryDy=-5;entryPerimeter=0;sketch=1;curveFitting=1;jiggle=2;" parent="1" source="Rq0TGhrO2O1hoqYybTN3-20" target="Rq0TGhrO2O1hoqYybTN3-21" edge="1">
           <mxGeometry relative="1" as="geometry" />
@@ -362,37 +362,37 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="ahfKM7zUQYzvdyyaW4t6-2" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};sketch=1;curveFitting=1;jiggle=2;" parent="1" vertex="1">
-          <mxGeometry x="-1929" y="-950" width="10" height="131" as="geometry" />
+          <mxGeometry x="-1749" y="329" width="10" height="131" as="geometry" />
         </mxCell>
         <mxCell id="ahfKM7zUQYzvdyyaW4t6-3" value="MatchLimit" style="html=1;whiteSpace=wrap;sketch=1;curveFitting=1;jiggle=2;strokeColor=light-dark(#000000, #ff9090);fontStyle=1" parent="1" vertex="1">
-          <mxGeometry x="-1820" y="-997" width="110" height="50" as="geometry" />
+          <mxGeometry x="-1640" y="282" width="110" height="50" as="geometry" />
         </mxCell>
         <mxCell id="ahfKM7zUQYzvdyyaW4t6-4" value="MatchMarket" style="html=1;whiteSpace=wrap;sketch=1;curveFitting=1;jiggle=2;strokeColor=light-dark(#000000, #ff9090);fontStyle=1" parent="1" vertex="1">
-          <mxGeometry x="-1820" y="-937" width="110" height="50" as="geometry" />
+          <mxGeometry x="-1640" y="342" width="110" height="50" as="geometry" />
         </mxCell>
         <mxCell id="ahfKM7zUQYzvdyyaW4t6-5" value="MatchStop" style="html=1;whiteSpace=wrap;sketch=1;curveFitting=1;jiggle=2;strokeColor=light-dark(#000000, #ff9090);fontStyle=1" parent="1" vertex="1">
-          <mxGeometry x="-1820" y="-876" width="110" height="50" as="geometry" />
+          <mxGeometry x="-1640" y="403" width="110" height="50" as="geometry" />
         </mxCell>
         <mxCell id="ahfKM7zUQYzvdyyaW4t6-6" value="MatchStopLimit" style="html=1;whiteSpace=wrap;sketch=1;curveFitting=1;jiggle=2;strokeColor=light-dark(#000000, #ff9090);fontStyle=1" parent="1" vertex="1">
-          <mxGeometry x="-1820" y="-814" width="110" height="50" as="geometry" />
+          <mxGeometry x="-1640" y="465" width="110" height="50" as="geometry" />
         </mxCell>
         <object placeholders="1" c4Name="OrderBook" c4Type="Container" c4Technology="Redis" c4Description="Responsabilidade de cache&#xa;do book de ordens." label="&lt;font style=&quot;font-size: 11px;&quot;&gt;&lt;b style=&quot;font-size: 11px;&quot;&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div style=&quot;font-size: 11px;&quot;&gt;[%c4Type%:&amp;nbsp;%c4Technology%]&lt;/div&gt;&lt;br style=&quot;font-size: 11px;&quot;&gt;&lt;div style=&quot;font-size: 11px;&quot;&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;&lt;font style=&quot;font-size: 11px;&quot;&gt;%c4Description%&lt;/font&gt;&lt;/font&gt;&lt;/div&gt;" id="RgCYCLEb-EpCQ7h4Fdm--2">
-          <mxCell style="shape=cylinder3;size=15;whiteSpace=wrap;html=1;boundedLbl=1;rounded=0;labelBackgroundColor=none;fillColor=#db2427;fontSize=11;fontColor=#000000;align=center;strokeColor=#421415;metaEdit=1;points=[[0.5,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.5,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];resizable=1;sketch=1;curveFitting=1;jiggle=2;" vertex="1" parent="1">
+          <mxCell style="shape=cylinder3;size=15;whiteSpace=wrap;html=1;boundedLbl=1;rounded=0;labelBackgroundColor=none;fillColor=#db2427;fontSize=11;fontColor=#000000;align=center;strokeColor=#421415;metaEdit=1;points=[[0.5,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.5,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];resizable=1;sketch=1;curveFitting=1;jiggle=2;" parent="1" vertex="1">
             <mxGeometry x="-1068" y="-1820" width="165" height="110" as="geometry" />
           </mxCell>
         </object>
         <object placeholders="1" c4Type="PriceChanged" c4Container="Container" c4Technology="RabbitMQ-Queue" c4Description="Responsabilidade de enfileiramento de ordens novas e executadas" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Type%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Container%:&amp;nbsp;%c4Technology%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;&lt;font&gt;%c4Description%&lt;/font&gt;&lt;/font&gt;&lt;/div&gt;" id="RgCYCLEb-EpCQ7h4Fdm--3">
-          <mxCell style="shape=cylinder3;size=15;direction=south;whiteSpace=wrap;html=1;boundedLbl=1;rounded=0;labelBackgroundColor=none;fillColor=#f76300;fontSize=12;fontColor=#000000;align=center;strokeColor=#994C00;metaEdit=1;points=[[0.5,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.5,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];resizable=1;rotation=-90;resizeHeight=1;resizeWidth=1;sketch=1;curveFitting=1;jiggle=2;" vertex="1" parent="1">
+          <mxCell style="shape=cylinder3;size=15;direction=south;whiteSpace=wrap;html=1;boundedLbl=1;rounded=0;labelBackgroundColor=none;fillColor=#f76300;fontSize=12;fontColor=#000000;align=center;strokeColor=#994C00;metaEdit=1;points=[[0.5,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.5,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];resizable=1;rotation=-90;resizeHeight=1;resizeWidth=1;sketch=1;curveFitting=1;jiggle=2;" parent="1" vertex="1">
             <mxGeometry x="-1298" y="-1755" width="230" height="105" as="geometry" />
           </mxCell>
         </object>
         <object placeholders="1" c4Name="OrderStop" c4Type="Container" c4Technology="Redis" c4Description="Responsabilidade de Cache&#xa;ordens Stop&#xa;" label="&lt;font style=&quot;font-size: 11px;&quot;&gt;&lt;b style=&quot;font-size: 11px;&quot;&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div style=&quot;font-size: 11px;&quot;&gt;[%c4Type%:&amp;nbsp;%c4Technology%]&lt;/div&gt;&lt;br style=&quot;font-size: 11px;&quot;&gt;&lt;div style=&quot;font-size: 11px;&quot;&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;&lt;font style=&quot;font-size: 11px;&quot;&gt;%c4Description%&lt;/font&gt;&lt;/font&gt;&lt;/div&gt;" id="RgCYCLEb-EpCQ7h4Fdm--4">
-          <mxCell style="shape=cylinder3;size=15;whiteSpace=wrap;html=1;boundedLbl=1;rounded=0;labelBackgroundColor=none;fillColor=#db2427;fontSize=11;fontColor=#000000;align=center;strokeColor=#421415;metaEdit=1;points=[[0.5,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.5,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];resizable=1;sketch=1;curveFitting=1;jiggle=2;" vertex="1" parent="1">
+          <mxCell style="shape=cylinder3;size=15;whiteSpace=wrap;html=1;boundedLbl=1;rounded=0;labelBackgroundColor=none;fillColor=#db2427;fontSize=11;fontColor=#000000;align=center;strokeColor=#421415;metaEdit=1;points=[[0.5,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.5,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];resizable=1;sketch=1;curveFitting=1;jiggle=2;" parent="1" vertex="1">
             <mxGeometry x="-1068" y="-1690" width="165" height="110" as="geometry" />
           </mxCell>
         </object>
         <object placeholders="1" c4Type="Relationship" c4Technology="ZeroMQ&#xa;Protobuf" c4Description="Envio de ordem &#xa;ExecutionReport" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;text-align: center&quot;&gt;[%c4Technology%]&lt;/div&gt;&lt;/div&gt;" id="RgCYCLEb-EpCQ7h4Fdm--6">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=5;endFill=1;strokeColor=#be211a;elbow=vertical;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=1;edgeStyle=orthogonalEdgeStyle;curved=0;flowAnimation=1;shadow=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="_R4T8RqZduUkPNaFtUaS-6" target="_R4T8RqZduUkPNaFtUaS-44">
+          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=5;endFill=1;strokeColor=#be211a;elbow=vertical;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=1;edgeStyle=orthogonalEdgeStyle;curved=0;flowAnimation=1;shadow=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="_R4T8RqZduUkPNaFtUaS-6" target="_R4T8RqZduUkPNaFtUaS-44" edge="1">
             <mxGeometry x="0.3253" y="-35" width="240" relative="1" as="geometry">
               <mxPoint x="-1249" y="-1677" as="sourcePoint" />
               <mxPoint x="-1641" y="-1719" as="targetPoint" />
@@ -404,6 +404,98 @@
             </mxGeometry>
           </mxCell>
         </object>
+        <object placeholders="1" c4Name="OutboxEngine" c4Type="Container" c4Technology="Redis" c4Description="Responsabilidade de storage &#xa;OrderEngine" label="&lt;font style=&quot;font-size: 11px;&quot;&gt;&lt;b style=&quot;font-size: 11px;&quot;&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div style=&quot;font-size: 11px;&quot;&gt;[%c4Type%:&amp;nbsp;%c4Technology%]&lt;/div&gt;&lt;br style=&quot;font-size: 11px;&quot;&gt;&lt;div style=&quot;font-size: 11px;&quot;&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;&lt;font style=&quot;font-size: 11px;&quot;&gt;%c4Description%&lt;/font&gt;&lt;/font&gt;&lt;/div&gt;" id="VvpUunc14n4GT_dByWAG-1">
+          <mxCell style="shape=cylinder3;size=15;whiteSpace=wrap;html=1;boundedLbl=1;rounded=0;labelBackgroundColor=none;fillColor=#db2427;fontSize=11;fontColor=#000000;align=center;strokeColor=#421415;metaEdit=1;points=[[0.5,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.5,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];resizable=1;sketch=1;curveFitting=1;jiggle=2;" vertex="1" parent="1">
+            <mxGeometry x="-1708" y="-1049" width="160" height="100" as="geometry" />
+          </mxCell>
+        </object>
+        <object placeholders="1" c4Name="ServicoQuaquer" c4Type="Component" c4Technology="C# BackgroundService&#xa;[ZeroMQ, FIX]" c4Description="Responsabilidade de criar mensagem envelopada com o outbox com generics &#xa;FIX e enviar para o OrdernEngine" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%: %c4Technology%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;" id="VvpUunc14n4GT_dByWAG-3">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#63BEF2;fontColor=#000000;align=center;arcSize=6;strokeColor=#2086C9;metaEdit=1;resizable=1;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];sketch=1;curveFitting=1;jiggle=2;movable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" vertex="1" parent="1">
+            <mxGeometry x="-2082" y="-1160" width="240" height="120" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="VvpUunc14n4GT_dByWAG-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;sketch=1;curveFitting=1;jiggle=2;exitX=0.75;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="VvpUunc14n4GT_dByWAG-3" target="VvpUunc14n4GT_dByWAG-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="VvpUunc14n4GT_dByWAG-8" value="Mensagem&lt;div&gt;Envelopada&lt;/div&gt;&lt;div&gt;Outbox&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="VvpUunc14n4GT_dByWAG-4">
+          <mxGeometry x="-0.1748" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="VvpUunc14n4GT_dByWAG-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;sketch=1;curveFitting=1;jiggle=2;" edge="1" parent="1" source="VvpUunc14n4GT_dByWAG-5" target="VvpUunc14n4GT_dByWAG-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="VvpUunc14n4GT_dByWAG-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;sketch=1;curveFitting=1;jiggle=2;" edge="1" parent="1" source="VvpUunc14n4GT_dByWAG-5" target="VvpUunc14n4GT_dByWAG-10">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-1962" y="-780" />
+              <mxPoint x="-1723" y="-780" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <object placeholders="1" c4Name="Outbox" c4Type="Component" c4Technology="C# BackgroundService&#xa;[ZeroMQ, FIX]" c4Description="Responsabilidade De enviar mensagem envelopada com generics para RabbitMq e ZeroMQ&#xa;FIX e enviar para o OrdernEngine" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%: %c4Technology%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;" id="VvpUunc14n4GT_dByWAG-5">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#63BEF2;fontColor=#000000;align=center;arcSize=6;strokeColor=#2086C9;metaEdit=1;resizable=0;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];sketch=1;curveFitting=1;jiggle=2;" vertex="1" parent="1">
+            <mxGeometry x="-2082" y="-937" width="240" height="120" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="VvpUunc14n4GT_dByWAG-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.999;entryY=0.535;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="VvpUunc14n4GT_dByWAG-1" target="VvpUunc14n4GT_dByWAG-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="VvpUunc14n4GT_dByWAG-9" value="Mensagem&amp;nbsp;&lt;div&gt;Envelopada&amp;nbsp;&lt;/div&gt;&lt;div&gt;Outbox&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="VvpUunc14n4GT_dByWAG-6">
+          <mxGeometry x="-0.6799" y="-2" relative="1" as="geometry">
+            <mxPoint x="-109" y="26" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <object placeholders="1" c4Type="RabbitMQ&lt;Type&gt;" c4Container="Container" c4Technology="RabbitMQ-Queue" c4Description="Responsabilidade de enfileiramento de mensagens" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Type%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Container%:&amp;nbsp;%c4Technology%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;&lt;font&gt;%c4Description%&lt;/font&gt;&lt;/font&gt;&lt;/div&gt;" id="VvpUunc14n4GT_dByWAG-10">
+          <mxCell style="shape=cylinder3;size=15;direction=south;whiteSpace=wrap;html=1;boundedLbl=1;rounded=0;labelBackgroundColor=none;fillColor=#f76300;fontSize=12;fontColor=#000000;align=center;strokeColor=#994C00;metaEdit=1;points=[[0.5,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.5,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];resizable=1;rotation=0;resizeHeight=1;resizeWidth=1;sketch=1;curveFitting=1;jiggle=2;" vertex="1" parent="1">
+            <mxGeometry x="-1819" y="-720" width="192" height="105" as="geometry" />
+          </mxCell>
+        </object>
+        <object placeholders="1" c4Type="ZeroMQ&lt;Type&gt;" c4Container="Container" c4Technology="ZeroMQ-Queue" c4Description="Responsabilidade de enfileiramento de mensagens&#xa;" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Type%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Container%:&amp;nbsp;%c4Technology%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;&lt;font&gt;%c4Description%&lt;/font&gt;&lt;/font&gt;&lt;/div&gt;" id="VvpUunc14n4GT_dByWAG-12">
+          <mxCell style="shape=cylinder3;size=15;direction=south;whiteSpace=wrap;html=1;boundedLbl=1;rounded=0;labelBackgroundColor=none;fillColor=#e51400;fontSize=12;align=center;strokeColor=#B20000;metaEdit=1;points=[[0.5,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.5,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];resizable=1;rotation=0;resizeHeight=1;resizeWidth=1;sketch=1;curveFitting=1;jiggle=2;fontColor=#000000;" vertex="1" parent="1">
+            <mxGeometry x="-2290" y="-719" width="192" height="105" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="VvpUunc14n4GT_dByWAG-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;fontFamily=Helvetica;fontSize=12;fontColor=#000000;labelBackgroundColor=none;resizable=0;sketch=1;curveFitting=1;jiggle=2;" edge="1" parent="1" source="VvpUunc14n4GT_dByWAG-5" target="VvpUunc14n4GT_dByWAG-12">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-1962" y="-780" />
+              <mxPoint x="-2194" y="-780" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="VvpUunc14n4GT_dByWAG-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;fontFamily=Helvetica;fontSize=12;fontColor=#000000;labelBackgroundColor=none;resizable=0;sketch=1;curveFitting=1;jiggle=2;dashed=1;dashPattern=8 8;" edge="1" parent="1" source="VvpUunc14n4GT_dByWAG-14" target="VvpUunc14n4GT_dByWAG-17">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <object placeholders="1" c4Name="Outbox" c4Type="Component" c4Technology="C# BackgroundService&#xa;[ZeroMQ, FIX]" c4Description="Responsabilidade De remover mensagem envelopada do redis" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%: %c4Technology%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;" id="VvpUunc14n4GT_dByWAG-14">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#63BEF2;fontColor=#000000;align=center;arcSize=6;strokeColor=#2086C9;metaEdit=1;resizable=0;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];sketch=1;curveFitting=1;jiggle=2;" vertex="1" parent="1">
+            <mxGeometry x="-2082" y="-530" width="240" height="120" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="VvpUunc14n4GT_dByWAG-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;fontFamily=Helvetica;fontSize=12;fontColor=#000000;labelBackgroundColor=none;resizable=0;sketch=1;curveFitting=1;jiggle=2;" edge="1" parent="1" source="VvpUunc14n4GT_dByWAG-12" target="VvpUunc14n4GT_dByWAG-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="VvpUunc14n4GT_dByWAG-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;fontFamily=Helvetica;fontSize=12;fontColor=#000000;labelBackgroundColor=none;resizable=0;sketch=1;curveFitting=1;jiggle=2;" edge="1" parent="1" source="VvpUunc14n4GT_dByWAG-10" target="VvpUunc14n4GT_dByWAG-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <object placeholders="1" c4Name="ServicoQuaquer" c4Type="Component" c4Technology="C# BackgroundService&#xa;[ZeroMQ, FIX]" c4Description="Responsabilidade de criar mensagem envelopada com o outbox com generics &#xa;FIX e enviar para o OrdernEngine" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%: %c4Technology%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;" id="VvpUunc14n4GT_dByWAG-17">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#63BEF2;fontColor=#000000;align=center;arcSize=6;strokeColor=#2086C9;metaEdit=1;resizable=1;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];sketch=1;curveFitting=1;jiggle=2;movable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" vertex="1" parent="1">
+            <mxGeometry x="-2082" y="-314" width="240" height="120" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="VvpUunc14n4GT_dByWAG-19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;fontFamily=Helvetica;fontSize=12;fontColor=#000000;labelBackgroundColor=none;resizable=0;sketch=1;curveFitting=1;jiggle=2;" edge="1" parent="1" source="VvpUunc14n4GT_dByWAG-14" target="VvpUunc14n4GT_dByWAG-1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-1528" y="-420" />
+              <mxPoint x="-1528" y="-999" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="VvpUunc14n4GT_dByWAG-20" value="Tenta deletar mensagem&amp;nbsp;&lt;div&gt;envelopada do redis&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];rounded=1;sketch=1;jiggle=2;curveFitting=1;strokeColor=#2086C9;arcSize=6;fontFamily=Helvetica;fontSize=12;fontColor=#000000;labelBackgroundColor=none;fillColor=#63BEF2;" vertex="1" connectable="0" parent="VvpUunc14n4GT_dByWAG-19">
+          <mxGeometry x="-0.6027" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>

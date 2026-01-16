@@ -198,4 +198,20 @@ public static class MatchingExtensions
 
         return result;
     }
+    public static TradeReport ToExecutionReport(this MatchOrder order)
+        => new ExecutionReport()
+        {
+            AccountType = order.AccountType, //1= Client and 3 = House
+            TimeInForce = order.TimeInForce,
+            StopPrice = order.StopPrice,
+            Symbol = order.Symbol,
+            Quantity = order.Quantity,
+            Side = order.Side,
+            OrigCLOrdID = order.ClOrdID,
+            OrderID = order.OrderID,
+            TradeId = order.OrderID,
+            ExecID = order.OrderID,
+            Price = order.Price,
+            ExecType = order.LeavesQuantity == 0 ? 'F' : 'P'      // Fully or partially 
+        };
 }

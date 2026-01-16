@@ -71,7 +71,7 @@ internal class NativeInjectorBoostrapper
 
         // Domain Bus (Mediator)
         services.AddScoped<IMediatorHandler, InMemmoryBus>();
-        //services.AddScoped<IOrderBook, OrderBook>();
+
 
         //SignalR
         services.AddSignalR();

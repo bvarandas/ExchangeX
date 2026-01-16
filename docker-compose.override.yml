@@ -56,13 +56,18 @@ services:
     networks:
       - exchange
 
-  redis:
-    container_name: redis
-    command: redis-server --requirepass Redis2019!
+  dragonflydb:
+    container_name: dragonflydb
+    command: "--proactor_threads 2 --snapshot_cron '*/5 * * * *'"
+    ulimits: 
+      memlock: -1
     ports:
       - "6379:6379"
+    restart: unless-stopped
     networks:
       - exchange
+    volumes: 
+      - dragonflydata:/data
   
   mongodb:
     command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
@@ -146,6 +151,7 @@ volumes:
   mongo1_config:
   mongo2_config:
   mongo3_config:
+  dragonflydata:
     # driver: local
 
 networks:

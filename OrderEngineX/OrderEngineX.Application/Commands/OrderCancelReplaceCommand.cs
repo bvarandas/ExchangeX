@@ -1,19 +1,16 @@
-﻿using MatchingX.Core.Interfaces;
-using OrderEngineX.Application.Validations;
+﻿using OrderEngineX.Application.Validations;
 using SharedX.Core.Matching.OrderEngine;
 namespace OrderEngineX.Application.Commands;
 public class OrderCancelReplaceCommand : OrderEngineCommand
 {
-    private readonly IBookOfferCache _cache;
-    public OrderCancelReplaceCommand(OrderEngine order, IBookOfferCache cache)
+    public OrderCancelReplaceCommand(OrderEngine order)
     {
         Timestamp = DateTime.Now;
         Order = order;
-        _cache = cache;
     }
     public override bool IsValid()
     {
-        ValidationResult = new OrderCancelReplaceRequestValidation(_cache).Validate(this);
+        ValidationResult = new OrderCancelReplaceRequestValidation().Validate(this);
         return ValidationResult.IsValid;
     }
 }

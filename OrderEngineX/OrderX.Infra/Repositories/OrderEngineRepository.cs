@@ -59,7 +59,7 @@ public class OrderEngineRepository : IOrderEngineRepository
         }
         return Result.Ok();
     }
-
+    private static object silngleton = new object();
     public async Task<Result<long>> GetOrderIdAsync(CancellationToken cancellation)
     {
         long result = 0;
@@ -74,30 +74,32 @@ public class OrderEngineRepository : IOrderEngineRepository
 
                 try
                 {
+                    lock (silngleton)
+                    {
+                        var single = _context.OrderId.Find(session, filter)
+                        .FirstOrDefault(cancellation);
 
-                    var single = await _context.OrderId.Find(session, filter)
-                        .FirstOrDefaultAsync(cancellation);
+                        single = single ?? new OrderIDEngine();
 
-                    single = single ?? new OrderIDEngine();
+                        if (string.IsNullOrEmpty(single.Id))
+                        {
+                            single.Id = ObjectId.GenerateNewId().ToString();
+                            single.OrderId = 1;
+                            _context.OrderId.InsertOne(session, single);
+                        }
+                        else
+                        {
+                            single.OrderId++;
+                            result = single.OrderId;
 
-                    if (string.IsNullOrEmpty(single.Id))
-                        single.Id = ObjectId.GenerateNewId().ToString();
+                            filter = Builders<OrderIDEngine>.Filter.Eq(r => r.Id, single.Id);
+                            var update = Builders<OrderIDEngine>.Update.Set(r => r.OrderId, result);
 
-                    single.OrderId++;
-                    result = single.OrderId;
+                            var resultReplace = _context.OrderId.UpdateOne(session, filter, update);
+                        }
 
-                    filter = Builders<OrderIDEngine>.Filter.Eq(r => r.Id, single.Id);
-
-                    var update = Builders<OrderIDEngine>.Update.Set(r => r.OrderId, result);
-
-
-                    var resultReplace = await _context.OrderId.UpdateOneAsync(session, filter, update);
-                    //    filter,
-                    //update: new OrderIDEngine() { OrderId = result, Id = single.Id },
-                    //options: new ReplaceOptions { IsUpsert = true },
-                    //cancellation);
-
-                    await session.CommitTransactionAsync();
+                        session.CommitTransaction();
+                    }
                 }
                 catch (Exception ex)
                 {

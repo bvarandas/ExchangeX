@@ -11,7 +11,6 @@ namespace MacthingX.Application.Events;
 public sealed class ExecutedTradeEventHandler :
     INotificationHandler<ExecutedTradeEvent>
 {
-    private bool _running;
     private readonly IMatchingCache _cacheMatching;
     private readonly ILogger<ExecutedTradeEventHandler> _logger;
     private readonly IPublisherEngine<TradeReport> _publisher;
@@ -29,13 +28,10 @@ public sealed class ExecutedTradeEventHandler :
         _publisher = publisher;
         _cancellationTokenSource = new CancellationTokenSource();
 
-
         QueueExecutedOrders = new ConcurrentQueue<MatchingEngine>();
         ThreadExecutedTrade = new Thread(new ThreadStart(ExecutedTradeOutcome));
         ThreadExecutedTrade.Name = nameof(ExecutedTradeOutcome);
         ThreadExecutedTrade.Start();
-
-        _running = true;
     }
 
     public async Task Handle(ExecutedTradeEvent notification, CancellationToken cancellationToken)
@@ -50,25 +46,16 @@ public sealed class ExecutedTradeEventHandler :
         while (!_cancellationTokenSource.IsCancellationRequested)
         {
             if (QueueExecutedOrders.TryDequeue(out MatchingEngine orders))
-                CreateReports(orders, _cancellationTokenSource.Token);
+            {
+                var executionReport = orders.ToExecutionReport();
 
-            if (!_running)
-                break;
+                foreach (var report in executionReport)
+                    _publisher.PublishEngine(report.Value, _cancellationTokenSource.Token);
+            }
+
 
             Thread.Sleep(10);
         }
-    }
-
-    public void CreateReports(MatchingEngine orders, CancellationToken token)
-    {
-        var executionReport = orders.ToExecutionReport();
-        var captureReport = orders.ToCaptureReport();
-
-        foreach (var report in executionReport)
-            _publisher.PublishEngine(report.Value, token);
-
-        foreach (var report in captureReport)
-            _publisher.PublishEngine(report.Value, token);
     }
 
     ~ExecutedTradeEventHandler()
