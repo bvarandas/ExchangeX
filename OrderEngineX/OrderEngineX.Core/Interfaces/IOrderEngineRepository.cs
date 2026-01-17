@@ -9,5 +9,4 @@ public interface IOrderEngineRepository
     Task<Result<OrderEngine>> GetOrderByIdAsync(long orderId, CancellationToken cancellation);
     Task<Result> CreateOrdersAsync(OrderEngine order, CancellationToken cancellation);
     Task<Result> UpdateOrderDetailAsync(OrderEngine order, OrderEngineDetail oderDetail, CancellationToken cancellation);
-    Task<Result<long>> GetOrderIdAsync(CancellationToken cancellation);
 }

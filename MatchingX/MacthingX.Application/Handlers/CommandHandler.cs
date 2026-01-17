@@ -1,7 +1,7 @@
-﻿using MatchingX.Core.Interfaces;
+﻿using MatchingX.Application.Handlers;
+using MatchingX.Core.Interfaces;
 using MatchingX.Core.Notifications;
 using MediatR;
-using SharedX.Core.Bus;
 using SharedX.Core.Commands;
 
 namespace MacthingX.Application.Handlers;

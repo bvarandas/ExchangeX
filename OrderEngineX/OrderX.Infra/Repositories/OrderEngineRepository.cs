@@ -1,6 +1,5 @@
 ﻿using FluentResults;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using OrderEngineX.Core.Interfaces;
 using OrderEngineX.Infra.Data;
@@ -13,16 +12,33 @@ public class OrderEngineRepository : IOrderEngineRepository
 {
     private readonly IOrderEngineContext _context;
     private readonly ILogger<OrderEngineRepository> _logger;
+    private static string ObjectId = "696befefc045d54c59745b78";
     public OrderEngineRepository(IOrderEngineContext context, ILogger<OrderEngineRepository> logger)
     {
         _logger = logger;
         _context = context;
     }
+    private async Task<long> GetNextSequenceValueAsync(string sequenceName)
+    {
+        var filter = Builders<OrderIDEngine>.Filter.Eq(c => c.Id, sequenceName);
+        var update = Builders<OrderIDEngine>.Update.Inc(c => c.OrderId, 1);
+        var options = new FindOneAndUpdateOptions<OrderIDEngine>
+        {
+            IsUpsert = true,
+            ReturnDocument = ReturnDocument.After
+        };
+
+        var updatedCounter = await _context.OrderId.FindOneAndUpdateAsync(filter, update, options);
+        return updatedCounter.OrderId;
+    }
+
     public async Task<Result> CreateOrdersAsync(OrderEngine order, CancellationToken cancellation)
     {
         bool result = false;
         try
         {
+            order.OrderID = await this.GetNextSequenceValueAsync(ObjectId);
+
             var inserts = new List<WriteModel<OrderEngine>>();
             inserts.Add(new InsertOneModel<OrderEngine>(order));
 
@@ -59,61 +75,10 @@ public class OrderEngineRepository : IOrderEngineRepository
         }
         return Result.Ok();
     }
-    private static object silngleton = new object();
-    public async Task<Result<long>> GetOrderIdAsync(CancellationToken cancellation)
-    {
-        long result = 0;
-        try
-        {
-            var builder = Builders<OrderIDEngine>.Filter;
-            var filter = builder.Empty;
 
-            using (var session = await _context.MongoClient.StartSessionAsync())
-            {
-                session.StartTransaction();
+    private static SemaphoreSlim _semaphore = new SemaphoreSlim(1);
 
-                try
-                {
-                    lock (silngleton)
-                    {
-                        var single = _context.OrderId.Find(session, filter)
-                        .FirstOrDefault(cancellation);
 
-                        single = single ?? new OrderIDEngine();
-
-                        if (string.IsNullOrEmpty(single.Id))
-                        {
-                            single.Id = ObjectId.GenerateNewId().ToString();
-                            single.OrderId = 1;
-                            _context.OrderId.InsertOne(session, single);
-                        }
-                        else
-                        {
-                            single.OrderId++;
-                            result = single.OrderId;
-
-                            filter = Builders<OrderIDEngine>.Filter.Eq(r => r.Id, single.Id);
-                            var update = Builders<OrderIDEngine>.Update.Set(r => r.OrderId, result);
-
-                            var resultReplace = _context.OrderId.UpdateOne(session, filter, update);
-                        }
-
-                        session.CommitTransaction();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex.Message, ex);
-                    await session.AbortTransactionAsync();
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex.Message, ex);
-        }
-        return result;
-    }
     public async Task<Result<IEnumerable<OrderEngine>>> GetOrdersByAccountIdAsync(int accountId, CancellationToken cancellation)
     {
         IEnumerable<OrderEngine> result = null!;

@@ -12,7 +12,7 @@ public sealed class MatchStop : MatchBase
     protected readonly IOrderStopCache _orderStopCache;
     protected readonly IMediatorHandler Bus;
 
-    public string Name => nameof(MatchStop);
+    public override string Name => nameof(MatchStop);
 
     public MatchStop(ILogger<MatchStop> logger, IMediatorHandler bus, IOrderStopCache orderStopCache, IMatchingRepository repository) : base(bus, repository)
     {

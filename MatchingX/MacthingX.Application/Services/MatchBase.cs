@@ -11,7 +11,7 @@ public class MatchBase : IMatch
 {
     public delegate void PriceChangedEventHandler(object sender, OrderPriceEventArgs args);
     protected readonly IMediatorHandler Bus;
-    public string Name => throw new NotImplementedException();
+    public virtual string Name => nameof(MatchBase);
     protected readonly CancellationTokenSource _cancellationTokenSource;
     public event PriceChangedEventHandler PriceChanged;
     protected readonly IMatchingRepository _repository;

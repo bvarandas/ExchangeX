@@ -18,7 +18,14 @@ public class ReceiverOrder : IReceiverEngine<OrderEngine>
     public async Task ReceiveEngine(OrderEngine message, CancellationToken cancellationToken)
     {
         var command = GetCommand(message);
-        await _mediator.Send(command);
+        try
+        {
+            await _mediator.Send(command);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+        }
     }
 
     private OrderEngineCommand GetCommand(OrderEngine order) => order.Execution switch

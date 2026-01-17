@@ -7,7 +7,7 @@ namespace MacthingX.Application.Services;
 public sealed class MatchMarket : MatchBase
 {
     private readonly IMediatorHandler Bus;
-    public string Name => nameof(MatchMarket);
+    public override string Name => nameof(MatchMarket);
 
     public MatchMarket(ILogger<MatchMarket> logger, IMediatorHandler bus, IMatchingRepository repository) : base(bus, repository)
     {

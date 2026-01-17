@@ -1,12 +1,12 @@
 ﻿using MacthingX.Application.Commands.Match;
 using MacthingX.Application.Commands.Match.OrderType;
+using MatchingX.Application.Handlers;
 using MatchingX.Core.Entities;
 using MatchingX.Core.Interfaces;
 using MatchingX.Core.Notifications;
 using MatchingX.Core.Repositories;
 using Medallion.Threading;
 using MediatR;
-using SharedX.Core.Bus;
 using SharedX.Core.Enums;
 
 namespace MacthingX.Application.Handlers;

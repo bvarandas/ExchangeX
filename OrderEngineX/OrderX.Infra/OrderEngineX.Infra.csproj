@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DistributedLock.ZooKeeper" Version="1.0.1-alpha001" />
     <PackageReference Include="MongoDB.Driver" Version="2.25.0" />
     <PackageReference Include="NetMQ" Version="4.0.1.13" />
     <PackageReference Include="ServiceStack.Redis" Version="8.2.2" />

@@ -13,7 +13,7 @@ public sealed class MatchStopLimit : MatchBase
     private readonly ConcurrentDictionary<long, MatchingEngine> DicOrdersToCancel;
     protected readonly IMediatorHandler Bus;
 
-    public string Name => nameof(MatchStopLimit);
+    public override string Name => nameof(MatchStopLimit);
 
     public MatchStopLimit(ILogger<MatchStopLimit> logger,
         IMediatorHandler bus,

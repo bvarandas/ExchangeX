@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OrderEngineX.Core.Interfaces;
+using SharedX.Core.Entities;
 using SharedX.Core.Enums;
 using SharedX.Core.Matching.OrderEngine;
 using SharedX.Core.Specs;
@@ -18,14 +19,16 @@ public class OrderEngineCache : IOrderEngineCache
     private readonly ConnectionMultiplexer _redis;
     private readonly IDatabase _dbOrderEngine;
     private readonly ILogger<OrderEngineCache> _logger;
-        private readonly RedisKey _key;
-    public OrderEngineCache(ILogger<OrderEngineCache> logger, 
+    private readonly RedisKey _key;
+
+    public OrderEngineCache(ILogger<OrderEngineCache> logger,
         IOptions<ConnectionRedis> config)
     {
         _config = config.Value;
         OrderEngineQueue = new ConcurrentQueue<OrderEngine>();
 
-        _redis = ConnectionMultiplexer.Connect(_config.ConnectionString, options => {
+        _redis = ConnectionMultiplexer.Connect(_config.ConnectionString, options =>
+        {
             options.ReconnectRetryPolicy = new ExponentialRetry(5000, 1000 * 60);
         });
 
@@ -47,7 +50,7 @@ public class OrderEngineCache : IOrderEngineCache
         }
 
         var ordersBySymbol = result
-            .Where(d=>d.Value.Symbol == symbol)
+            .Where(d => d.Value.Symbol == symbol)
             .ToDictionary(i => i.Key, i => i.Value);
 
         return Result.Ok(ordersBySymbol);
@@ -93,5 +96,35 @@ public class OrderEngineCache : IOrderEngineCache
             return true;
         }
         return false;
+    }
+
+    public async Task<Result<long>> GetOrderIdAsync(CancellationToken cancellation)
+    {
+        var key = string.Concat(_key, ":", "id");
+        var hashEntry = await _dbOrderEngine.HashGetAllAsync(key);
+        var item = hashEntry?.FirstOrDefault();
+        long orderId = 1;
+
+        if (item.HasValue)
+        {
+            var value = JsonSerializer.Deserialize<OrderIDEngine>(item.Value.Value!);
+            value.OrderId++;
+            orderId = value.OrderId;
+
+            await _dbOrderEngine.HashSetAsync(key, new HashEntry[]
+            {
+                new HashEntry("1", orderId)
+            });
+
+        }
+        else
+        {
+            await _dbOrderEngine.HashSetAsync(key, new HashEntry[]
+            {
+                new HashEntry("1", orderId)
+            });
+        }
+
+        return Result.Ok(orderId);
     }
 }

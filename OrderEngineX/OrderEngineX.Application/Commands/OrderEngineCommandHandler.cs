@@ -19,18 +19,22 @@ public class OrderEngineCommandHandler : CommandHandler,
     private readonly IOrderEngineRepository _repository;
     private readonly IMediatorHandler _bus;
     private readonly IPublisherEngine<OrderEngine> _publisherEngine;
+    private readonly IOrderEngineCache _orderEngineCache;
+
     public OrderEngineCommandHandler(
         ILogger<OrderEngineCommandHandler> logger,
         IOrderEngineRepository repository,
         IMediatorHandler bus,
         INotificationHandler<DomainNotification> notifications,
-        IPublisherEngine<OrderEngine> publisherEngine)
+        IPublisherEngine<OrderEngine> publisherEngine,
+        IOrderEngineCache orderEngineCache)
         : base(bus, notifications)
     {
         _logger = logger;
         _repository = repository;
         _bus = bus;
         _publisherEngine = publisherEngine;
+        _orderEngineCache = orderEngineCache;
     }
 
     public async Task<Result> Handle(OrderCancelCommand command, CancellationToken cancellationToken)
@@ -73,10 +77,8 @@ public class OrderEngineCommandHandler : CommandHandler,
                 if (statusUpdate.IsSuccess)
                     await _bus.Publish(new OrderEngineCancelEvent(orderOld.Value));
 
-                var idOrder = await _repository.GetOrderIdAsync(cancellationToken);
-
-                command.Order.OrderID = idOrder.Value;
                 command.Order.LeavesQuantity = command.Order.Quantity;
+
                 var statusCreate = await _repository.CreateOrdersAsync(command.Order, cancellationToken);
 
                 if (statusCreate.IsSuccess)
@@ -103,8 +105,6 @@ public class OrderEngineCommandHandler : CommandHandler,
             return Result.Fail(new Error(""));
         }
 
-        var idOrder = await _repository.GetOrderIdAsync(cancellationToken);
-        command.Order.OrderID = idOrder.Value;
         command.Order.LeavesQuantity = command.Order.Quantity;
         command.Order.TransactTime = DateTime.UtcNow;
 

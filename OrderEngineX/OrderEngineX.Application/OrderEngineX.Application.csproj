@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DistributedLock.ZooKeeper" Version="1.0.1-alpha001" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\MatchingX\MatchingX.Core\MatchingX.Core.csproj" />
     <ProjectReference Include="..\..\OrderEntryX\OrderEntryX.Infra\OrderEntryX.Infra.csproj" />
     <ProjectReference Include="..\..\SharedX\SharedX.Models\SharedX.Core.csproj" />

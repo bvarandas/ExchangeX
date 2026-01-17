@@ -93,7 +93,6 @@ public class ProducerOrderApp : BackgroundService
                         _cache.UpsertOutboxAsync(envelopeOrder);
 
                         _sendEndpoint.Send(envelopeOrder);
-
                     }
                     Thread.Sleep(1000);
                 }
