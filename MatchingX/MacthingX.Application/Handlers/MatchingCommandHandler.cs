@@ -21,14 +21,16 @@ public class MatchingCommandHandler :
     private readonly IExecutedTradeRepository _tradeRepository;
     private readonly IMediatorHandler _bus;
     private readonly IDistributedLockProvider _distributedLockProvider;
-    private readonly IMatchingCache _matchingCache;
+    private static IMatchingCache _matchingCache;
+    private static IBookOfferCache _bookOfferCache;
 
     public MatchingCommandHandler(IMatchingRepository repository,
         IExecutedTradeRepository tradeRepository,
         IMediatorHandler bus,
         INotificationHandler<DomainNotification> notifications,
         IDistributedLockProvider distributedLockProvider,
-        IMatchingCache matchingCache)
+        IMatchingCache matchingCache,
+        IBookOfferCache bookOfferCache)
         : base(bus, notifications, matchingCache)
     {
         _matchingCache = matchingCache;
@@ -36,138 +38,99 @@ public class MatchingCommandHandler :
         _matchRepository = repository;
         _bus = bus;
         _distributedLockProvider = distributedLockProvider;
+        _bookOfferCache = bookOfferCache;
     }
 
-    public async Task<MatchingEngine> Handle(MatchingLimitCommand command, CancellationToken cancellationToken)
+    private static async Task<MatchingEngine> MachtingMaking(MatchingEngineCommand command, CancellationToken stoppingToken)
     {
-        string nameLock = $"{command.Order.Symbol}_{command.Order.Side.ToString().ToLower()}";
-        await using (await _distributedLockProvider.TryAcquireLockAsync(nameLock, TimeSpan.FromSeconds(3), cancellationToken))
+        var orderToMatch = command.Order.Side == SideTrade.Buy ?
+                await _bookOfferCache.GetOrderBySymbolAsync(command.Order.Symbol, SideTrade.Sell) :
+                await _bookOfferCache.GetOrderBySymbolAsync(command.Order.Symbol, SideTrade.Buy);
+
+        var orderToExecute = new MatchingEngine();
+
+        Dictionary<long, MatchOrder> dicOrderToMatch;
+
+        if (command.Order.Side == SideTrade.Buy)
         {
-            var orderToMatch = command.Order.Side == SideTrade.Buy ?
-                await _matchingCache.GetSellOrderBySymbol(command.Order.Symbol) :
-                await _matchingCache.GetBuyOrderBySymbol(command.Order.Symbol);
+            dicOrderToMatch = orderToMatch.Value
+                                        .Where(i =>
+                                        i.Value.LastQuantity <= command.Order.LastQuantity &&
+                                        i.Value.Price <= command.Order.Price)
+                                        .OrderByDescending(i => i.Value.Price)
+                                        .ToDictionary(i => i.Key, i => i.Value);
+        }
+        else
+        {
 
-            var orderToExecute = new MatchingEngine();
-
-            var dicOrderToMatch = orderToMatch.Value
+            dicOrderToMatch = orderToMatch.Value
                                         .Where(i =>
                                         i.Value.LastQuantity <= command.Order.LastQuantity &&
                                         i.Value.Price <= command.Order.Price)
                                         .OrderBy(i => i.Value.Price)
                                         .ToDictionary(i => i.Key, i => i.Value);
+        }
+        if (command.Order.TimeInForce != TimeInForce.FOK)
+        {
+            orderToExecute = await Execute(command, dicOrderToMatch, stoppingToken);
+        }
+        else if (command.Order.TimeInForce == TimeInForce.FOK)
+        {
+            orderToExecute = await ExecuteFok(command, dicOrderToMatch, stoppingToken);
+        }
 
-            if (command.Order.TimeInForce != TimeInForce.FOK)
-            {
-                orderToExecute = await Execute(command, dicOrderToMatch, cancellationToken);
-            }
-            else if (command.Order.TimeInForce == TimeInForce.FOK)
-            {
-                orderToExecute = await ExecuteFok(command, dicOrderToMatch, cancellationToken);
-            }
+        return orderToExecute;
+    }
 
-            return orderToExecute;
+    public async Task<MatchingEngine> Handle(MatchingLimitCommand command, CancellationToken cancellationToken)
+    {
+        string nameLock = $"{command.Order.Symbol}_{command.Order.OrderType}";
+        await using (await _distributedLockProvider.TryAcquireLockAsync(nameLock, TimeSpan.FromSeconds(3), cancellationToken))
+        {
+            var result = await MachtingMaking(command, cancellationToken);
+
+            return result;
         }
 
     }
 
     public async Task<MatchingEngine> Handle(MatchingMarketCommand command, CancellationToken cancellationToken)
     {
-        string nameLock = $"{command.Order.Symbol}_{command.Order.Side.ToString().ToLower()}";
+        string nameLock = $"{command.Order.Symbol}_{command.Order.OrderType}";
 
         await using (await _distributedLockProvider.TryAcquireLockAsync(nameLock, TimeSpan.FromSeconds(3), cancellationToken))
         {
-            var orderToMatch = command.Order.Side == SideTrade.Buy ?
-                await _matchingCache.GetSellOrderBySymbol(command.Order.Symbol) :
-                await _matchingCache.GetBuyOrderBySymbol(command.Order.Symbol);
+            var result = await MachtingMaking(command, cancellationToken);
 
-            var orderToExecute = new MatchingEngine();
-
-            var dicOrderToMatch = orderToMatch.Value
-                                        .Where(i =>
-                                        i.Value.LastQuantity <= command.Order.LastQuantity &&
-                                        i.Value.Price <= command.Order.Price)
-                                        .OrderBy(i => i.Value.Price)
-                                        .ToDictionary(i => i.Key, i => i.Value);
-
-            if (command.Order.TimeInForce != TimeInForce.FOK)
-            {
-                orderToExecute = await Execute(command, dicOrderToMatch, cancellationToken);
-            }
-            else if (command.Order.TimeInForce == TimeInForce.FOK)
-            {
-                orderToExecute = await ExecuteFok(command, dicOrderToMatch, cancellationToken);
-            }
-
-            return orderToExecute;
+            return result;
         }
     }
 
     public async Task<MatchingEngine> Handle(MatchingStopLimitCommand command, CancellationToken cancellationToken)
     {
-        string nameLock = string.Concat(command.Order.Symbol, "_", command.Order.Side.ToString().ToLower());
+        string nameLock = $"{command.Order.Symbol}_{command.Order.OrderType}";
+
         await using (await _distributedLockProvider.TryAcquireLockAsync(nameLock, TimeSpan.FromSeconds(3), cancellationToken))
         {
-            var orderToMatch = command.Order.Side == SideTrade.Buy ?
-                await _matchingCache.GetSellOrderBySymbol(command.Order.Symbol) :
-                await _matchingCache.GetBuyOrderBySymbol(command.Order.Symbol);
+            var result = await MachtingMaking(command, cancellationToken);
 
-            var orderToExecute = new MatchingEngine();
-
-            var dicOrderToMatch = orderToMatch.Value
-                                        .Where(i =>
-                                        i.Value.LastQuantity <= command.Order.LastQuantity &&
-                                        i.Value.Price <= command.Order.Price)
-                                        .OrderBy(i => i.Value.Price)
-                                        .ToDictionary(i => i.Key, i => i.Value);
-
-            if (command.Order.TimeInForce != TimeInForce.FOK)
-            {
-                orderToExecute = await Execute(command, dicOrderToMatch, cancellationToken);
-            }
-            else if (command.Order.TimeInForce == TimeInForce.FOK)
-            {
-                orderToExecute = await ExecuteFok(command, dicOrderToMatch, cancellationToken);
-            }
-
-
-
-            return orderToExecute;
+            return result;
         }
     }
 
     public async Task<MatchingEngine> Handle(MatchingStopCommand command, CancellationToken cancellationToken)
     {
-        string nameLock = $"{command.Order.Symbol}_{command.Order.Side.ToString().ToLower()}";
+        string nameLock = $"{command.Order.Symbol}_{command.Order.OrderType}";
 
         await using (await _distributedLockProvider.TryAcquireLockAsync(nameLock, TimeSpan.FromSeconds(3), cancellationToken))
         {
-            var orderToMatch = command.Order.Side == SideTrade.Buy ?
-                await _matchingCache.GetSellOrderBySymbol(command.Order.Symbol) :
-                await _matchingCache.GetBuyOrderBySymbol(command.Order.Symbol);
+            var result = await MachtingMaking(command, cancellationToken);
 
-            var orderToExecute = new MatchingEngine();
-
-            var dicOrderToMatch = orderToMatch.Value
-                                        .Where(i =>
-                                        i.Value.LastQuantity <= command.Order.LastQuantity &&
-                                        i.Value.Price <= command.Order.Price)
-                                        .OrderBy(i => i.Value.Price)
-                                        .ToDictionary(i => i.Key, i => i.Value);
-
-            if (command.Order.TimeInForce != TimeInForce.FOK)
-            {
-                orderToExecute = await Execute(command, dicOrderToMatch, cancellationToken);
-            }
-            else if (command.Order.TimeInForce == TimeInForce.FOK)
-            {
-                orderToExecute = await ExecuteFok(command, dicOrderToMatch, cancellationToken);
-            }
-
-            return orderToExecute;
+            return result;
         }
     }
 
-    private async Task<MatchingEngine> Execute(MatchingEngineCommand command,
+    private static async Task<MatchingEngine> Execute(MatchingEngineCommand command,
         Dictionary<long, MatchOrder> dicOrderToMatch, CancellationToken cancellation)
     {
         var orderToExecute = new MatchingEngine();
@@ -205,15 +168,12 @@ public class MatchingCommandHandler :
             }
         }
 
-        if (command.Order.Side == SideTrade.Sell)
-            await _matchingCache.UpsertSellOrderMatchingAsync(orderToExecute, cancellation);
-        else
-            await _matchingCache.UpsertBuyOrderMatchingAsync(orderToExecute, cancellation);
+        await _matchingCache.UpsertOrderMatchingAsync(orderToExecute, cancellation);
 
         return orderToExecute;
     }
 
-    private async Task<MatchingEngine> ExecuteFok(MatchingEngineCommand command,
+    private static async Task<MatchingEngine> ExecuteFok(MatchingEngineCommand command,
         Dictionary<long, MatchOrder> dicOrderToMatch, CancellationToken cancellation)
     {
         var orderToExecute = new MatchingEngine();
@@ -252,10 +212,7 @@ public class MatchingCommandHandler :
             }
         }
 
-        if (orderToExecute.PrincipalOrder.Side == SideTrade.Buy)
-            await _matchingCache.UpsertBuyOrderMatchingAsync(orderToExecute, cancellation);
-        else
-            await _matchingCache.UpsertSellOrderMatchingAsync(orderToExecute, cancellation);
+        await _matchingCache.UpsertOrderMatchingAsync(orderToExecute, cancellation);
 
         return orderToExecute;
     }

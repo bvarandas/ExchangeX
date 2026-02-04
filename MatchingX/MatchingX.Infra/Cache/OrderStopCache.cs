@@ -31,10 +31,11 @@ public class OrderStopCache : IOrderStopCache
         _logger = logger;
     }
 
-    public async Task<Result<MatchOrder>> GetBuyOrderByIdandSymbolAsync(long orderId, string symbol)
+    public async Task<Result<MatchOrder>> GetOrderByIdandSymbolAsync(long orderId, string symbol, SideTrade side)
     {
         var result = new MatchOrder();
-        var key = $"{_keyBuy}:{symbol}";
+        var key = side == SideTrade.Buy ? $"{_keyBuy}:{symbol}" : $"{_keySell}:{symbol}";
+
         RedisValue value = new RedisValue(orderId.ToString());
         var hashEntry = await _dbOrderStop.HashGetAsync(key, value);
 
@@ -45,24 +46,10 @@ public class OrderStopCache : IOrderStopCache
         return Result.Ok(result!);
     }
 
-    public async Task<Result<MatchOrder>> GetSellOrderByIdandSymbolAsync(long orderId, string symbol)
-    {
-        var result = new MatchOrder();
-        var key = $"{_keySell}:{symbol}";
-        RedisValue value = new RedisValue(orderId.ToString());
-        var hashEntry = await _dbOrderStop.HashGetAsync(key, value);
-
-        if (hashEntry.HasValue)
-            return Result.Fail(new Error($"Order {orderId} with symbol {symbol} not found"));
-
-        result = JsonSerializer.Deserialize<MatchOrder>(hashEntry!);
-        return Result.Ok(result!);
-    }
-
-    public async Task<Result<Dictionary<long, MatchOrder>>> GetBuyOrderBySymbolAsync(string symbol)
+    public async Task<Result<Dictionary<long, MatchOrder>>> GetOrderBySymbolAsync(string symbol, SideTrade side)
     {
         var result = new Dictionary<long, MatchOrder>();
-        var key = $"{_keyBuy}:{symbol}";
+        var key = side == SideTrade.Sell ? $"{_keySell}:{symbol}" : $"{_keyBuy}:{symbol}";
 
         var hashEntry = await _dbOrderStop.HashGetAllAsync(key);
 
@@ -75,26 +62,11 @@ public class OrderStopCache : IOrderStopCache
         return Result.Ok(result);
     }
 
-    public async Task<Result<Dictionary<long, MatchOrder>>> GetSellOrderBySymbolAsync(string symbol)
-    {
-        var result = new Dictionary<long, MatchOrder>();
-        var key = $"{_keySell}:{symbol}";
-
-        var hashEntry = await _dbOrderStop.HashGetAllAsync(key);
-
-        foreach (var item in hashEntry)
-        {
-            var value = JsonSerializer.Deserialize<MatchOrder>(item.Value!);
-            result.Add(long.Parse(item.Name!), value!);
-        }
-
-        return Result.Ok(result);
-    }
-
-    public async Task UpsertBuyOrderAsync(MatchOrder order)
+    public async Task UpsertOrderAsync(MatchOrder order)
     {
         RedisValue value = new RedisValue(JsonSerializer.Serialize<MatchOrder>(order));
         var key = $"{_keyBuy}:{order.Symbol}";
+
         await _dbOrderStop.HashSetAsync(key,
             new HashEntry[]
             {
@@ -102,31 +74,13 @@ public class OrderStopCache : IOrderStopCache
             });
     }
 
-    public async Task UpsertSellOrderAsync(MatchOrder order)
-    {
-        RedisValue value = new RedisValue(JsonSerializer.Serialize<MatchOrder>(order));
-        var key = $"{_keySell}:{order.Symbol}";
-        await _dbOrderStop.HashSetAsync(key,
-            new HashEntry[]
-            {
-                new HashEntry(order.OrderID, value)
-            });
-    }
-
-    public async Task<bool> DeleteBuyOrderAsync(string symbol, long orderId)
+    public async Task<bool> DeleteOrderAsync(string symbol, long orderId, SideTrade side)
     {
         RedisValue value = new RedisValue(orderId.ToString());
-        var key = $"{_keyBuy}:{symbol}";
+
+        var key = side == SideTrade.Buy ? $"{_keyBuy}:{symbol}" : $"{_keySell}:{symbol}";
+
         var result = await _dbOrderStop.HashDeleteAsync(key, value);
         return result;
     }
-
-    public async Task<bool> DeleteSellOrderAsync(string symbol, long orderId)
-    {
-        RedisValue value = new RedisValue(orderId.ToString());
-        var key = $"{_keySell}:{symbol}";
-        var result = await _dbOrderStop.HashDeleteAsync(key, value);
-        return result;
-    }
-
 }

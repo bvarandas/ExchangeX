@@ -1,16 +1,15 @@
 ﻿using FluentResults;
 using MatchingX.Core.Entities;
+using SharedX.Core.Enums;
+using SharedX.Core.Matching.MarketData;
 
 namespace MatchingX.Core.Interfaces;
 public interface IBookOfferCache
 {
-    Task<Result<MatchOrder>> GetBuyOrderByIdandSymbolAsync(long orderId, string symbol);
-    Task<Result<MatchOrder>> GetSellOrderByIdandSymbolAsync(long orderId, string symbol);
-    Task<Result<Dictionary<long, MatchOrder>>> GetBuyOrderBySymbol(string symbol);
-    Task<Result<Dictionary<long, MatchOrder>>> GetSellOrderBySymbol(string symbol);
-    Task<bool> UpsertBuyOrder(MatchOrder order);
-    Task<bool> UpsertSellOrder(MatchOrder order);
-    Task<bool> DeleteBuyOrderAsync(string symbol, long orderId);
-    Task<bool> DeleteSellOrderAsync(string symbol, long orderId);
+    Task<Result<MatchOrder>> GetOrderByIdandSymbolAsync(long orderId, string symbol, SideTrade side);
+    Task<Result<Dictionary<long, MatchOrder>>> GetOrderBySymbolAsync(string symbol, SideTrade side);
+    Task<bool> UpsertOrder(MatchOrder order);
+    Task<bool> DeleteOrderAsync(string symbol, long orderId, SideTrade side);
     Task<bool> DeleteAllOrderAsync(Dictionary<long, MatchOrder> dicOrders);
+    Task<Result> UpsertPrice(MarketData marketData);
 }

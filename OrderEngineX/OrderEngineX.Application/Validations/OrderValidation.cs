@@ -383,7 +383,7 @@ public abstract class OrderValidation<T> :
 
     private bool IsOrderExists(OrderEngine order)
     {
-        var orderFound = _matchingCache.GetBuyOrderByIdandSymbolAsync(order.OrderID, order.Symbol).Result;
+        var orderFound = _matchingCache.GetOrderByIdandSymbolAsync(order.OrderID, order.Symbol, order.Side).Result;
         if (orderFound.IsSuccess)
         {
 
@@ -393,7 +393,7 @@ public abstract class OrderValidation<T> :
     }
     private bool IsValidOrderToCancel(OrderEngine order)
     {
-        var orderFound = _matchingCache.GetBuyOrderByIdandSymbolAsync(order.OrderID, order.Symbol).Result;
+        var orderFound = _matchingCache.GetOrderByIdandSymbolAsync(order.OrderID, order.Symbol, order.Side).Result;
 
         if (orderFound.IsSuccess)
         {
@@ -422,7 +422,7 @@ public abstract class OrderValidation<T> :
 
     private bool IsNotDuplicatedClOrdID(OrderEngine order)
     {
-        var orders = _matchingCache.GetBuyOrderBySymbol(order.Symbol).Result;
+        var orders = _matchingCache.GetOrderBySymbolAsync(order.Symbol, order.Side).Result;
 
         if (orders.IsSuccess)
         {

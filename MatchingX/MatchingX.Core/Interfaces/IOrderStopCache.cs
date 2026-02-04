@@ -1,15 +1,12 @@
 ﻿using FluentResults;
 using MatchingX.Core.Entities;
+using SharedX.Core.Enums;
 namespace MatchingX.Core.Interfaces;
 
 public interface IOrderStopCache
 {
-    Task<bool> DeleteBuyOrderAsync(string symbol, long orderId);
-    Task<bool> DeleteSellOrderAsync(string symbol, long orderId);
-    Task UpsertBuyOrderAsync(MatchOrder order);
-    Task UpsertSellOrderAsync(MatchOrder order);
-    Task<Result<MatchOrder>> GetBuyOrderByIdandSymbolAsync(long orderId, string symbol);
-    Task<Result<MatchOrder>> GetSellOrderByIdandSymbolAsync(long orderId, string symbol);
-    Task<Result<Dictionary<long, MatchOrder>>> GetBuyOrderBySymbolAsync(string symbol);
-    Task<Result<Dictionary<long, MatchOrder>>> GetSellOrderBySymbolAsync(string symbol);
+    Task<bool> DeleteOrderAsync(string symbol, long orderId, SideTrade side);
+    Task UpsertOrderAsync(MatchOrder order);
+    Task<Result<MatchOrder>> GetOrderByIdandSymbolAsync(long orderId, string symbol, SideTrade side);
+    Task<Result<Dictionary<long, MatchOrder>>> GetOrderBySymbolAsync(string symbol, SideTrade side);
 }

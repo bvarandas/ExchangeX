@@ -14,7 +14,7 @@ public sealed class MatchStop : MatchBase
 
     public override string Name => nameof(MatchStop);
 
-    public MatchStop(ILogger<MatchStop> logger, IMediatorHandler bus, IOrderStopCache orderStopCache, IMatchingRepository repository) : base(bus, repository)
+    public MatchStop(ILogger<MatchStop> logger, IMediatorHandler bus, IOrderStopCache orderStopCache, IMatchingRepository repository, IMatchingCache cache) : base(bus, repository, cache)
     {
         DicOrdersToCancel = new ConcurrentDictionary<long, MatchOrder>();
 
@@ -28,9 +28,7 @@ public sealed class MatchStop : MatchBase
         var order = args.Order;
         decimal price = order.Price;
 
-        var ordersStop = (order.Side == SideTrade.Sell) ?
-            await _orderStopCache.GetBuyOrderBySymbolAsync(order.Symbol) :
-            await _orderStopCache.GetSellOrderBySymbolAsync(order.Symbol);
+        var ordersStop = await _orderStopCache.GetOrderBySymbolAsync(order.Symbol, order.Side);
 
         if (!ordersStop.IsSuccess)
             return;

@@ -18,7 +18,8 @@ public sealed class MatchStopLimit : MatchBase
     public MatchStopLimit(ILogger<MatchStopLimit> logger,
         IMediatorHandler bus,
         IOrderStopCache orderStopCache,
-        IMatchingRepository repository) : base(bus, repository)
+        IMatchingRepository repository,
+        IMatchingCache cache) : base(bus, repository, cache)
     {
         DicOrdersToCancel = new ConcurrentDictionary<long, MatchingEngine>();
 
@@ -28,14 +29,13 @@ public sealed class MatchStopLimit : MatchBase
 
     }
 
+
     private async void TradeOrder_PriceChanged(object sender, Events.OrderPriceEventArgs args)
     {
         var order = args.Order;
         decimal price = order.Price;
 
-        var ordersStop = order.Side == SideTrade.Sell ?
-            await _orderStopCache.GetBuyOrderBySymbolAsync(order.Symbol) :
-            await _orderStopCache.GetSellOrderBySymbolAsync(order.Symbol);
+        var ordersStop = await _orderStopCache.GetOrderBySymbolAsync(order.Symbol, order.Side);
 
         if (ordersStop.IsSuccess)
         {
@@ -46,16 +46,21 @@ public sealed class MatchStopLimit : MatchBase
 
                 switch ((order.OrderType, order.Side))
                 {
-                    case (OrderType.Stop, SideTrade.Sell) when order.StopPrice >= price:
-                        await _orderStopCache.DeleteSellOrderAsync(order.Symbol, order.OrderID);
-
-                        await this.MatchOrderAsync(order, _cancellationTokenSource.Token);
-
+                    case (OrderType.Stop, SideTrade.Sell) or
+                         (OrderType.StopLimit, SideTrade.Sell) when
+                         order.StopPrice >= price:
+                        {
+                            await _orderStopCache.DeleteOrderAsync(order.Symbol, order.OrderID, order.Side);
+                            await this.MatchOrderAsync(order, _cancellationTokenSource.Token);
+                        }
                         break;
-                    case (OrderType.Stop, SideTrade.Buy) when order.StopPrice <= price:
-                        await _orderStopCache.DeleteBuyOrderAsync(order.Symbol, order.OrderID);
-
-                        await this.MatchOrderAsync(order, _cancellationTokenSource.Token);
+                    case (OrderType.Stop, SideTrade.Buy) or
+                         (OrderType.StopLimit, SideTrade.Buy) when
+                         order.StopPrice <= price:
+                        {
+                            await _orderStopCache.DeleteOrderAsync(order.Symbol, order.OrderID, order.Side);
+                            await this.MatchOrderAsync(order, _cancellationTokenSource.Token);
+                        }
                         break;
                     default:
                         break;

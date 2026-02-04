@@ -42,22 +42,13 @@ public class MatchingCache : IMatchingCache
         _logger = logger;
     }
 
-    public async Task<Result> UpsertBuyOrderMatchingAsync(MatchingEngine matchEngine, CancellationToken cancellation)
+    public async Task<Result> UpsertOrderMatchingAsync(MatchingEngine matchEngine, CancellationToken cancellation)
     {
         RedisValue value = new RedisValue(JsonSerializer.Serialize<MatchingEngine>(matchEngine));
-        var key = string.Concat(keyBuy, ":", matchEngine.PrincipalOrder.Symbol);
 
-        await _dbMatching.HashSetAsync(key,
-            new HashEntry[]{
-                new HashEntry(matchEngine.PrincipalOrder.OrderID, value)
-            });
+        var keyRedis = (matchEngine.PrincipalOrder.Side == SideTrade.Buy) ? keyBuy : keySell;
 
-        return Result.Ok();
-    }
-    public async Task<Result> UpsertSellOrderMatchingAsync(MatchingEngine matchEngine, CancellationToken cancellation)
-    {
-        RedisValue value = new RedisValue(JsonSerializer.Serialize<MatchingEngine>(matchEngine));
-        var key = string.Concat(keySell, ":", matchEngine.PrincipalOrder.Symbol);
+        var key = string.Concat(keyRedis, ":", matchEngine.PrincipalOrder.Symbol);
 
         await _dbMatching.HashSetAsync(key,
             new HashEntry[]{
@@ -103,9 +94,14 @@ public class MatchingCache : IMatchingCache
         return Result.Ok(result);
     }
 
-    public async Task<Result<bool>> RemoveOrderMatchingAsync(string symbol, long orderId)
+
+
+    public async Task<Result<bool>> RemoveOrderMatchingAsync(string symbol, long orderId, SideTrade side)
     {
-        var key = string.Concat(keySell, ":", symbol);
+        var keyRedis = (side == SideTrade.Buy) ? keyBuy : keySell;
+
+        var key = string.Concat(keyRedis, ":", symbol);
+
         RedisValue value = new RedisValue(orderId.ToString());
         var hashResult = await _dbMatching.HashDeleteAsync(key, value);
 

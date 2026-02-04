@@ -15,29 +15,44 @@ public class MatchBase : IMatch
     protected readonly CancellationTokenSource _cancellationTokenSource;
     public event PriceChangedEventHandler PriceChanged;
     protected readonly IMatchingRepository _repository;
+    protected readonly IMatchingCache _cache;
 
-    public MatchBase(IMediatorHandler bus, IMatchingRepository repository)
+    public MatchBase(IMediatorHandler bus, IMatchingRepository repository, IMatchingCache cache)
     {
         Bus = bus;
         _cancellationTokenSource = new CancellationTokenSource();
         _repository = repository;
+        _cache = cache;
     }
 
-    public async Task<bool> AddOrderAsync(MatchOrder order, CancellationToken cancellationToken)
+    public async Task<bool> AddOrderAsync(MatchOrder order, CancellationToken cancellation)
     {
-        var result = await _repository.UpsertOrderMatchingAsync(order, cancellationToken);
+        var result = await _repository.UpsertOrderMatchingAsync(order, cancellation);
+        if (result.IsSuccess)
+        {
+            await SetMatchingOrderCache(order, cancellation);
+        }
         return result.IsSuccess;
     }
 
-    public async Task<bool> CancelOrderAsync(MatchOrder orderToCancel, CancellationToken cancellationToken)
+    public async Task<bool> CancelOrderAsync(MatchOrder order, CancellationToken cancellationToken)
     {
-        var result = await _repository.RemoveOrdersMatchingAsync(new List<long>() { orderToCancel.OrderID }, cancellationToken);
+        var result = await _repository.RemoveOrdersMatchingAsync(new List<long>() { order.OrderID }, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            await _cache.RemoveOrderMatchingAsync(order.Symbol, order.OrderID, order.Side);
+        }
         return result.IsSuccess;
     }
 
     public async Task<bool> ModifyOrderAsync(MatchOrder order, CancellationToken cancellationToken)
     {
         var result = await _repository.UpsertOrderMatchingAsync(order, cancellationToken);
+        if (result.IsSuccess)
+        {
+            await SetMatchingOrderCache(order, cancellationToken);
+        }
         return result.IsSuccess;
     }
 
@@ -64,4 +79,14 @@ public class MatchBase : IMatch
         }
         return true;
     }
+
+    private async Task SetMatchingOrderCache(MatchOrder order, CancellationToken cancellation)
+    {
+        var orderToExecute = new MatchingEngine();
+
+        orderToExecute.PrincipalOrder = order;
+
+        await _cache.UpsertOrderMatchingAsync(orderToExecute, cancellation);
+    }
+
 }

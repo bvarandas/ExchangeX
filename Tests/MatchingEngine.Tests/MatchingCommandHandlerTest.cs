@@ -1,6 +1,7 @@
 using FluentAssertions;
 using MacthingX.Application.Commands.Match.OrderType;
 using MacthingX.Application.Handlers;
+using MatchingX.Application.Handlers;
 using MatchingX.Core.Entities;
 using MatchingX.Core.Interfaces;
 using MatchingX.Core.Notifications;
@@ -8,7 +9,6 @@ using MatchingX.Core.Repositories;
 using Medallion.Threading;
 using MediatR;
 using Moq;
-using SharedX.Core.Bus;
 using SharedX.Core.Enums;
 
 
@@ -29,6 +29,8 @@ public class MatchingCommandHandlerTest
     private readonly Mock<IDistributedLockProvider> _mockDistributedLockProvider;
     private readonly Mock<INotificationHandler<DomainNotification>> _mockNotificationHandler;
     private readonly Mock<IMatchingCache> _mockMatchingCache;
+    private readonly Mock<IBookOfferCache> _mockBookOfferCache;
+
 
     private CommandHandler commandHandler = null!;
     private MatchingCommandHandler _handler = null!;
@@ -43,7 +45,7 @@ public class MatchingCommandHandlerTest
         _mockNotificationHandler = new Mock<INotificationHandler<DomainNotification>>();
 
         _mockMatchingCache = new Mock<IMatchingCache>();
-
+        _mockBookOfferCache = new Mock<IBookOfferCache>();
         commandHandler = new CommandHandler(_mockMediatorHandler.Object, _domainNotificationHandler, _mockMatchingCache.Object);
     }
 
@@ -214,7 +216,8 @@ public class MatchingCommandHandlerTest
                                               _mockMediatorHandler.Object,
                                               _domainNotificationHandler,
                                               _mockDistributedLockProvider.Object,
-                                              _mockMatchingCache.Object);
+                                              _mockMatchingCache.Object,
+                                              _mockBookOfferCache.Object);
 
         var result = await _handler.Handle(command, default(CancellationToken));
 
@@ -231,7 +234,8 @@ public class MatchingCommandHandlerTest
                                               _mockMediatorHandler.Object,
                                               _mockNotificationHandler.Object,
                                               _mockDistributedLockProvider.Object,
-                                              _mockMatchingCache.Object);
+                                              _mockMatchingCache.Object,
+                                              _mockBookOfferCache.Object);
 
         var result = await _handler.Handle(command, default(CancellationToken));
 
@@ -248,7 +252,8 @@ public class MatchingCommandHandlerTest
                                               _mockMediatorHandler.Object,
                                               _domainNotificationHandler,
                                               _mockDistributedLockProvider.Object,
-                                              _mockMatchingCache.Object);
+                                              _mockMatchingCache.Object,
+                                              _mockBookOfferCache.Object);
 
         var result = await _handler.Handle(command, default(CancellationToken));
 
@@ -265,7 +270,8 @@ public class MatchingCommandHandlerTest
                                               _mockMediatorHandler.Object,
                                               _mockNotificationHandler.Object,
                                               _mockDistributedLockProvider.Object,
-                                              _mockMatchingCache.Object);
+                                              _mockMatchingCache.Object,
+                                              _mockBookOfferCache.Object);
 
         var result = await _handler.Handle(command, default(CancellationToken));
 
@@ -282,7 +288,8 @@ public class MatchingCommandHandlerTest
                                               _mockMediatorHandler.Object,
                                               _mockNotificationHandler.Object,
                                               _mockDistributedLockProvider.Object,
-                                              _mockMatchingCache.Object);
+                                              _mockMatchingCache.Object,
+                                              _mockBookOfferCache.Object);
 
         var result = await _handler.Handle(command, default(CancellationToken));
 
@@ -299,7 +306,8 @@ public class MatchingCommandHandlerTest
                                               _mockMediatorHandler.Object,
                                               _mockNotificationHandler.Object,
                                               _mockDistributedLockProvider.Object,
-                                              _mockMatchingCache.Object);
+                                              _mockMatchingCache.Object,
+                                              _mockBookOfferCache.Object);
 
         var result = await _handler.Handle(command, default(CancellationToken));
 
@@ -316,7 +324,8 @@ public class MatchingCommandHandlerTest
                                               _mockMediatorHandler.Object,
                                               _mockNotificationHandler.Object,
                                               _mockDistributedLockProvider.Object,
-                                              _mockMatchingCache.Object);
+                                              _mockMatchingCache.Object,
+                                              _mockBookOfferCache.Object);
 
         var result = await _handler.Handle(command, default(CancellationToken));
 
@@ -333,7 +342,8 @@ public class MatchingCommandHandlerTest
                                               _mockMediatorHandler.Object,
                                               _mockNotificationHandler.Object,
                                               _mockDistributedLockProvider.Object,
-                                              _mockMatchingCache.Object);
+                                              _mockMatchingCache.Object,
+                                              _mockBookOfferCache.Object);
 
         var result = await _handler.Handle(command, default(CancellationToken));
 

@@ -40,7 +40,8 @@ public enum RedisDataBases
     Fix = 4,    // DropCopy e MarketData
     Outbox = 5,
     Trade = 6,
-    OfferBook = 7
+    OfferBook = 7,
+    OrderStop = 8,
 
 }
 //public enum Redis

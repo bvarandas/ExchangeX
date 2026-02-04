@@ -52,17 +52,11 @@ public sealed class OrderEventHandler :
 
     private async Task UpdateBookAndStop(MatchOrder order)
     {
-        if (order is { Side: SideTrade.Buy })
-            await _bookOfferCache.UpsertBuyOrder(order);
-        else
-            await _bookOfferCache.UpsertSellOrder(order);
+        await _bookOfferCache.UpsertOrder(order);
 
         if (order is { OrderType: OrderType.StopLimit | OrderType.Stop })
         {
-            if (order is { Side: SideTrade.Sell })
-                await _orderStopCache.UpsertSellOrderAsync(order);
-            else
-                await _orderStopCache.UpsertBuyOrderAsync(order);
+            await _orderStopCache.UpsertOrderAsync(order);
         }
     }
 }

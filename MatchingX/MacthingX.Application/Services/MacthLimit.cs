@@ -7,7 +7,10 @@ public sealed class MatchLimit : MatchBase
 {
     private readonly IMediatorHandler Bus;
     public override string Name => nameof(MatchLimit);
-    public MatchLimit(ILogger<MatchLimit> logger, IMediatorHandler bus, IMatchingRepository repository) : base(bus, repository)
+    public MatchLimit(ILogger<MatchLimit> logger,
+        IMediatorHandler bus,
+        IMatchingRepository repository,
+        IMatchingCache cache) : base(bus, repository, cache)
     {
         Bus = bus;
     }

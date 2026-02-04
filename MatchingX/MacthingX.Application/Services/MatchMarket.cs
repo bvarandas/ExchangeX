@@ -9,7 +9,10 @@ public sealed class MatchMarket : MatchBase
     private readonly IMediatorHandler Bus;
     public override string Name => nameof(MatchMarket);
 
-    public MatchMarket(ILogger<MatchMarket> logger, IMediatorHandler bus, IMatchingRepository repository) : base(bus, repository)
+    public MatchMarket(ILogger<MatchMarket> logger,
+        IMediatorHandler bus,
+        IMatchingRepository repository,
+        IMatchingCache cache) : base(bus, repository, cache)
     {
         Bus = bus;
     }
